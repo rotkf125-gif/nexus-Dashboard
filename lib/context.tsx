@@ -18,6 +18,15 @@ interface NexusContextType {
   setTheme: (theme: 'dark' | 'light') => void;
   setCompactMode: (compact: boolean) => void;
   toast: (message: string, type?: 'success' | 'danger' | 'warning' | 'info') => void;
+  // Modal states
+  assetModalOpen: boolean;
+  setAssetModalOpen: (open: boolean) => void;
+  editingAsset: Asset | null;
+  editingIndex: number | null;
+  openAddAssetModal: () => void;
+  openEditAssetModal: (index: number) => void;
+  closeAssetModal: () => void;
+  saveAssetFromModal: (asset: Asset) => void;
 }
 
 const defaultState: NexusState = {
@@ -44,6 +53,11 @@ const NexusContext = createContext<NexusContextType | null>(null);
 export function NexusProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<NexusState>(defaultState);
   const [isLoaded, setIsLoaded] = useState(false);
+  
+  // Modal states
+  const [assetModalOpen, setAssetModalOpen] = useState(false);
+  const [editingAsset, setEditingAsset] = useState<Asset | null>(null);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -179,6 +193,41 @@ export function NexusProvider({ children }: { children: ReactNode }) {
     }, 3000);
   }, []);
 
+  // Modal functions
+  const openAddAssetModal = useCallback(() => {
+    setEditingAsset(null);
+    setEditingIndex(null);
+    setAssetModalOpen(true);
+  }, []);
+
+  const openEditAssetModal = useCallback((index: number) => {
+    setEditingAsset(state.assets[index]);
+    setEditingIndex(index);
+    setAssetModalOpen(true);
+  }, [state.assets]);
+
+  const closeAssetModal = useCallback(() => {
+    setAssetModalOpen(false);
+    setEditingAsset(null);
+    setEditingIndex(null);
+  }, []);
+
+  const saveAssetFromModal = useCallback((asset: Asset) => {
+    if (editingIndex !== null) {
+      // 수정 모드
+      setState(prev => ({
+        ...prev,
+        assets: prev.assets.map((a, i) => (i === editingIndex ? { ...a, ...asset } : a)),
+      }));
+      toast('Asset updated', 'success');
+    } else {
+      // 추가 모드
+      setState(prev => ({ ...prev, assets: [...prev.assets, asset] }));
+      toast('Asset added', 'success');
+    }
+    closeAssetModal();
+  }, [editingIndex, closeAssetModal, toast]);
+
   if (!isLoaded) {
     return <div className="min-h-screen flex items-center justify-center">
       <i className="fas fa-spinner spinner text-2xl opacity-50" />
@@ -200,6 +249,15 @@ export function NexusProvider({ children }: { children: ReactNode }) {
         setTheme,
         setCompactMode,
         toast,
+        // Modal states
+        assetModalOpen,
+        setAssetModalOpen,
+        editingAsset,
+        editingIndex,
+        openAddAssetModal,
+        openEditAssetModal,
+        closeAssetModal,
+        saveAssetFromModal,
       }}
     >
       {children}

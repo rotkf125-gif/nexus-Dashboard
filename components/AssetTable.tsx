@@ -4,7 +4,7 @@ import { useNexus } from '@/lib/context';
 import { SECTORS, TYPE_COLORS, CHART_COLORS } from '@/lib/config';
 
 export default function AssetTable() {
-  const { state, removeAsset } = useNexus();
+  const { state, removeAsset, openEditAssetModal } = useNexus();
   const { assets, exchangeRate, previousPrices } = state;
 
   const formatUSD = (n: number) => '$' + n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -160,7 +160,11 @@ export default function AssetTable() {
                 </td>
                 <td className="p-3 text-center">
                   <div className="quick-actions">
-                    <button className="quick-action-btn" title="편집">
+                    <button 
+                      className="quick-action-btn" 
+                      title="편집"
+                      onClick={() => openEditAssetModal(i)}
+                    >
                       <i className="fas fa-pen" />
                     </button>
                     <button 
