@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNexus } from '@/lib/context';
 
 interface HeaderProps {
@@ -12,6 +12,10 @@ export default function Header({ onOpenSettings }: HeaderProps) {
   const [clock, setClock] = useState('--:--');
   const [isLive, setIsLive] = useState(false);
   const [syncTime, setSyncTime] = useState('--');
+  const [connectionStatus, setConnectionStatus] = useState<'offline' | 'loading' | 'online'>('offline');
+  
+  const liveIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isFetchingRef = useRef(false);
 
   // Clock update
   useEffect(() => {
@@ -23,21 +27,6 @@ export default function Header({ onOpenSettings }: HeaderProps) {
     const interval = setInterval(updateClock, 1000);
     return () => clearInterval(interval);
   }, []);
-
-  // Auto refresh when live
-  useEffect(() => {
-    if (!isLive) return;
-    
-    const refreshInterval = parseInt(localStorage.getItem('nexus_refresh_interval') || '5') * 60 * 1000;
-    const interval = setInterval(() => {
-      refreshPrices();
-    }, refreshInterval);
-    
-    // Initial fetch
-    refreshPrices();
-    
-    return () => clearInterval(interval);
-  }, [isLive, refreshPrices]);
 
   // Update sync time
   useEffect(() => {
@@ -53,6 +42,58 @@ export default function Header({ onOpenSettings }: HeaderProps) {
       return () => clearInterval(interval);
     }
   }, [state.lastSync]);
+
+  // Refresh prices with status update
+  const handleRefresh = useCallback(async () => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
+    setConnectionStatus('loading');
+    
+    try {
+      await refreshPrices();
+      setConnectionStatus('online');
+      toast('SYNCHRONIZED', 'success');
+    } catch {
+      setConnectionStatus('offline');
+      toast('SYNC FAILED', 'danger');
+    } finally {
+      isFetchingRef.current = false;
+    }
+  }, [refreshPrices, toast]);
+
+  // Toggle Live mode
+  const toggleLive = useCallback(() => {
+    if (isLive) {
+      // Disconnect
+      if (liveIntervalRef.current) {
+        clearInterval(liveIntervalRef.current);
+        liveIntervalRef.current = null;
+      }
+      setIsLive(false);
+      setConnectionStatus('offline');
+      toast('DISCONNECTED', 'info');
+    } else {
+      // Connect
+      setIsLive(true);
+      toast('CONNECTING...', 'info');
+      
+      // Initial fetch
+      handleRefresh();
+      
+      // Set interval
+      const refreshInterval = parseInt(localStorage.getItem('nexus_refresh_interval') || '5') * 60 * 1000;
+      liveIntervalRef.current = setInterval(handleRefresh, refreshInterval);
+    }
+  }, [isLive, handleRefresh, toast]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (liveIntervalRef.current) {
+        clearInterval(liveIntervalRef.current);
+      }
+    };
+  }, []);
 
   // Calculate totals
   let totalCost = 0, totalValue = 0, totalCostKrw = 0, totalValueKrw = 0;
@@ -230,16 +271,16 @@ export default function Header({ onOpenSettings }: HeaderProps) {
         {/* Controls */}
         <div className="flex flex-col items-end gap-2">
           <div className="flex items-center gap-3">
-            <span className={`status-dot ${state.isFetching ? 'loading' : isLive ? 'connected' : ''}`} />
+            <span className={`status-dot ${connectionStatus}`} />
             <span className="text-[10px] tracking-widest font-light opacity-60">
-              {state.isFetching ? 'SYNC...' : isLive ? 'ONLINE' : 'OFFLINE'}
+              {connectionStatus === 'loading' ? 'SYNC...' : connectionStatus === 'online' ? 'ONLINE' : 'OFFLINE'}
             </span>
             <span className="text-[9px] opacity-40">{syncTime}</span>
             <div className="text-lg font-display font-light w-20 text-center">{clock}</div>
           </div>
           <div className="flex gap-1.5">
             <button
-              onClick={handleToggleLive}
+              onClick={toggleLive}
               className={`celestial-btn text-[9px] ${isLive ? 'border-v64-success/40 text-v64-success' : ''}`}
             >
               {isLive ? 'DISCONNECT' : 'CONNECT'}

@@ -222,8 +222,7 @@ export function NexusProvider({ children }: { children: ReactNode }) {
   const syncFromSheet = useCallback(async () => {
     const scriptUrl = localStorage.getItem('nexus_script_url');
     
-    // 디버깅: localStorage 전체 키 확인
-    console.log('localStorage keys:', Object.keys(localStorage));
+    // 디버깅
     console.log('nexus_script_url:', scriptUrl);
     
     if (!scriptUrl || scriptUrl.trim() === '') {
@@ -251,17 +250,29 @@ export function NexusProvider({ children }: { children: ReactNode }) {
         const text = await res.text();
         try {
           const data = JSON.parse(text);
-          if (data.dividends && Array.isArray(data.dividends)) {
+          
+          // 배열 직접 반환 또는 { dividends: [...] } 객체 모두 처리
+          let dividends: Array<{ date: string; ticker: string; dps: number; qty: number }> = [];
+          let tradeSumsData = null;
+          
+          if (Array.isArray(data)) {
+            // 배열 직접 반환인 경우
+            dividends = data;
+          } else if (data.dividends && Array.isArray(data.dividends)) {
+            // { dividends: [...] } 객체인 경우
+            dividends = data.dividends;
+            tradeSumsData = data.tradeSums;
+          }
+          
+          if (dividends.length > 0) {
             setState(prev => ({
               ...prev,
-              dividends: data.dividends,
-              tradeSums: data.tradeSums || prev.tradeSums,
+              dividends: dividends,
+              tradeSums: tradeSumsData || prev.tradeSums,
             }));
-            toast(`동기화 완료: ${data.dividends.length}개 배당 기록`, 'success');
-          } else if (data.error) {
-            toast(`서버 오류: ${data.error}`, 'danger');
+            toast(`동기화 완료: ${dividends.length}개 배당 기록`, 'success');
           } else {
-            toast('응답 형식 오류: dividends 배열 없음', 'warning');
+            toast('배당 기록이 없습니다', 'warning');
           }
         } catch {
           toast('JSON 파싱 오류', 'danger');

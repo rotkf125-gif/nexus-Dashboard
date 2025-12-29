@@ -167,7 +167,8 @@ body {
   background: #546E7A;
 }
 
-.status-dot.connected {
+.status-dot.connected,
+.status-dot.online {
   background: #E0F7FA;
   box-shadow: 0 0 10px #E0F7FA;
 }
