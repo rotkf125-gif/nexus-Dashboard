@@ -219,24 +219,48 @@ export function NexusProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    // URL 유효성 검사
+    if (!scriptUrl.startsWith('https://script.google.com/')) {
+      toast('잘못된 Google Script URL 형식', 'danger');
+      return;
+    }
+
     try {
       toast('구글 시트 동기화 중...', 'info');
-      const res = await fetch(scriptUrl);
+      
+      const res = await fetch(scriptUrl, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+      
       if (res.ok) {
-        const data = await res.json();
-        if (data.dividends) {
-          setState(prev => ({
-            ...prev,
-            dividends: data.dividends,
-            tradeSums: data.tradeSums || prev.tradeSums,
-          }));
-          toast('동기화 완료', 'success');
+        const text = await res.text();
+        try {
+          const data = JSON.parse(text);
+          if (data.dividends && Array.isArray(data.dividends)) {
+            setState(prev => ({
+              ...prev,
+              dividends: data.dividends,
+              tradeSums: data.tradeSums || prev.tradeSums,
+            }));
+            toast(`동기화 완료: ${data.dividends.length}개 배당 기록`, 'success');
+          } else if (data.error) {
+            toast(`서버 오류: ${data.error}`, 'danger');
+          } else {
+            toast('응답 형식 오류: dividends 배열 없음', 'warning');
+          }
+        } catch {
+          toast('JSON 파싱 오류', 'danger');
+          console.error('Response text:', text);
         }
       } else {
-        toast('동기화 실패', 'danger');
+        toast(`동기화 실패: HTTP ${res.status}`, 'danger');
       }
-    } catch {
-      toast('동기화 오류', 'danger');
+    } catch (err) {
+      console.error('Sync error:', err);
+      toast('네트워크 오류 또는 CORS 문제', 'danger');
     }
   }, [toast]);
 

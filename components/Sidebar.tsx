@@ -9,13 +9,12 @@ Chart.register(DoughnutController, ArcElement, Tooltip);
 
 export default function Sidebar() {
   const { state } = useNexus();
+  const { assets } = state;
   const sectorChartRef = useRef<HTMLCanvasElement>(null);
   const sectorChartInstance = useRef<Chart | null>(null);
 
-  // 계산된 값들
+  // 계산된 값들 - assets만 의존
   const calculations = useMemo(() => {
-    const { assets, exchangeRate } = state;
-    
     // 총 가치
     const totalValue = assets.reduce((sum, a) => sum + (a.qty * a.price), 0);
     
@@ -40,7 +39,7 @@ export default function Sidebar() {
         sectorData[sector] = { value: 0, return: 0 };
       }
       sectorData[sector].value += value;
-      sectorData[sector].return = ret; // 마지막 자산의 수익률 (단순화)
+      sectorData[sector].return = ret;
     });
 
     const sectors = Object.entries(sectorData)
@@ -83,50 +82,72 @@ export default function Sidebar() {
       assetCount: assets.length,
       sectorCount: Object.keys(sectorData).length,
     };
-  }, [state]);
+  }, [assets]);
 
-  // Sector Chart
+  // Sector 데이터만 별도 메모이제이션
+  const sectorChartData = useMemo(() => ({
+    labels: calculations.sectors.map(s => s.name),
+    values: calculations.sectors.map(s => s.value),
+    total: calculations.totalValue,
+  }), [calculations.sectors, calculations.totalValue]);
+
+  // Sector Chart - 데이터 업데이트만
   useEffect(() => {
     if (!sectorChartRef.current) return;
 
-    if (sectorChartInstance.current) {
-      sectorChartInstance.current.destroy();
-    }
-
-    const { sectors } = calculations;
-    
-    sectorChartInstance.current = new Chart(sectorChartRef.current, {
-      type: 'doughnut',
-      data: {
-        labels: sectors.map(s => s.name),
-        datasets: [{
-          data: sectors.map(s => s.value),
-          backgroundColor: CHART_COLORS.slice(0, sectors.length),
-          borderWidth: 0,
-        }],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        cutout: '65%',
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: 'rgba(10, 15, 41, 0.9)',
-            callbacks: {
-              label: (ctx) => `${ctx.label}: ${ctx.parsed.toFixed(0)} (${((ctx.parsed / calculations.totalValue) * 100).toFixed(1)}%)`,
+    // 차트가 없으면 생성
+    if (!sectorChartInstance.current) {
+      sectorChartInstance.current = new Chart(sectorChartRef.current, {
+        type: 'doughnut',
+        data: {
+          labels: sectorChartData.labels,
+          datasets: [{
+            data: sectorChartData.values,
+            backgroundColor: CHART_COLORS.slice(0, sectorChartData.labels.length),
+            borderWidth: 0,
+          }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '65%',
+          animation: false, // 애니메이션 비활성화로 깜빡임 방지
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(10, 15, 41, 0.9)',
+              callbacks: {
+                label: (ctx) => {
+                  const total = sectorChartData.total || 1;
+                  return `${ctx.label}: ${ctx.parsed.toFixed(0)} (${((ctx.parsed / total) * 100).toFixed(1)}%)`;
+                },
+              },
             },
           },
         },
-      },
-    });
+      });
+    } else {
+      // 기존 차트 데이터만 업데이트
+      sectorChartInstance.current.data.labels = sectorChartData.labels;
+      sectorChartInstance.current.data.datasets[0].data = sectorChartData.values;
+      sectorChartInstance.current.data.datasets[0].backgroundColor = CHART_COLORS.slice(0, sectorChartData.labels.length);
+      sectorChartInstance.current.update('none'); // 애니메이션 없이 업데이트
+    }
 
+    return () => {
+      // 컴포넌트 언마운트 시에만 destroy
+    };
+  }, [sectorChartData]);
+
+  // 컴포넌트 언마운트 시 차트 정리
+  useEffect(() => {
     return () => {
       if (sectorChartInstance.current) {
         sectorChartInstance.current.destroy();
+        sectorChartInstance.current = null;
       }
     };
-  }, [calculations]);
+  }, []);
 
   return (
     <div className="space-y-4">

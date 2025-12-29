@@ -14,10 +14,22 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const [manualRate, setManualRate] = useState('');
   const [scriptUrl, setScriptUrl] = useState('');
   const [refreshInterval, setRefreshInterval] = useState(5);
+  const [isLoaded, setIsLoaded] = useState(false);
 
+  // 컴포넌트 마운트 시 localStorage에서 설정 로드
   useEffect(() => {
-    if (isOpen) {
-      // localStorage에서 설정 로드
+    if (typeof window !== 'undefined') {
+      const savedUrl = localStorage.getItem('nexus_script_url') || '';
+      const savedInterval = localStorage.getItem('nexus_refresh_interval') || '5';
+      setScriptUrl(savedUrl);
+      setRefreshInterval(parseInt(savedInterval));
+      setIsLoaded(true);
+    }
+  }, []);
+
+  // 모달이 열릴 때마다 최신 값 로드
+  useEffect(() => {
+    if (isOpen && typeof window !== 'undefined') {
       const savedUrl = localStorage.getItem('nexus_script_url') || '';
       const savedInterval = localStorage.getItem('nexus_refresh_interval') || '5';
       setScriptUrl(savedUrl);
@@ -35,32 +47,38 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   };
 
   const handleSaveScriptUrl = () => {
-    localStorage.setItem('nexus_script_url', scriptUrl);
-    toast('Google Script URL 저장됨', 'success');
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('nexus_script_url', scriptUrl);
+      toast('Google Script URL 저장됨', 'success');
+    }
   };
 
   const handleSaveInterval = () => {
-    localStorage.setItem('nexus_refresh_interval', refreshInterval.toString());
-    toast(`API 갱신 주기: ${refreshInterval}분`, 'success');
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('nexus_refresh_interval', refreshInterval.toString());
+      toast(`API 갱신 주기: ${refreshInterval}분`, 'success');
+    }
   };
 
   const handleExport = () => {
-    const data = localStorage.getItem('nexus_state');
-    if (data) {
-      const blob = new Blob([data], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `nexus_backup_${new Date().toISOString().split('T')[0]}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-      toast('데이터 내보내기 완료', 'success');
+    if (typeof window !== 'undefined') {
+      const data = localStorage.getItem('nexus_state');
+      if (data) {
+        const blob = new Blob([data], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `nexus_backup_${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast('데이터 내보내기 완료', 'success');
+      }
     }
   };
 
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
+    if (file && typeof window !== 'undefined') {
       const reader = new FileReader();
       reader.onload = (event) => {
         try {
@@ -77,7 +95,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   };
 
   const handleReset = () => {
-    if (confirm('모든 데이터를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+    if (typeof window !== 'undefined' && confirm('모든 데이터를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
       localStorage.removeItem('nexus_state');
       localStorage.removeItem('nexus_script_url');
       localStorage.removeItem('nexus_refresh_interval');
