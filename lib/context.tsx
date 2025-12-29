@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
 import { NexusState, Asset, Dividend, MarketData } from './types';
 import { loadState, saveState } from './storage';
 import { DEFAULT_EXCHANGE_RATE } from './config';
@@ -137,6 +137,12 @@ export function NexusProvider({ children }: { children: ReactNode }) {
     }));
   }, []);
 
+  // useRef로 현재 assets 참조 (무한 루프 방지)
+  const assetsRef = useRef(state.assets);
+  useEffect(() => {
+    assetsRef.current = state.assets;
+  }, [state.assets]);
+
   const refreshPrices = useCallback(async () => {
     if (state.isFetching) return;
     
@@ -150,14 +156,15 @@ export function NexusProvider({ children }: { children: ReactNode }) {
         updateMarket(marketData);
       }
 
-      // Fetch asset prices
+      // Fetch asset prices - useRef 사용
+      const currentAssets = assetsRef.current;
       const previousPrices: Record<string, number> = {};
-      state.assets.forEach(a => {
+      currentAssets.forEach(a => {
         if (a.price > 0) previousPrices[a.ticker] = a.price;
       });
 
       const updatedAssets = await Promise.all(
-        state.assets.map(async (asset) => {
+        currentAssets.map(async (asset) => {
           try {
             const res = await fetch(`/api/price/${asset.ticker}`);
             if (res.ok) {
@@ -179,7 +186,7 @@ export function NexusProvider({ children }: { children: ReactNode }) {
     } catch {
       setState(prev => ({ ...prev, isFetching: false }));
     }
-  }, [state.assets, state.isFetching, updateMarket]);
+  }, [state.isFetching, updateMarket]); // state.assets 제거!
 
   const setTheme = useCallback((theme: 'dark' | 'light') => {
     setState(prev => ({ ...prev, theme }));
@@ -214,7 +221,12 @@ export function NexusProvider({ children }: { children: ReactNode }) {
 
   const syncFromSheet = useCallback(async () => {
     const scriptUrl = localStorage.getItem('nexus_script_url');
-    if (!scriptUrl) {
+    
+    // 디버깅: localStorage 전체 키 확인
+    console.log('localStorage keys:', Object.keys(localStorage));
+    console.log('nexus_script_url:', scriptUrl);
+    
+    if (!scriptUrl || scriptUrl.trim() === '') {
       toast('설정에서 Google Script URL을 입력하세요', 'warning');
       return;
     }

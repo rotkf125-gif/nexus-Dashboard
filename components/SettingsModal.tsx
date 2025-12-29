@@ -47,9 +47,17 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   };
 
   const handleSaveScriptUrl = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('nexus_script_url', scriptUrl);
-      toast('Google Script URL 저장됨', 'success');
+    if (scriptUrl.trim()) {
+      localStorage.setItem('nexus_script_url', scriptUrl.trim());
+      // 저장 확인
+      const saved = localStorage.getItem('nexus_script_url');
+      if (saved === scriptUrl.trim()) {
+        toast('Google Script URL 저장됨', 'success');
+      } else {
+        toast('저장 실패', 'danger');
+      }
+    } else {
+      toast('URL을 입력하세요', 'warning');
     }
   };
 
