@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useNexus } from '@/lib/context';
 
 export default function IncomeStream() {
@@ -12,11 +12,7 @@ export default function IncomeStream() {
     return assets.filter(a => a.type === 'INCOME');
   }, [assets]);
 
-  // 손실금액 수동 입력 상태
-  const [editingLoss, setEditingLoss] = useState<string | null>(null);
-  const [lossInput, setLossInput] = useState('');
-
-  // 각 INCOME 자산별 배당 통계 계산
+  // 각 INCOME 자산별 통계 계산
   const incomeStats = useMemo(() => {
     return incomeAssets.map(asset => {
       const tickerDividends = dividends.filter(d => d.ticker === asset.ticker);
@@ -30,28 +26,34 @@ export default function IncomeStream() {
       // 배당 횟수
       const dividendCount = tickerDividends.length;
 
-      // 평균 DPS
+      // 평균 DPS (1주당 배당금)
       const avgDps = dividendCount > 0
         ? tickerDividends.reduce((sum, d) => sum + d.dps, 0) / dividendCount
         : 0;
 
-      // 손실금액 (tradeSums에서 가져오거나 자산 손익으로 계산)
-      const currentValue = asset.qty * asset.price;
+      // 원금 (매수 비용)
       const costBasis = asset.qty * asset.avg;
-      const unrealizedLoss = Math.max(0, costBasis - currentValue);
-      const lossAmount = tradeSums[asset.ticker] || unrealizedLoss;
+      
+      // 평가금 (현재 가치)
+      const currentValue = asset.qty * asset.price;
 
-      // Recovery 진행률
+      // 매수/매도 합 (손실금액) - tradeSums에서 가져옴
+      const tradeReturn = tradeSums[asset.ticker] ?? 0;
+
+      // Recovery 진행률 (손실금액 기준)
+      const lossAmount = Math.abs(tradeReturn);
       const recoveryPct = lossAmount > 0 ? Math.min(100, (totalDividend / lossAmount) * 100) : 0;
 
       return {
         ticker: asset.ticker,
         qty: asset.qty,
-        totalDividend,
-        dividendCount,
         avgDps,
-        lossAmount,
+        costBasis,
+        totalDividend,
+        currentValue,
+        tradeReturn,
         recoveryPct,
+        dividendCount,
       };
     });
   }, [incomeAssets, dividends, tradeSums]);
@@ -62,10 +64,8 @@ export default function IncomeStream() {
     const now = new Date();
     const weeksSinceStart = Math.max(1, Math.ceil((now.getTime() - startDate.getTime()) / (7 * 24 * 60 * 60 * 1000)));
 
-    // 2025-10-23 이후 배당만 필터
     const recentDividends = dividends.filter(d => new Date(d.date) >= startDate);
 
-    // 주간별 배당 합계
     const weeklyTotals: number[] = [];
     recentDividends.forEach(d => {
       const weekIndex = Math.floor((new Date(d.date).getTime() - startDate.getTime()) / (7 * 24 * 60 * 60 * 1000));
@@ -89,14 +89,16 @@ export default function IncomeStream() {
       .slice(0, 5);
   }, [dividends]);
 
-  const handleSaveLoss = (ticker: string) => {
-    const amount = parseFloat(lossInput);
-    if (!isNaN(amount) && amount >= 0) {
-      setTradeSums(ticker, amount);
-      toast(`${ticker} 손실금액 설정: $${amount.toFixed(2)}`, 'success');
+  // 손실금액 입력 (브라우저 prompt 사용)
+  const handleEditTradeReturn = (ticker: string, currentValue: number) => {
+    const input = prompt(`Trade Return (${ticker}):`, currentValue.toString());
+    if (input !== null) {
+      const amount = parseFloat(input);
+      if (!isNaN(amount)) {
+        setTradeSums(ticker, amount);
+        toast(`${ticker} Trade Return: $${amount.toFixed(2)}`, 'success');
+      }
     }
-    setEditingLoss(null);
-    setLossInput('');
   };
 
   if (incomeAssets.length === 0) {
@@ -108,7 +110,6 @@ export default function IncomeStream() {
     );
   }
 
-  // 그리드 컬럼 결정
   const gridCols = incomeAssets.length === 1 ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2';
 
   return (
@@ -139,74 +140,66 @@ export default function IncomeStream() {
                 <span className={`text-base font-light font-display tracking-widest ${textClass}`}>
                   {stat.ticker}
                 </span>
-                <span className={`text-[10px] font-light px-2 py-0.5 border rounded ${isGold ? 'bg-celestial-gold/10 border-celestial-gold/30' : 'bg-white/5 border-white/10'}`}>
-                  ${stat.totalDividend.toFixed(2)}
-                </span>
+                <span className="text-[9px] opacity-50">{stat.dividendCount}회 배당</span>
               </div>
 
-              {/* Stats Grid */}
-              <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[9px] font-light mb-3 opacity-80">
-                <div className="flex justify-between">
-                  <span className="opacity-60">배당 횟수</span>
-                  <span>{stat.dividendCount}회</span>
+              {/* Stats Grid - 새로운 구성 */}
+              <div className="space-y-1.5 text-[10px] font-light mb-3">
+                {/* Row 1: 보유 수량 | 1주당 배당금 */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="flex justify-between items-center">
+                    <span className="opacity-50">보유 수량</span>
+                    <span className={textClass}>{stat.qty.toLocaleString()}주</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="opacity-50">1주당 배당금</span>
+                    <span className={textClass}>${stat.avgDps.toFixed(4)}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="opacity-60">평균 DPS</span>
-                  <span>${stat.avgDps.toFixed(4)}</span>
+
+                {/* Row 2: 원금 | 총 배당금 */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="flex justify-between items-center">
+                    <span className="opacity-50">원금</span>
+                    <span className="text-white/60">${stat.costBasis.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="opacity-50">총 배당금</span>
+                    <span className="text-v64-success">${stat.totalDividend.toFixed(2)}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="opacity-60">보유</span>
-                  <span>{stat.qty}주</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="opacity-60">손실금액</span>
-                  {editingLoss === stat.ticker ? (
-                    <div className="flex items-center gap-1">
-                      <input
-                        type="number"
-                        value={lossInput}
-                        onChange={(e) => setLossInput(e.target.value)}
-                        className="w-16 bg-black/30 border border-white/20 rounded px-1 text-[9px] text-right"
-                        placeholder="0"
-                        autoFocus
-                      />
-                      <button 
-                        onClick={() => handleSaveLoss(stat.ticker)}
-                        className="text-v64-success"
-                      >
-                        <i className="fas fa-check" />
-                      </button>
-                      <button 
-                        onClick={() => { setEditingLoss(null); setLossInput(''); }}
-                        className="text-v64-danger"
-                      >
-                        <i className="fas fa-times" />
-                      </button>
-                    </div>
-                  ) : (
+
+                {/* Row 3: 평가금 | 매수/매도 합 */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="flex justify-between items-center">
+                    <span className="opacity-50">평가금</span>
+                    <span className={stat.currentValue >= stat.costBasis ? 'text-v64-success' : 'text-v64-danger'}>
+                      ${stat.currentValue.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="opacity-50">매수/매도 합</span>
                     <span 
-                      className="cursor-pointer hover:text-celestial-gold"
-                      onClick={() => {
-                        setEditingLoss(stat.ticker);
-                        setLossInput(stat.lossAmount.toString());
-                      }}
+                      className={`cursor-pointer hover:opacity-80 ${stat.tradeReturn >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}
+                      onClick={() => handleEditTradeReturn(stat.ticker, stat.tradeReturn)}
                       title="클릭하여 수정"
                     >
-                      ${stat.lossAmount.toFixed(2)} <i className="fas fa-pen text-[7px] opacity-50" />
+                      {stat.tradeReturn >= 0 ? '+' : ''}${stat.tradeReturn.toFixed(2)}
+                      <i className="fas fa-pen text-[7px] ml-1 opacity-50" />
                     </span>
-                  )}
+                  </div>
                 </div>
               </div>
 
               {/* Recovery Progress */}
               <div className={`border-t pt-2 ${isGold ? 'border-celestial-gold/20' : 'border-white/10'}`}>
                 <div className={`flex justify-between mb-1 text-[9px] tracking-widest font-light ${isGold ? 'text-celestial-gold/50' : 'opacity-50'}`}>
-                  <span>RECOVERY</span>
-                  <span>{stat.recoveryPct.toFixed(1)}%</span>
+                  <span>RECOVERY (회수율)</span>
+                  <span className={stat.recoveryPct >= 100 ? 'text-v64-success' : ''}>{stat.recoveryPct.toFixed(1)}%</span>
                 </div>
-                <div className={`w-full h-1 rounded-full overflow-hidden ${barBg}`}>
+                <div className={`w-full h-1.5 rounded-full overflow-hidden ${barBg}`}>
                   <div 
-                    className={`h-full transition-all ${barFill}`}
+                    className={`h-full transition-all ${stat.recoveryPct >= 100 ? 'bg-v64-success' : barFill}`}
                     style={{ width: `${Math.min(100, stat.recoveryPct)}%` }}
                   />
                 </div>
