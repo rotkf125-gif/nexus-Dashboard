@@ -13,6 +13,7 @@ import DividendModal from '@/components/DividendModal';
 import SettingsModal from '@/components/SettingsModal';
 import IncomeStream from '@/components/IncomeStream';
 import DPSTrend from '@/components/DPSTrend';
+import Learning from '@/components/Learning';
 
 function DashboardContent() {
   const { 
@@ -25,6 +26,7 @@ function DashboardContent() {
     dividendModalOpen,
     closeDividendModal,
     openDividendModal,
+    syncFromSheet,
     state,
     refreshPrices
   } = useNexus();
@@ -148,7 +150,11 @@ function DashboardContent() {
               <i className="fas fa-coins text-celestial-gold text-xs" /> INCOME STREAM
             </h2>
             <div className="flex gap-2">
-              <button className="celestial-btn text-[10px]" style={{ borderColor: 'rgba(105,240,174,0.4)', color: '#69F0AE' }}>
+              <button 
+                onClick={syncFromSheet}
+                className="celestial-btn text-[10px]" 
+                style={{ borderColor: 'rgba(105,240,174,0.4)', color: '#69F0AE' }}
+              >
                 SYNC
               </button>
               <button
@@ -179,61 +185,7 @@ function DashboardContent() {
               <i className="fas fa-brain text-white/60 text-xs" /> LEARNING
             </h2>
           </div>
-          <div className="space-y-3">
-            {/* Accuracy */}
-            <div className="inner-glass p-3 rounded">
-              <div className="text-[9px] opacity-50 tracking-widest mb-2">ACCURACY</div>
-              {incomeAssets.length > 0 ? incomeAssets.slice(0, 2).map((asset, i) => (
-                <div key={asset.ticker} className="mb-2">
-                  <div className="flex justify-between text-[9px] mb-1">
-                    <span className={i === 0 ? 'opacity-60' : 'text-celestial-gold/60'}>{asset.ticker}</span>
-                    <span>--</span>
-                  </div>
-                  <div className={`h-1 rounded-full ${i === 0 ? 'bg-white/10' : 'bg-celestial-gold/10'}`}>
-                    <div className={`h-full rounded-full ${i === 0 ? 'bg-white/40' : 'bg-celestial-gold/60'}`} style={{ width: '0%' }} />
-                  </div>
-                </div>
-              )) : (
-                <div className="text-[9px] opacity-40 text-center py-2">INCOME 자산 없음</div>
-              )}
-            </div>
-            
-            {/* 95% CI */}
-            <div className="inner-glass p-3 rounded">
-              <div className="text-[9px] opacity-50 tracking-widest mb-2">95% CI</div>
-              {incomeAssets.length > 0 ? incomeAssets.slice(0, 2).map((asset, i) => (
-                <div key={asset.ticker} className="flex justify-between text-[9px] mb-1">
-                  <span className={i === 0 ? 'opacity-60' : 'text-celestial-gold/60'}>{asset.ticker}</span>
-                  <span className="opacity-70">$0.0000 - $0.0000</span>
-                </div>
-              )) : (
-                <div className="text-[9px] opacity-40 text-center py-2">--</div>
-              )}
-            </div>
-
-            {/* Stats */}
-            <div className="inner-glass p-3 rounded">
-              <div className="text-[9px] opacity-50 tracking-widest mb-2">STATS</div>
-              <div className="space-y-1 text-[9px]">
-                <div className="flex justify-between">
-                  <span className="opacity-60">Data Points</span>
-                  <span>{state.dividends.length}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="opacity-60">Period</span>
-                  <span>--</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="opacity-60">MAE</span>
-                  <span>--</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="opacity-60">Trend</span>
-                  <span>--</span>
-                </div>
-              </div>
-            </div>
-          </div>
+          <Learning />
         </div>
       </div>
 

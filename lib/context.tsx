@@ -15,6 +15,8 @@ interface NexusContextType {
   removeDividend: (index: number) => void;
   updateMarket: (market: Partial<MarketData>) => void;
   setExchangeRate: (rate: number) => void;
+  setTradeSums: (ticker: string, amount: number) => void;
+  syncFromSheet: () => Promise<void>;
   refreshPrices: () => Promise<void>;
   setTheme: (theme: 'dark' | 'light') => void;
   setCompactMode: (compact: boolean) => void;
@@ -127,6 +129,42 @@ export function NexusProvider({ children }: { children: ReactNode }) {
   const setExchangeRate = useCallback((rate: number) => {
     setState(prev => ({ ...prev, exchangeRate: rate }));
   }, []);
+
+  const setTradeSums = useCallback((ticker: string, amount: number) => {
+    setState(prev => ({
+      ...prev,
+      tradeSums: { ...prev.tradeSums, [ticker]: amount },
+    }));
+  }, []);
+
+  const syncFromSheet = useCallback(async () => {
+    const scriptUrl = localStorage.getItem('nexus_script_url');
+    if (!scriptUrl) {
+      toast('설정에서 Google Script URL을 입력하세요', 'warning');
+      return;
+    }
+
+    try {
+      toast('구글 시트 동기화 중...', 'info');
+      const res = await fetch(scriptUrl);
+      if (res.ok) {
+        const data = await res.json();
+        // data 형식: { dividends: [...], tradeSums: {...} }
+        if (data.dividends) {
+          setState(prev => ({
+            ...prev,
+            dividends: data.dividends,
+            tradeSums: data.tradeSums || prev.tradeSums,
+          }));
+          toast('동기화 완료', 'success');
+        }
+      } else {
+        toast('동기화 실패', 'danger');
+      }
+    } catch (err) {
+      toast('동기화 오류', 'danger');
+    }
+  }, [toast]);
 
   const refreshPrices = useCallback(async () => {
     if (state.isFetching) return;
@@ -268,6 +306,8 @@ export function NexusProvider({ children }: { children: ReactNode }) {
         removeDividend,
         updateMarket,
         setExchangeRate,
+        setTradeSums,
+        syncFromSheet,
         refreshPrices,
         setTheme,
         setCompactMode,
