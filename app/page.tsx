@@ -5,6 +5,9 @@ import Header from '@/components/Header';
 import AssetTable from '@/components/AssetTable';
 import StarCore from '@/components/StarCore';
 import AssetModal from '@/components/AssetModal';
+import DividendModal from '@/components/DividendModal';
+import IncomeStream from '@/components/IncomeStream';
+import DPSTrend from '@/components/DPSTrend';
 
 function DashboardContent() {
   const { 
@@ -14,6 +17,9 @@ function DashboardContent() {
     editingAsset, 
     editingIndex,
     openAddAssetModal,
+    dividendModalOpen,
+    closeDividendModal,
+    openDividendModal,
     state 
   } = useNexus();
 
@@ -27,6 +33,12 @@ function DashboardContent() {
         editingAsset={editingAsset}
         editingIndex={editingIndex}
         exchangeRate={state.exchangeRate}
+      />
+
+      {/* Dividend Modal */}
+      <DividendModal
+        isOpen={dividendModalOpen}
+        onClose={closeDividendModal}
       />
 
       {/* Header */}
@@ -104,23 +116,27 @@ function DashboardContent() {
         </div>
       </div>
 
-      {/* Second Row - Placeholder sections */}
+      {/* Second Row - Income Stream, What-If, DPS Trend */}
       <div className="grid grid-cols-1 xl:grid-cols-5 gap-5">
-        {/* Income Stream */}
+        {/* Income Stream (2/5) */}
         <div className="xl:col-span-2 glass-card p-5 border-accent-gold">
           <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
             <h2 className="text-lg font-display tracking-widest flex items-center gap-3 text-white">
               <i className="fas fa-coins text-celestial-gold text-xs" /> INCOME STREAM
             </h2>
+            <div className="flex gap-2">
+              <button 
+                onClick={openDividendModal}
+                className="celestial-btn celestial-btn-gold text-[10px]"
+              >
+                RECORD
+              </button>
+            </div>
           </div>
-          <div className="text-center py-8 opacity-40">
-            <i className="fas fa-chart-line text-2xl mb-2" />
-            <p className="text-sm">배당 분석 섹션</p>
-            <p className="text-[10px] mt-1">추후 구현 예정</p>
-          </div>
+          <IncomeStream />
         </div>
 
-        {/* What-If Simulator */}
+        {/* What-If Simulator (1/5) */}
         <div className="glass-card p-5 border-accent-success">
           <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
             <h2 className="text-base font-semibold font-display tracking-widest flex items-center gap-2 text-white">
@@ -134,18 +150,14 @@ function DashboardContent() {
           </div>
         </div>
 
-        {/* DPS Trend */}
+        {/* DPS Trend (2/5) */}
         <div className="xl:col-span-2 glass-card p-5 border-accent-purple">
           <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
             <h2 className="text-lg font-display tracking-widest flex items-center gap-3 text-white">
               <i className="fas fa-chart-area text-celestial-purple text-xs" /> DPS TREND
             </h2>
           </div>
-          <div className="text-center py-8 opacity-40">
-            <i className="fas fa-chart-bar text-2xl mb-2" />
-            <p className="text-sm">DPS 트렌드 차트</p>
-            <p className="text-[10px] mt-1">추후 구현 예정</p>
-          </div>
+          <DPSTrend />
         </div>
       </div>
 

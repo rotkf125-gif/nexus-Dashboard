@@ -18,7 +18,7 @@ interface NexusContextType {
   setTheme: (theme: 'dark' | 'light') => void;
   setCompactMode: (compact: boolean) => void;
   toast: (message: string, type?: 'success' | 'danger' | 'warning' | 'info') => void;
-  // Modal states
+  // Asset Modal states
   assetModalOpen: boolean;
   setAssetModalOpen: (open: boolean) => void;
   editingAsset: Asset | null;
@@ -27,6 +27,11 @@ interface NexusContextType {
   openEditAssetModal: (index: number) => void;
   closeAssetModal: () => void;
   saveAssetFromModal: (asset: Asset) => void;
+  // Dividend Modal states
+  dividendModalOpen: boolean;
+  setDividendModalOpen: (open: boolean) => void;
+  openDividendModal: () => void;
+  closeDividendModal: () => void;
 }
 
 const defaultState: NexusState = {
@@ -58,6 +63,9 @@ export function NexusProvider({ children }: { children: ReactNode }) {
   const [assetModalOpen, setAssetModalOpen] = useState(false);
   const [editingAsset, setEditingAsset] = useState<Asset | null>(null);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  
+  // Dividend Modal states
+  const [dividendModalOpen, setDividendModalOpen] = useState(false);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -228,6 +236,15 @@ export function NexusProvider({ children }: { children: ReactNode }) {
     closeAssetModal();
   }, [editingIndex, closeAssetModal, toast]);
 
+  // Dividend Modal functions
+  const openDividendModal = useCallback(() => {
+    setDividendModalOpen(true);
+  }, []);
+
+  const closeDividendModal = useCallback(() => {
+    setDividendModalOpen(false);
+  }, []);
+
   if (!isLoaded) {
     return <div className="min-h-screen flex items-center justify-center">
       <i className="fas fa-spinner spinner text-2xl opacity-50" />
@@ -249,7 +266,7 @@ export function NexusProvider({ children }: { children: ReactNode }) {
         setTheme,
         setCompactMode,
         toast,
-        // Modal states
+        // Asset Modal states
         assetModalOpen,
         setAssetModalOpen,
         editingAsset,
@@ -258,6 +275,11 @@ export function NexusProvider({ children }: { children: ReactNode }) {
         openEditAssetModal,
         closeAssetModal,
         saveAssetFromModal,
+        // Dividend Modal states
+        dividendModalOpen,
+        setDividendModalOpen,
+        openDividendModal,
+        closeDividendModal,
       }}
     >
       {children}
