@@ -1,10 +1,59 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useNexus } from '@/lib/context';
 
-export default function Header() {
-  const { state, refreshPrices } = useNexus();
-  
+interface HeaderProps {
+  onOpenSettings: () => void;
+}
+
+export default function Header({ onOpenSettings }: HeaderProps) {
+  const { state, refreshPrices, toast } = useNexus();
+  const [clock, setClock] = useState('--:--');
+  const [isLive, setIsLive] = useState(false);
+  const [syncTime, setSyncTime] = useState('--');
+
+  // Clock update
+  useEffect(() => {
+    const updateClock = () => {
+      const now = new Date();
+      setClock(now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }));
+    };
+    updateClock();
+    const interval = setInterval(updateClock, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Auto refresh when live
+  useEffect(() => {
+    if (!isLive) return;
+    
+    const refreshInterval = parseInt(localStorage.getItem('nexus_refresh_interval') || '5') * 60 * 1000;
+    const interval = setInterval(() => {
+      refreshPrices();
+    }, refreshInterval);
+    
+    // Initial fetch
+    refreshPrices();
+    
+    return () => clearInterval(interval);
+  }, [isLive, refreshPrices]);
+
+  // Update sync time
+  useEffect(() => {
+    if (state.lastSync) {
+      const updateSyncTime = () => {
+        const diff = Date.now() - state.lastSync!;
+        const minutes = Math.floor(diff / 60000);
+        const seconds = Math.floor((diff % 60000) / 1000);
+        setSyncTime(minutes > 0 ? `${minutes}분 전` : `${seconds}초 전`);
+      };
+      updateSyncTime();
+      const interval = setInterval(updateSyncTime, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [state.lastSync]);
+
   // Calculate totals
   let totalCost = 0, totalValue = 0, totalCostKrw = 0, totalValueKrw = 0;
   state.assets.forEach(a => {
@@ -21,8 +70,75 @@ export default function Header() {
   const returnKrw = totalValueKrw - totalCostKrw;
   const sign = returnVal >= 0 ? '+' : '';
   const signKrw = returnKrw >= 0 ? '+' : '';
-  const colorClass = returnVal >= 0 ? 'text-celestial-success glow-success' : 'text-celestial-danger glow-danger';
-  const colorClassKrw = returnKrw >= 0 ? 'text-celestial-success glow-success' : 'text-celestial-danger glow-danger';
+  const colorClass = returnVal >= 0 ? 'text-v64-success glow-success' : 'text-v64-danger glow-danger';
+  const colorClassKrw = returnKrw >= 0 ? 'text-v64-success glow-success' : 'text-v64-danger glow-danger';
+
+  // VIX Level
+  const vix = state.market.vix || 15;
+  let vixLevel = 'LOW';
+  let vixAction = '평상 운용';
+  let vixBarWidth = 20;
+  let vixBarColor = 'bg-v64-success';
+  
+  if (vix <= 15) {
+    vixLevel = 'LOW';
+    vixAction = '평상 운용';
+    vixBarWidth = 20;
+    vixBarColor = 'bg-v64-success';
+  } else if (vix <= 25) {
+    vixLevel = 'NORMAL';
+    vixAction = '주의 관찰';
+    vixBarWidth = 40;
+    vixBarColor = 'bg-v64-success';
+  } else if (vix <= 35) {
+    vixLevel = 'ELEVATED';
+    vixAction = '현금 확보';
+    vixBarWidth = 60;
+    vixBarColor = 'bg-v64-warning';
+  } else if (vix <= 50) {
+    vixLevel = 'HIGH';
+    vixAction = '방어 모드';
+    vixBarWidth = 80;
+    vixBarColor = 'bg-v64-danger';
+  } else {
+    vixLevel = 'EXTREME';
+    vixAction = '시장 혼란';
+    vixBarWidth = 100;
+    vixBarColor = 'bg-v64-danger';
+  }
+
+  const handleToggleLive = () => {
+    setIsLive(!isLive);
+    if (!isLive) {
+      toast('실시간 모드 활성화', 'success');
+    } else {
+      toast('실시간 모드 비활성화', 'info');
+    }
+  };
+
+  const handleExportFreedom = () => {
+    const data = {
+      timestamp: new Date().toISOString(),
+      totalValue,
+      totalCost,
+      returnPct: totalCost > 0 ? ((totalValue - totalCost) / totalCost * 100).toFixed(2) : 0,
+      exchangeRate: state.exchangeRate,
+      assets: state.assets.map(a => ({
+        ticker: a.ticker,
+        qty: a.qty,
+        avg: a.avg,
+        price: a.price,
+        value: a.qty * a.price,
+        returnPct: a.avg > 0 ? ((a.price - a.avg) / a.avg * 100).toFixed(2) : 0,
+        type: a.type,
+        sector: a.sector,
+      })),
+      market: state.market,
+    };
+    
+    navigator.clipboard.writeText(JSON.stringify(data, null, 2));
+    toast('Freedom 데이터 복사됨', 'success');
+  };
 
   const formatUSD = (n: number) => '$' + n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -44,18 +160,19 @@ export default function Header() {
         <div className="flex items-center gap-6 px-6 border-l border-white/10">
           <div className="text-center">
             <div className="text-[8px] uppercase tracking-widest mb-1 opacity-50">Total Assets($)</div>
-            <div className="text-2xl font-light tracking-tight text-gradient-cyan">{formatUSD(totalCost)}</div>
+            <div className="text-2xl font-light tracking-tight text-gradient-cyan">{formatUSD(totalValue)}</div>
             <div className={`text-[10px] mt-0.5 ${colorClass}`}>({sign}{formatUSD(Math.abs(returnVal))})</div>
           </div>
           <div className="text-center">
             <div className="text-[8px] uppercase tracking-widest mb-1 opacity-50">Total Assets(₩)</div>
-            <div className="text-2xl font-light tracking-tight text-gradient-gold">₩{totalCostKrw.toLocaleString()}</div>
+            <div className="text-2xl font-light tracking-tight text-gradient-gold">₩{totalValueKrw.toLocaleString()}</div>
             <div className={`text-[10px] mt-0.5 ${colorClassKrw}`}>({signKrw}₩{Math.abs(returnKrw).toLocaleString()})</div>
           </div>
         </div>
 
         {/* Market Indices */}
         <div className="flex gap-6 px-6 border-l border-r border-white/15">
+          {/* Left Column */}
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between gap-4 min-w-[140px]">
               <span className="text-[10px] tracking-widest text-blue-400/80">NASDAQ</span>
@@ -64,8 +181,8 @@ export default function Header() {
               </span>
             </div>
             <div className="flex items-center justify-between gap-4">
-              <span className="text-[10px] tracking-widest text-green-400/80">S&P 500</span>
-              <span className="text-base font-display text-green-400">
+              <span className="text-[10px] tracking-widest text-emerald-400/80">S&P 500</span>
+              <span className="text-base font-display text-emerald-400">
                 {state.market.sp500 ? state.market.sp500.toLocaleString(undefined, { maximumFractionDigits: 2 }) : '---'}
               </span>
             </div>
@@ -76,37 +193,71 @@ export default function Header() {
               </span>
             </div>
           </div>
+          
+          {/* Right Column */}
           <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between gap-4 min-w-[120px]">
-              <span className="text-[10px] tracking-widest text-red-400/80">VIX</span>
-              <span className="text-base font-display text-red-400">
-                {state.market.vix ? state.market.vix.toFixed(2) : '---'}
+            <div className="flex items-center justify-between gap-4 min-w-[140px]">
+              <span className="text-[10px] tracking-widest text-white/60">USD/KRW</span>
+              <span className="text-base font-display text-white">
+                ₩{state.exchangeRate.toLocaleString()}
               </span>
             </div>
-            <div className="flex items-center justify-between gap-4">
-              <span className="text-[10px] tracking-widest text-white/60">USD/KRW</span>
-              <span className="text-base font-display text-white/80">
-                ₩{state.exchangeRate.toLocaleString()}
+            
+            {/* VIX Box */}
+            <div className="inner-glass px-3 py-2 rounded border border-v64-danger/30">
+              <div className="flex items-center justify-between gap-4 mb-1.5">
+                <span className="text-[10px] tracking-widest text-v64-danger/80">VIX</span>
+                <span className="text-base font-display text-v64-danger font-medium">
+                  {vix.toFixed(2)}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 h-[3px] bg-white/10 rounded-full overflow-hidden">
+                  <div 
+                    className={`h-full transition-all duration-500 ${vixBarColor}`}
+                    style={{ width: `${vixBarWidth}%` }}
+                  />
+                </div>
+                <span className="text-[9px] opacity-60">{vixLevel}</span>
+              </div>
+              <span className="text-[9px] text-celestial-gold/80 font-light mt-1 block text-right">
+                {vixAction}
               </span>
             </div>
           </div>
         </div>
 
         {/* Controls */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 text-[9px] tracking-widest opacity-60">
-            <div className={`status-dot ${state.isFetching ? 'loading' : state.lastSync ? 'connected' : ''}`} />
-            <span>{state.isFetching ? 'SYNC...' : state.lastSync ? 'ONLINE' : 'OFFLINE'}</span>
+        <div className="flex flex-col items-end gap-2">
+          <div className="flex items-center gap-3">
+            <span className={`status-dot ${state.isFetching ? 'loading' : isLive ? 'connected' : ''}`} />
+            <span className="text-[10px] tracking-widest font-light opacity-60">
+              {state.isFetching ? 'SYNC...' : isLive ? 'ONLINE' : 'OFFLINE'}
+            </span>
+            <span className="text-[9px] opacity-40">{syncTime}</span>
+            <div className="text-lg font-display font-light w-20 text-center">{clock}</div>
           </div>
-          
-          <button
-            onClick={refreshPrices}
-            disabled={state.isFetching}
-            className="celestial-btn flex items-center gap-2"
-          >
-            <i className={`fas fa-sync-alt ${state.isFetching ? 'spinner' : ''}`} />
-            <span>SYNC</span>
-          </button>
+          <div className="flex gap-1.5">
+            <button
+              onClick={handleToggleLive}
+              className={`celestial-btn text-[9px] ${isLive ? 'border-v64-success/40 text-v64-success' : ''}`}
+            >
+              {isLive ? 'DISCONNECT' : 'CONNECT'}
+            </button>
+            <button
+              onClick={handleExportFreedom}
+              className="celestial-btn celestial-btn-gold text-[9px]"
+              title="Freedom v30"
+            >
+              <i className="fas fa-bolt mr-1" />FREEDOM
+            </button>
+            <button
+              onClick={onOpenSettings}
+              className="celestial-btn text-[9px]"
+            >
+              <i className="fas fa-cog" />
+            </button>
+          </div>
         </div>
       </div>
     </header>

@@ -452,3 +452,140 @@ body {
 .asset-row.drag-over {
   border-top: 2px solid var(--info);
 }
+
+/* ─── SCENARIO SLIDER ─── */
+.scenario-slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  outline: none;
+  border-radius: 2px;
+}
+
+.scenario-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+  transition: transform 0.2s;
+}
+
+.scenario-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+/* ─── COMPACT TOGGLE ─── */
+.compact-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+.compact-toggle input { display: none; }
+
+.compact-toggle-switch {
+  width: 32px;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  position: relative;
+  transition: background 0.3s;
+}
+
+.compact-toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.3s;
+}
+
+.compact-toggle input:checked + .compact-toggle-switch {
+  background: rgba(255, 215, 0, 0.4);
+}
+
+.compact-toggle input:checked + .compact-toggle-switch::after {
+  transform: translateX(16px);
+}
+
+/* ─── DIVIDEND COUNTDOWN ─── */
+.dividend-countdown {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: rgba(255, 215, 0, 0.05);
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  border-radius: 4px;
+  font-size: 10px;
+}
+
+.dividend-countdown-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.dividend-countdown-ticker {
+  color: rgba(255, 215, 0, 0.8);
+  font-weight: 500;
+}
+
+.dividend-countdown-days {
+  color: rgba(255, 255, 255, 0.9);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ─── VIX COLORS ─── */
+.bg-v64-success { background-color: var(--success); }
+.bg-v64-warning { background-color: var(--warning); }
+.bg-v64-danger { background-color: var(--danger); }
+.text-v64-success { color: var(--success); }
+.text-v64-warning { color: var(--warning); }
+.text-v64-danger { color: var(--danger); }
+
+/* ─── GLOW EFFECTS ─── */
+.glow-success {
+  text-shadow: 0 0 20px rgba(74, 222, 128, 0.5), 0 0 40px rgba(74, 222, 128, 0.3);
+}
+.glow-danger {
+  text-shadow: 0 0 20px rgba(248, 113, 113, 0.5), 0 0 40px rgba(248, 113, 113, 0.3);
+}
+.glow-gold {
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.5), 0 0 40px rgba(255, 215, 0, 0.3);
+}
+
+/* ─── TEXT GLOW ─── */
+.text-glow {
+  text-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+}
+
+/* ─── GRADIENTS ─── */
+.text-gradient-cyan {
+  background: linear-gradient(135deg, #00ffff, #00bfff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-gold {
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
