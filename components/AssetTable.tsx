@@ -1,11 +1,16 @@
 'use client';
 
+import { useState } from 'react';
 import { useNexus } from '@/lib/context';
 import { SECTORS, TYPE_COLORS, CHART_COLORS } from '@/lib/config';
 
 export default function AssetTable() {
-  const { state, removeAsset, openEditAssetModal } = useNexus();
-  const { assets, exchangeRate, previousPrices } = state;
+  const { state, removeAsset, openEditAssetModal, updateAssets } = useNexus();
+  const { assets, exchangeRate, previousPrices, compactMode } = state;
+  
+  // 드래그 정렬 상태
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   const formatUSD = (n: number) => '$' + n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -22,6 +27,41 @@ export default function AssetTable() {
     );
   };
 
+  // 드래그 핸들러
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedIndex !== null && draggedIndex !== index) {
+      setDragOverIndex(index);
+    }
+  };
+
+  const handleDragLeave = () => {
+    setDragOverIndex(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === dropIndex) return;
+
+    const newAssets = [...assets];
+    const [draggedItem] = newAssets.splice(draggedIndex, 1);
+    newAssets.splice(dropIndex, 0, draggedItem);
+    
+    updateAssets(newAssets);
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
   if (assets.length === 0) {
     return (
       <div className="empty-state py-16">
@@ -35,6 +75,66 @@ export default function AssetTable() {
     );
   }
 
+  // Compact 모드: 간소화된 테이블
+  if (compactMode) {
+    return (
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm font-light border-separate border-spacing-y-0">
+          <thead className="text-[9px] font-sans uppercase tracking-widest sticky top-0 bg-[#0a0f29] z-10">
+            <tr>
+              <th className="p-1.5 w-6 border-b border-white/15" />
+              <th className="p-2 text-left border-b border-white/15 font-medium opacity-85">Ticker</th>
+              <th className="p-2 text-right border-b border-white/15 font-medium opacity-85">Qty</th>
+              <th className="p-2 text-right border-b border-white/15 font-medium opacity-85">Price</th>
+              <th className="p-2 text-right border-b border-white/15 font-medium opacity-85">Value</th>
+              <th className="p-2 text-center border-b border-white/15 font-medium opacity-85">P/L</th>
+            </tr>
+          </thead>
+          <tbody className="font-light text-gray-300">
+            {assets.map((a, i) => {
+              const cost = a.qty * a.avg;
+              const value = a.qty * a.price;
+              const pl = cost > 0 ? ((value - cost) / cost * 100) : 0;
+              const tickerColor = CHART_COLORS[i % CHART_COLORS.length];
+              const plClass = pl >= 0 ? 'text-v64-success' : 'text-v64-danger';
+              const isDragging = draggedIndex === i;
+              const isDragOver = dragOverIndex === i;
+
+              return (
+                <tr 
+                  key={i} 
+                  className={`transition-all border-b border-white/5 ${isDragging ? 'opacity-50' : ''} ${isDragOver ? 'bg-celestial-purple/20' : ''}`}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, i)}
+                  onDragOver={(e) => handleDragOver(e, i)}
+                  onDragLeave={handleDragLeave}
+                  onDrop={(e) => handleDrop(e, i)}
+                  onDragEnd={handleDragEnd}
+                >
+                  <td className="p-1.5 text-center">
+                    <span className="drag-handle cursor-grab active:cursor-grabbing">
+                      <i className="fas fa-grip-vertical text-[10px]" />
+                    </span>
+                  </td>
+                  <td className="p-2">
+                    <span className="font-display text-[11px]" style={{ color: tickerColor }}>{a.ticker}</span>
+                  </td>
+                  <td className="p-2 text-right text-[10px] opacity-70">{a.qty}</td>
+                  <td className="p-2 text-right text-[10px]">${a.price.toFixed(2)}</td>
+                  <td className="p-2 text-right text-[10px]">{formatUSD(value)}</td>
+                  <td className={`p-2 text-center text-[10px] font-medium ${plClass}`}>
+                    {pl >= 0 ? '+' : ''}{pl.toFixed(1)}%
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
+  // 일반 모드: 전체 테이블
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm font-light border-separate border-spacing-y-0">
@@ -79,11 +179,22 @@ export default function AssetTable() {
             }
             
             const prevPrice = previousPrices[a.ticker] || 0;
+            const isDragging = draggedIndex === i;
+            const isDragOver = dragOverIndex === i;
 
             return (
-              <tr key={i} className={`${rowClass} transition-all border-b border-white/5`}>
+              <tr 
+                key={i} 
+                className={`${rowClass} transition-all border-b border-white/5 ${isDragging ? 'opacity-50' : ''} ${isDragOver ? 'bg-celestial-purple/20' : ''}`}
+                draggable
+                onDragStart={(e) => handleDragStart(e, i)}
+                onDragOver={(e) => handleDragOver(e, i)}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, i)}
+                onDragEnd={handleDragEnd}
+              >
                 <td className="p-2 text-center">
-                  <span className="drag-handle" title="드래그하여 순서 변경">
+                  <span className="drag-handle cursor-grab active:cursor-grabbing" title="드래그하여 순서 변경">
                     <i className="fas fa-grip-vertical" />
                   </span>
                 </td>

@@ -197,34 +197,48 @@ export default function Header({ onOpenSettings }: HeaderProps) {
           </div>
         </div>
 
-        {/* Total Assets */}
+        {/* Total Assets - 평가금(수익금), 원금 순 */}
         <div className="flex items-center gap-6 px-6 border-l border-white/10">
+          {/* USD */}
           <div className="text-center">
-            <div className="text-[8px] uppercase tracking-widest mb-1 opacity-50">Total Assets($)</div>
+            <div className="text-[8px] uppercase tracking-widest mb-1 opacity-50">평가금($)</div>
             <div className="text-2xl font-light tracking-tight text-gradient-cyan">{formatUSD(totalValue)}</div>
             <div className={`text-[10px] mt-0.5 ${colorClass}`}>({sign}{formatUSD(Math.abs(returnVal))})</div>
+            <div className="text-[9px] mt-1 opacity-40">원금: {formatUSD(totalCost)}</div>
           </div>
+          {/* KRW */}
           <div className="text-center">
-            <div className="text-[8px] uppercase tracking-widest mb-1 opacity-50">Total Assets(₩)</div>
+            <div className="text-[8px] uppercase tracking-widest mb-1 opacity-50">평가금(₩)</div>
             <div className="text-2xl font-light tracking-tight text-gradient-gold">₩{totalValueKrw.toLocaleString()}</div>
             <div className={`text-[10px] mt-0.5 ${colorClassKrw}`}>({signKrw}₩{Math.abs(returnKrw).toLocaleString()})</div>
+            <div className="text-[9px] mt-1 opacity-40">원금: ₩{totalCostKrw.toLocaleString()}</div>
           </div>
         </div>
 
-        {/* Market Indices */}
-        <div className="flex gap-6 px-6 border-l border-r border-white/15">
-          {/* Left Column */}
+        {/* Market Indices - 나스닥/환율, VIX, S&P500/US10Y 순 */}
+        <div className="flex gap-4 px-6 border-l border-r border-white/15">
+          {/* Column 1: NASDAQ, S&P500 */}
           <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between gap-4 min-w-[140px]">
+            <div className="flex items-center justify-between gap-4 min-w-[130px]">
               <span className="text-[10px] tracking-widest text-blue-400/80">NASDAQ</span>
               <span className="text-base font-display text-blue-400">
-                {state.market.nasdaq ? state.market.nasdaq.toLocaleString(undefined, { maximumFractionDigits: 2 }) : '---'}
+                {state.market.nasdaq ? state.market.nasdaq.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '---'}
               </span>
             </div>
             <div className="flex items-center justify-between gap-4">
               <span className="text-[10px] tracking-widest text-emerald-400/80">S&P 500</span>
               <span className="text-base font-display text-emerald-400">
-                {state.market.sp500 ? state.market.sp500.toLocaleString(undefined, { maximumFractionDigits: 2 }) : '---'}
+                {state.market.sp500 ? state.market.sp500.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '---'}
+              </span>
+            </div>
+          </div>
+          
+          {/* Column 2: USD/KRW, US10Y */}
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between gap-4 min-w-[120px]">
+              <span className="text-[10px] tracking-widest text-white/60">USD/KRW</span>
+              <span className="text-base font-display text-white">
+                ₩{state.exchangeRate.toLocaleString()}
               </span>
             </div>
             <div className="flex items-center justify-between gap-4">
@@ -234,37 +248,27 @@ export default function Header({ onOpenSettings }: HeaderProps) {
               </span>
             </div>
           </div>
-          
-          {/* Right Column */}
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between gap-4 min-w-[140px]">
-              <span className="text-[10px] tracking-widest text-white/60">USD/KRW</span>
-              <span className="text-base font-display text-white">
-                ₩{state.exchangeRate.toLocaleString()}
+
+          {/* Column 3: VIX Box */}
+          <div className="inner-glass px-3 py-2 rounded border border-v64-danger/30 min-w-[130px]">
+            <div className="flex items-center justify-between gap-3 mb-1.5">
+              <span className="text-[10px] tracking-widest text-v64-danger/80">VIX</span>
+              <span className="text-base font-display text-v64-danger font-medium">
+                {vix.toFixed(2)}
               </span>
             </div>
-            
-            {/* VIX Box */}
-            <div className="inner-glass px-3 py-2 rounded border border-v64-danger/30">
-              <div className="flex items-center justify-between gap-4 mb-1.5">
-                <span className="text-[10px] tracking-widest text-v64-danger/80">VIX</span>
-                <span className="text-base font-display text-v64-danger font-medium">
-                  {vix.toFixed(2)}
-                </span>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 h-[3px] bg-white/10 rounded-full overflow-hidden">
+                <div 
+                  className={`h-full transition-all duration-500 ${vixBarColor}`}
+                  style={{ width: `${vixBarWidth}%` }}
+                />
               </div>
-              <div className="flex items-center gap-2">
-                <div className="flex-1 h-[3px] bg-white/10 rounded-full overflow-hidden">
-                  <div 
-                    className={`h-full transition-all duration-500 ${vixBarColor}`}
-                    style={{ width: `${vixBarWidth}%` }}
-                  />
-                </div>
-                <span className="text-[9px] opacity-60">{vixLevel}</span>
-              </div>
-              <span className="text-[9px] text-celestial-gold/80 font-light mt-1 block text-right">
-                {vixAction}
-              </span>
+              <span className="text-[9px] opacity-60">{vixLevel}</span>
             </div>
+            <span className="text-[9px] text-celestial-gold/80 font-light mt-1 block text-right">
+              {vixAction}
+            </span>
           </div>
         </div>
 

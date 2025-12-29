@@ -28,7 +28,8 @@ function DashboardContent() {
     openDividendModal,
     syncFromSheet,
     state,
-    refreshPrices
+    refreshPrices,
+    setCompactMode
   } = useNexus();
 
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -74,7 +75,12 @@ function DashboardContent() {
             <div className="flex items-center gap-4">
               {/* Compact Mode Toggle */}
               <label className="compact-toggle">
-                <input type="checkbox" id="compact-toggle" />
+                <input 
+                  type="checkbox" 
+                  id="compact-toggle" 
+                  checked={state.compactMode}
+                  onChange={(e) => setCompactMode(e.target.checked)}
+                />
                 <span className="compact-toggle-switch" />
                 <span>COMPACT</span>
               </label>

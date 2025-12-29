@@ -91,7 +91,11 @@ export default function DPSTrend() {
     chartInstance.current = new Chart(chartRef.current, {
       type: 'line',
       data: {
-        labels: sortedDates.map(d => d.slice(5)), // MM-DD 형식
+        labels: sortedDates.map(d => {
+          // YYYY-MM-DD → YY/MM/DD
+          const parts = d.split('-');
+          return `${parts[0].slice(2)}/${parts[1]}/${parts[2]}`;
+        }),
         datasets,
       },
       options: {

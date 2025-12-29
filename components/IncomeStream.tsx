@@ -226,15 +226,20 @@ export default function IncomeStream() {
             <i className="fas fa-history text-[8px]" />
           </div>
           <div className="overflow-y-auto custom-scrollbar flex-grow max-h-[80px] space-y-1">
-            {recentLogs.length > 0 ? recentLogs.map((d, i) => (
-              <div key={i} className="flex justify-between text-[9px] font-light">
-                <span className="opacity-50">{d.date.slice(5)}</span>
-                <span className={d.ticker === incomeStats[0]?.ticker ? 'text-white/80' : 'text-celestial-gold'}>
-                  {d.ticker}
-                </span>
-                <span>${(d.qty * d.dps * 0.85).toFixed(2)}</span>
-              </div>
-            )) : (
+            {recentLogs.length > 0 ? recentLogs.map((d, i) => {
+              // YYYY-MM-DD → YY/MM/DD
+              const dateParts = d.date.split('-');
+              const formattedDate = `${dateParts[0].slice(2)}/${dateParts[1]}/${dateParts[2]}`;
+              return (
+                <div key={i} className="flex justify-between text-[9px] font-light">
+                  <span className="opacity-50">{formattedDate}</span>
+                  <span className={d.ticker === incomeStats[0]?.ticker ? 'text-white/80' : 'text-celestial-gold'}>
+                    {d.ticker}
+                  </span>
+                  <span>${(d.qty * d.dps * 0.85).toFixed(2)}</span>
+                </div>
+              );
+            }) : (
               <div className="text-[9px] opacity-40 text-center py-2">기록 없음</div>
             )}
           </div>
