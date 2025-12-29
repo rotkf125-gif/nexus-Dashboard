@@ -9,7 +9,7 @@ interface SettingsModalProps {
 }
 
 export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
-  const { state, updateMarket, toast } = useNexus();
+  const { state, setExchangeRate, toast } = useNexus();
   
   const [manualRate, setManualRate] = useState('');
   const [scriptUrl, setScriptUrl] = useState('');
@@ -28,7 +28,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const handleSetManualRate = () => {
     const rate = parseFloat(manualRate);
     if (rate && rate > 0) {
-      updateMarket({ exchangeRate: rate });
+      setExchangeRate(rate);
       toast(`환율 설정: ₩${rate.toLocaleString()}`, 'success');
       setManualRate('');
     }

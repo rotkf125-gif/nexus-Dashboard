@@ -14,6 +14,7 @@ interface NexusContextType {
   addDividend: (dividend: Dividend) => void;
   removeDividend: (index: number) => void;
   updateMarket: (market: Partial<MarketData>) => void;
+  setExchangeRate: (rate: number) => void;
   refreshPrices: () => Promise<void>;
   setTheme: (theme: 'dark' | 'light') => void;
   setCompactMode: (compact: boolean) => void;
@@ -121,6 +122,10 @@ export function NexusProvider({ children }: { children: ReactNode }) {
       market: { ...prev.market, ...market },
       exchangeRate: market.krw || prev.exchangeRate,
     }));
+  }, []);
+
+  const setExchangeRate = useCallback((rate: number) => {
+    setState(prev => ({ ...prev, exchangeRate: rate }));
   }, []);
 
   const refreshPrices = useCallback(async () => {
@@ -262,6 +267,7 @@ export function NexusProvider({ children }: { children: ReactNode }) {
         addDividend,
         removeDividend,
         updateMarket,
+        setExchangeRate,
         refreshPrices,
         setTheme,
         setCompactMode,
