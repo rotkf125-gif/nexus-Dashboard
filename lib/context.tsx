@@ -137,35 +137,6 @@ export function NexusProvider({ children }: { children: ReactNode }) {
     }));
   }, []);
 
-  const syncFromSheet = useCallback(async () => {
-    const scriptUrl = localStorage.getItem('nexus_script_url');
-    if (!scriptUrl) {
-      toast('설정에서 Google Script URL을 입력하세요', 'warning');
-      return;
-    }
-
-    try {
-      toast('구글 시트 동기화 중...', 'info');
-      const res = await fetch(scriptUrl);
-      if (res.ok) {
-        const data = await res.json();
-        // data 형식: { dividends: [...], tradeSums: {...} }
-        if (data.dividends) {
-          setState(prev => ({
-            ...prev,
-            dividends: data.dividends,
-            tradeSums: data.tradeSums || prev.tradeSums,
-          }));
-          toast('동기화 완료', 'success');
-        }
-      } else {
-        toast('동기화 실패', 'danger');
-      }
-    } catch (err) {
-      toast('동기화 오류', 'danger');
-    }
-  }, [toast]);
-
   const refreshPrices = useCallback(async () => {
     if (state.isFetching) return;
     
@@ -205,13 +176,10 @@ export function NexusProvider({ children }: { children: ReactNode }) {
         lastSync: Date.now(),
         isFetching: false,
       }));
-
-      toast('SYNCHRONIZED', 'success');
-    } catch (error) {
+    } catch {
       setState(prev => ({ ...prev, isFetching: false }));
-      toast('Sync failed', 'danger');
     }
-  }, [state.assets, state.isFetching]);
+  }, [state.assets, state.isFetching, updateMarket]);
 
   const setTheme = useCallback((theme: 'dark' | 'light') => {
     setState(prev => ({ ...prev, theme }));
@@ -243,6 +211,34 @@ export function NexusProvider({ children }: { children: ReactNode }) {
       setTimeout(() => toastEl.remove(), 300);
     }, 3000);
   }, []);
+
+  const syncFromSheet = useCallback(async () => {
+    const scriptUrl = localStorage.getItem('nexus_script_url');
+    if (!scriptUrl) {
+      toast('설정에서 Google Script URL을 입력하세요', 'warning');
+      return;
+    }
+
+    try {
+      toast('구글 시트 동기화 중...', 'info');
+      const res = await fetch(scriptUrl);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.dividends) {
+          setState(prev => ({
+            ...prev,
+            dividends: data.dividends,
+            tradeSums: data.tradeSums || prev.tradeSums,
+          }));
+          toast('동기화 완료', 'success');
+        }
+      } else {
+        toast('동기화 실패', 'danger');
+      }
+    } catch {
+      toast('동기화 오류', 'danger');
+    }
+  }, [toast]);
 
   // Modal functions
   const openAddAssetModal = useCallback(() => {
