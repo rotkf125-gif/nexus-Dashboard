@@ -31,27 +31,33 @@ export default function IncomeStream() {
         ? tickerDividends.reduce((sum, d) => sum + d.dps, 0) / dividendCount
         : 0;
 
-      // 원금 (매수 비용)
-      const costBasis = asset.qty * asset.avg;
+      // 원금 (매수 비용) - PRINCIPAL
+      const principal = asset.qty * asset.avg;
       
-      // 평가금 (현재 가치)
-      const currentValue = asset.qty * asset.price;
+      // 평가금 (현재 가치) - VALUATION
+      const valuation = asset.qty * asset.price;
 
-      // 매수/매도 합 (손실금액) - tradeSums에서 가져옴
+      // 미실현 수익금
+      const unrealizedPL = valuation - principal;
+
+      // 매수/매도 합 - TRADE RETURN
       const tradeReturn = tradeSums[asset.ticker] ?? 0;
 
-      // Recovery 진행률 (손실금액 기준)
-      const lossAmount = Math.abs(tradeReturn);
-      const recoveryPct = lossAmount > 0 ? Math.min(100, (totalDividend / lossAmount) * 100) : 0;
+      // Total Return = 매수/매도 합 + 미실현 수익금 + 누적 배당금
+      const totalReturn = tradeReturn + unrealizedPL + totalDividend;
+
+      // Recovery = 총 누적 배당금 / 원금 × 100
+      const recoveryPct = principal > 0 ? (totalDividend / principal) * 100 : 0;
 
       return {
         ticker: asset.ticker,
         qty: asset.qty,
         avgDps,
-        costBasis,
+        principal,
         totalDividend,
-        currentValue,
+        valuation,
         tradeReturn,
+        totalReturn,
         recoveryPct,
         dividendCount,
       };
@@ -89,7 +95,7 @@ export default function IncomeStream() {
       .slice(0, 5);
   }, [dividends]);
 
-  // 손실금액 입력 (브라우저 prompt 사용)
+  // Trade Return 입력 (브라우저 prompt 사용)
   const handleEditTradeReturn = (ticker: string, currentValue: number) => {
     const input = prompt(`Trade Return (${ticker}):`, currentValue.toString());
     if (input !== null) {
@@ -118,74 +124,59 @@ export default function IncomeStream() {
       <div className={`grid ${gridCols} gap-3`}>
         {incomeStats.map((stat, i) => {
           const isGold = i % 2 === 1;
-          const borderClass = isGold ? 'border-celestial-gold/20' : 'border-white/5';
-          const textClass = isGold ? 'text-celestial-gold' : 'text-white/80';
+          const borderClass = isGold ? 'border-celestial-gold/20' : 'border-white/10';
+          const textClass = isGold ? 'text-celestial-gold' : 'text-white';
           const barBg = isGold ? 'bg-celestial-gold/10' : 'bg-white/5';
           const barFill = isGold 
             ? 'bg-gradient-to-r from-celestial-gold/50 to-celestial-gold' 
             : 'bg-gradient-to-r from-white/30 to-white/60';
 
+          const totalReturnColor = stat.totalReturn >= 0 ? 'text-v64-success bg-v64-success/10 border-v64-success/30' : 'text-v64-danger bg-v64-danger/10 border-v64-danger/30';
+
           return (
             <div 
               key={stat.ticker} 
-              className={`inner-glass p-4 rounded border ${borderClass} relative overflow-hidden`}
+              className={`inner-glass p-4 rounded border ${borderClass}`}
             >
-              {/* Background ticker */}
-              <div className={`absolute top-0 right-0 p-2 text-[20px] font-display font-light ${isGold ? 'text-celestial-gold/10' : 'text-white/5'}`}>
-                {stat.ticker}
-              </div>
-
-              {/* Header */}
-              <div className="flex justify-between items-center mb-3 relative z-10">
-                <span className={`text-base font-light font-display tracking-widest ${textClass}`}>
+              {/* Header: 종목명 + Total Return */}
+              <div className="flex justify-between items-center mb-3">
+                <span className={`text-base font-display tracking-widest ${textClass}`}>
                   {stat.ticker}
                 </span>
-                <span className="text-[9px] opacity-50">{stat.dividendCount}회 배당</span>
+                <span className={`text-[11px] font-medium px-2 py-0.5 border rounded ${totalReturnColor}`}>
+                  {stat.totalReturn >= 0 ? '+' : ''}${stat.totalReturn.toFixed(2)}
+                </span>
               </div>
 
-              {/* Stats Grid - 새로운 구성 */}
-              <div className="space-y-1.5 text-[10px] font-light mb-3">
-                {/* Row 1: 보유 수량 | 1주당 배당금 */}
-                <div className="grid grid-cols-2 gap-2">
+              {/* Stats Grid */}
+              <div className="space-y-1 text-[10px] mb-3">
+                {/* Row 1: PRINCIPAL | DIVIDEND */}
+                <div className="grid grid-cols-2 gap-4">
                   <div className="flex justify-between items-center">
-                    <span className="opacity-50">보유 수량</span>
-                    <span className={textClass}>{stat.qty.toLocaleString()}주</span>
+                    <span className="opacity-40 tracking-wider">PRINCIPAL</span>
+                    <span className="text-white/80">${stat.principal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="opacity-50">1주당 배당금</span>
-                    <span className={textClass}>${stat.avgDps.toFixed(4)}</span>
-                  </div>
-                </div>
-
-                {/* Row 2: 원금 | 총 배당금 */}
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="flex justify-between items-center">
-                    <span className="opacity-50">원금</span>
-                    <span className="text-white/60">${stat.costBasis.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="opacity-50">총 배당금</span>
+                    <span className="opacity-40 tracking-wider">DIVIDEND</span>
                     <span className="text-v64-success">${stat.totalDividend.toFixed(2)}</span>
                   </div>
                 </div>
 
-                {/* Row 3: 평가금 | 매수/매도 합 */}
-                <div className="grid grid-cols-2 gap-2">
+                {/* Row 2: VALUATION | TRADE R. */}
+                <div className="grid grid-cols-2 gap-4">
                   <div className="flex justify-between items-center">
-                    <span className="opacity-50">평가금</span>
-                    <span className={stat.currentValue >= stat.costBasis ? 'text-v64-success' : 'text-v64-danger'}>
-                      ${stat.currentValue.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                    </span>
+                    <span className="opacity-40 tracking-wider">VALUATION</span>
+                    <span className="text-white/80">${stat.valuation.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="opacity-50">매수/매도 합</span>
+                    <span className="opacity-40 tracking-wider">TRADE R.</span>
                     <span 
                       className={`cursor-pointer hover:opacity-80 ${stat.tradeReturn >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}
                       onClick={() => handleEditTradeReturn(stat.ticker, stat.tradeReturn)}
                       title="클릭하여 수정"
                     >
                       {stat.tradeReturn >= 0 ? '+' : ''}${stat.tradeReturn.toFixed(2)}
-                      <i className="fas fa-pen text-[7px] ml-1 opacity-50" />
+                      <i className="fas fa-pen text-[7px] ml-1 opacity-40" />
                     </span>
                   </div>
                 </div>
@@ -193,9 +184,11 @@ export default function IncomeStream() {
 
               {/* Recovery Progress */}
               <div className={`border-t pt-2 ${isGold ? 'border-celestial-gold/20' : 'border-white/10'}`}>
-                <div className={`flex justify-between mb-1 text-[9px] tracking-widest font-light ${isGold ? 'text-celestial-gold/50' : 'opacity-50'}`}>
-                  <span>RECOVERY (회수율)</span>
-                  <span className={stat.recoveryPct >= 100 ? 'text-v64-success' : ''}>{stat.recoveryPct.toFixed(1)}%</span>
+                <div className="flex justify-between mb-1 text-[9px] tracking-widest">
+                  <span className={isGold ? 'text-celestial-gold/50' : 'opacity-40'}>RECOVERY</span>
+                  <span className={stat.recoveryPct >= 100 ? 'text-v64-success' : (isGold ? 'text-celestial-gold/70' : 'opacity-70')}>
+                    {stat.recoveryPct.toFixed(1)}%
+                  </span>
                 </div>
                 <div className={`w-full h-1.5 rounded-full overflow-hidden ${barBg}`}>
                   <div 
