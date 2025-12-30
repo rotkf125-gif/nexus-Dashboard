@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNexus } from '@/lib/context';
+import { supabase, getCurrentUserId } from '@/lib/supabase';
+import AuthModal from './AuthModal';
 
 interface HeaderProps {
   onOpenSettings: () => void;
@@ -13,9 +15,24 @@ export default function Header({ onOpenSettings }: HeaderProps) {
   const [isLive, setIsLive] = useState(false);
   const [syncTime, setSyncTime] = useState('--');
   const [connectionStatus, setConnectionStatus] = useState<'offline' | 'loading' | 'online'>('offline');
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
   
   const liveIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const isFetchingRef = useRef(false);
+
+  // Auth 상태 체크
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   // Clock update
   useEffect(() => {
@@ -275,6 +292,15 @@ export default function Header({ onOpenSettings }: HeaderProps) {
         {/* Controls */}
         <div className="flex flex-col items-end gap-2">
           <div className="flex items-center gap-3">
+            {/* Auth Status */}
+            {user ? (
+              <div className="flex items-center gap-2">
+                <i className="fas fa-user-check text-v64-success text-[10px]" />
+                <span className="text-[9px] text-v64-success">{user.email?.split('@')[0]}</span>
+              </div>
+            ) : (
+              <span className="text-[9px] opacity-40">Guest</span>
+            )}
             <span className={`status-dot ${connectionStatus}`} />
             <span className="text-[10px] tracking-widest font-light opacity-60">
               {connectionStatus === 'loading' ? 'SYNC...' : connectionStatus === 'online' ? 'ONLINE' : 'OFFLINE'}
@@ -283,6 +309,27 @@ export default function Header({ onOpenSettings }: HeaderProps) {
             <div className="text-lg font-display font-light w-20 text-center">{clock}</div>
           </div>
           <div className="flex gap-1.5">
+            {/* Auth Button */}
+            {user ? (
+              <button
+                onClick={async () => {
+                  await supabase.auth.signOut();
+                  toast('로그아웃 되었습니다', 'info');
+                }}
+                className="celestial-btn text-[9px]"
+                title="Logout"
+              >
+                <i className="fas fa-sign-out-alt" />
+              </button>
+            ) : (
+              <button
+                onClick={() => setAuthModalOpen(true)}
+                className="celestial-btn text-[9px]"
+                title="Login"
+              >
+                <i className="fas fa-user" />
+              </button>
+            )}
             <button
               onClick={toggleLive}
               className={`celestial-btn text-[9px] ${isLive ? 'border-v64-success/40 text-v64-success' : ''}`}
@@ -305,6 +352,13 @@ export default function Header({ onOpenSettings }: HeaderProps) {
           </div>
         </div>
       </div>
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        onAuthChange={setUser}
+      />
     </header>
   );
 }
