@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
 import { NexusState, Asset, Dividend, MarketData } from './types';
-import { loadState, saveState } from './storage';
+import { loadState, saveState, loadStateFromSupabase, saveStateToSupabase } from './storage';
 import { DEFAULT_EXCHANGE_RATE } from './config';
 
 interface NexusContextType {
@@ -35,6 +35,8 @@ interface NexusContextType {
   setDividendModalOpen: (open: boolean) => void;
   openDividendModal: () => void;
   closeDividendModal: () => void;
+  // Sync status
+  isSyncing: boolean;
 }
 
 const defaultState: NexusState = {
@@ -42,7 +44,7 @@ const defaultState: NexusState = {
   dividends: [],
   timeline: [],
   exchangeRate: DEFAULT_EXCHANGE_RATE,
-  tradeSums: { PLTY: 0, HOOY: 0 },
+  tradeSums: {},
   scriptUrl: '',
   strategy: '',
   theme: 'dark',
@@ -61,6 +63,7 @@ const NexusContext = createContext<NexusContextType | null>(null);
 export function NexusProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<NexusState>(defaultState);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   
   // Modal states
   const [assetModalOpen, setAssetModalOpen] = useState(false);
@@ -70,18 +73,53 @@ export function NexusProvider({ children }: { children: ReactNode }) {
   // Dividend Modal states
   const [dividendModalOpen, setDividendModalOpen] = useState(false);
 
-  // Load from localStorage on mount
+  // Debounce timer ref
+  const saveTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Load from Supabase on mount
   useEffect(() => {
-    const saved = loadState();
-    setState(prev => ({ ...prev, ...saved }));
-    setIsLoaded(true);
+    const loadData = async () => {
+      try {
+        // 먼저 localStorage에서 빠르게 로드 (즉시 표시)
+        const localState = loadState();
+        setState(prev => ({ ...prev, ...localState }));
+        
+        // 그 다음 Supabase에서 로드 (최신 데이터)
+        const supabaseState = await loadStateFromSupabase();
+        setState(prev => ({ ...prev, ...supabaseState }));
+      } catch (error) {
+        console.error('Failed to load state:', error);
+      } finally {
+        setIsLoaded(true);
+      }
+    };
+    
+    loadData();
   }, []);
 
-  // Save to localStorage on state change
+  // Save to Supabase on state change (debounced)
   useEffect(() => {
-    if (isLoaded) {
-      saveState(state);
+    if (!isLoaded) return;
+
+    // localStorage에 즉시 저장 (로컬 백업)
+    saveState(state);
+
+    // Supabase 저장은 debounce (1초 후)
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
     }
+
+    saveTimerRef.current = setTimeout(async () => {
+      setIsSyncing(true);
+      await saveStateToSupabase(state);
+      setIsSyncing(false);
+    }, 1000);
+
+    return () => {
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current);
+      }
+    };
   }, [state, isLoaded]);
 
   const updateAssets = useCallback((assets: Asset[]) => {
@@ -369,6 +407,8 @@ export function NexusProvider({ children }: { children: ReactNode }) {
         setDividendModalOpen,
         openDividendModal,
         closeDividendModal,
+        // Sync status
+        isSyncing,
       }}
     >
       {children}
