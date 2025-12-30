@@ -1,104 +1,54 @@
+[README.md](https://github.com/user-attachments/files/24377474/README.md)
 # 🌟 NEXUS CELESTIAL V64.2 - Next.js Edition
 
-개인 투자 포트폴리오 대시보드의 Next.js 버전입니다.
+개인 투자 포트폴리오 대시보드 (Celestial Glass 테마)
 
-## ✅ 해결된 문제
+## 🔗 배포 정보
 
-| 문제 | 기존 | Next.js |
-|------|------|---------|
-| CORS | 프록시 의존 (불안정) | API Routes로 해결 |
-| 호스팅 | GitHub Pages (정적만) | Vercel (서버리스 포함) |
-| 코드 구조 | 단일 HTML | 모듈화된 컴포넌트 |
-
----
-
-## 📋 Mino가 해야 할 것
-
-### 1단계: 개발 환경 설치
-
-#### Node.js 설치 (필수)
-1. https://nodejs.org 접속
-2. **LTS 버전** (v20.x) 다운로드 & 설치
-3. 터미널에서 확인:
-   ```bash
-   node -v   # v20.x.x 출력되면 성공
-   npm -v    # 10.x.x 출력되면 성공
-   ```
-
-#### VS Code 설치 (권장)
-1. https://code.visualstudio.com 접속
-2. 다운로드 & 설치
-3. 추천 확장 프로그램:
-   - ESLint
-   - Prettier
-   - Tailwind CSS IntelliSense
-   - ES7+ React snippets
+| 항목 | URL |
+|------|-----|
+| **Live Site** | https://nexus-dashboard-beige.vercel.app |
+| **GitHub** | https://github.com/rotkf125-gif/nexus-dashboard |
+| **Database** | Supabase (PostgreSQL) |
 
 ---
 
-### 2단계: 프로젝트 실행
+## ✅ 구현 완료 기능
 
-```bash
-# 1. 압축 해제 후 폴더로 이동
-cd nexus-next
+### 🔐 인증 & 동기화
+- [x] Supabase 연동 (클라우드 데이터 저장)
+- [x] Google OAuth 로그인
+- [x] 이메일/비밀번호 로그인
+- [x] URL 파라미터 공유 (`?uid=xxx`)
+- [x] 모바일 동기화 지원
 
-# 2. 패키지 설치 (최초 1회)
-npm install
+### 📊 대시보드
+- [x] 실시간 주가 조회 (Yahoo Finance)
+- [x] 프리마켓/애프터마켓 가격 지원
+- [x] 주요 지수 (NASDAQ, S&P500, VIX, US10Y, USD/KRW)
+- [x] 평가금/원금/수익금 표시
+- [x] Star Core 도넛 차트
+- [x] Sidebar 차트 (Weight, Sector, Type, Rankings)
 
-# 3. 개발 서버 실행
-npm run dev
-```
+### 📈 자산 관리
+- [x] 자산 추가/수정/삭제 모달
+- [x] 드래그 앤 드롭 정렬
+- [x] Compact 모드
+- [x] Delta 지표 (가격 변동 표시)
 
-브라우저에서 http://localhost:3000 접속!
+### 💰 배당 관리
+- [x] Income Stream 카드 (Total Return 계산)
+- [x] Trade Return 입력
+- [x] Recovery 진행률
+- [x] Google Sheets 동기화
+- [x] Dividend Analytics (DPS Trend + Learning 통합)
 
----
-
-### 3단계: GitHub 저장소 생성
-
-#### GitHub 계정 만들기
-1. https://github.com 접속
-2. Sign up → 계정 생성
-
-#### 저장소 생성
-1. GitHub 로그인
-2. 우측 상단 **+** → **New repository**
-3. Repository name: `nexus-dashboard`
-4. **Public** 선택 (Vercel 무료 플랜용)
-5. **Create repository** 클릭
-
-#### 코드 업로드
-```bash
-# 터미널에서 프로젝트 폴더로 이동
-cd nexus-next
-
-# Git 초기화
-git init
-git add .
-git commit -m "Initial commit - NEXUS V64.2"
-
-# GitHub 연결 (YOUR_USERNAME을 본인 계정으로 변경!)
-git remote add origin https://github.com/YOUR_USERNAME/nexus-dashboard.git
-git branch -M main
-git push -u origin main
-```
-
----
-
-### 4단계: Vercel 배포
-
-#### Vercel 가입
-1. https://vercel.com 접속
-2. **Continue with GitHub** 클릭 (GitHub 계정으로 로그인)
-
-#### 프로젝트 배포
-1. Vercel 대시보드 → **Add New...** → **Project**
-2. **Import Git Repository** → `nexus-dashboard` 선택
-3. 설정은 기본값 유지 → **Deploy** 클릭
-4. 2-3분 후 배포 완료!
-
-#### 결과
-- URL 예시: `https://nexus-dashboard-xxx.vercel.app`
-- 이후 GitHub에 push하면 **자동 배포**!
+### ⚙️ 설정
+- [x] 환율 수동 설정
+- [x] API 갱신 주기 설정
+- [x] 데이터 Export (JSON)
+- [x] 데이터 Import (JSON)
+- [x] 데이터 초기화
 
 ---
 
@@ -107,124 +57,205 @@ git push -u origin main
 ```
 nexus-next/
 ├── app/
-│   ├── layout.tsx          # 공통 레이아웃
-│   ├── page.tsx             # 메인 페이지
+│   ├── page.tsx              # 메인 대시보드
+│   ├── layout.tsx            # 루트 레이아웃
 │   └── api/
-│       ├── price/[ticker]/  # 주가 API (CORS 해결!)
-│       │   └── route.ts
-│       └── market/          # 시장 지수 API
-│           └── route.ts
+│       ├── market/route.ts   # 지수 API (프리/애프터마켓)
+│       └── price/[ticker]/route.ts
 ├── components/
-│   ├── Header.tsx           # 헤더 컴포넌트
-│   ├── AssetTable.tsx       # 자산 테이블
-│   └── StarCore.tsx         # 중앙 차트
+│   ├── Header.tsx            # 헤더 (Auth, 지수)
+│   ├── AuthModal.tsx         # 로그인/회원가입
+│   ├── AssetTable.tsx        # 자산 테이블 (드래그)
+│   ├── AssetModal.tsx        # 자산 추가/수정
+│   ├── IncomeStream.tsx      # 배당 수익 카드
+│   ├── DividendAnalytics.tsx # DPS + Learning 통합
+│   ├── DividendModal.tsx     # 배당 기록
+│   ├── SettingsModal.tsx     # 설정 (Export/Import)
+│   ├── Sidebar.tsx           # 차트 사이드바
+│   ├── StarCore.tsx          # 도넛 차트
+│   ├── WhatIfSimulator.tsx   # What-If 시뮬레이터
+│   └── StrategyBar.tsx       # 전략 메모
 ├── lib/
-│   ├── types.ts             # TypeScript 타입
-│   ├── config.ts            # 설정 상수
-│   ├── storage.ts           # localStorage 관리
-│   └── context.tsx          # React Context (상태 관리)
-├── styles/
-│   └── globals.css          # 전역 스타일
-├── package.json
-├── tailwind.config.js
-└── next.config.js
+│   ├── supabase.ts           # Supabase 클라이언트
+│   ├── storage.ts            # 하이브리드 스토리지
+│   ├── context.tsx           # 전역 상태 관리
+│   ├── types.ts              # TypeScript 타입
+│   └── config.ts             # 기본 설정
+└── styles/
+    └── globals.css           # Celestial Glass 테마
 ```
 
 ---
 
-## 🔧 API Routes 설명
+## 🚀 설치 및 실행
 
-### `/api/price/[ticker]`
-```
-GET /api/price/AAPL
-→ { "ticker": "AAPL", "price": 178.52, ... }
-```
-
-### `/api/market`
-```
-GET /api/market
-→ { "nasdaq": 15234.56, "sp500": 4892.34, "vix": 14.23, ... }
+### 1. 의존성 설치
+```bash
+npm install
 ```
 
-**서버에서 Yahoo Finance를 호출**하므로 CORS 문제 없음!
+### 2. 환경 변수 설정
+`.env.local` 파일 생성:
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGci...
+```
+
+### 3. 개발 서버 실행
+```bash
+npm run dev
+```
+http://localhost:3000 접속
+
+### 4. 프로덕션 빌드
+```bash
+npm run build
+npm run start
+```
 
 ---
 
-## 🚀 개발 명령어
+## 🗄️ Supabase 설정
+
+### 테이블 생성 (SQL Editor)
+```sql
+CREATE TABLE portfolios (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id TEXT NOT NULL UNIQUE,
+  assets JSONB DEFAULT '[]'::jsonb,
+  dividends JSONB DEFAULT '[]'::jsonb,
+  trade_sums JSONB DEFAULT '{}'::jsonb,
+  market JSONB DEFAULT '{}'::jsonb,
+  exchange_rate NUMERIC DEFAULT 1450,
+  strategy TEXT DEFAULT '',
+  compact_mode BOOLEAN DEFAULT false,
+  theme TEXT DEFAULT 'dark',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE portfolios ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow all"
+  ON portfolios FOR ALL
+  USING (true) WITH CHECK (true);
+```
+
+### Google OAuth 설정
+1. Supabase Dashboard → Authentication → Providers → Google
+2. Google Cloud Console에서 OAuth 2.0 클라이언트 생성
+3. Redirect URI: `https://xxx.supabase.co/auth/v1/callback`
+
+---
+
+## 🔧 API Routes
+
+### GET /api/price/[ticker]
+```json
+{
+  "ticker": "AAPL",
+  "price": 178.52,
+  "previousClose": 177.30,
+  "change": 1.22,
+  "changePercent": 0.69,
+  "marketState": "REGULAR"
+}
+```
+
+### GET /api/market
+```json
+{
+  "nasdaq": 19500,
+  "sp500": 6000,
+  "vix": 14.20,
+  "tnx": 4.25,
+  "krw": 1435,
+  "marketState": "REGULAR"
+}
+```
+
+**marketState 값:**
+- `REGULAR`: 정규장
+- `PRE`: 프리마켓
+- `POST`: 애프터마켓
+- `CLOSED`: 장 마감
+
+---
+
+## 📱 모바일 동기화
+
+### 방법 1: URL 공유
+1. PC에서 👤 아이콘 클릭
+2. 하단 "모바일 공유 링크" 복사
+3. 모바일에서 해당 링크 접속
+
+### 방법 2: Google 로그인
+1. PC/모바일 모두 같은 Google 계정으로 로그인
+2. 자동 동기화
+
+---
+
+## 🎨 테마 커스터마이징
+
+### Tailwind 색상 (`tailwind.config.js`)
+```javascript
+colors: {
+  'celestial-cyan': '#00d4ff',
+  'celestial-gold': '#ffd700',
+  'celestial-purple': '#b388ff',
+  'v64-success': '#69F0AE',
+  'v64-danger': '#FF5252',
+  'v64-warning': '#FFD740',
+}
+```
+
+---
+
+## 📝 Git 명령어
 
 ```bash
-npm run dev      # 개발 서버 (localhost:3000)
-npm run build    # 프로덕션 빌드
-npm run start    # 프로덕션 서버
-npm run lint     # 코드 검사
+# 변경사항 커밋 & 푸시
+git add .
+git commit -m "커밋 메시지"
+git push
+
+# Vercel 자동 배포됨
 ```
-
----
-
-## 📝 커스터마이징
-
-### 자산 추가/삭제
-`lib/config.ts`의 `DEFAULT_ASSETS` 수정:
-```typescript
-export const DEFAULT_ASSETS: Asset[] = [
-  { ticker: 'PLTY', qty: 100, avg: 27.00, ... },
-  { ticker: 'HOOY', qty: 100, avg: 34.00, ... },
-  // 여기에 추가
-];
-```
-
-### 테마 색상 변경
-`tailwind.config.js`의 `colors` 수정
-
-### 새 컴포넌트 추가
-`components/` 폴더에 파일 생성 후 `app/page.tsx`에서 import
-
----
-
-## ⚠️ 현재 미구현 기능
-
-Phase 1으로 핵심 기능만 구현되어 있습니다:
-
-- [x] Header (총 자산, 시장 지수)
-- [x] Asset Table (자산 목록)
-- [x] Star Core (도넛 차트)
-- [x] API Routes (CORS 해결)
-- [ ] Asset 추가/수정 모달
-- [ ] Dividend 입력/분석
-- [ ] What-If 시뮬레이터
-- [ ] DPS 트렌드 차트
-- [ ] Freedom v30 연동
-- [ ] 드래그 정렬
-
-추가 구현이 필요하면 말씀해주세요!
 
 ---
 
 ## 🆘 문제 해결
 
-### `npm install` 오류
+### npm install 오류
 ```bash
-# Node.js 버전 확인
-node -v  # v18 이상 필요
-
-# 캐시 정리 후 재시도
 npm cache clean --force
+rm -rf node_modules package-lock.json
 npm install
 ```
 
-### Vercel 배포 실패
-1. Vercel 대시보드 → Deployments → 실패한 배포 클릭
-2. Build Logs 확인
-3. 대부분 TypeScript 타입 오류 → 해당 파일 수정
+### Vercel 빌드 실패
+- Vercel Dashboard → Deployments → Build Logs 확인
+- TypeScript 타입 오류 수정
 
-### 포트 충돌
-```bash
-# 다른 포트로 실행
-npm run dev -- -p 3001
-```
+### Supabase 연결 실패
+- 환경 변수 확인 (NEXT_PUBLIC_ 접두사 필수)
+- Vercel에서 환경 변수 설정 후 Redeploy
 
 ---
 
-## 📞 연락
+## 📞 기술 스택
 
-문제가 있으면 Claude에게 물어보세요! 🤖
+- **Framework**: Next.js 14
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Database**: Supabase (PostgreSQL)
+- **Auth**: Supabase Auth (Google OAuth)
+- **Charts**: Chart.js
+- **Hosting**: Vercel
+- **API**: Yahoo Finance
+
+---
+
+## 📄 라이선스
+
+Private Project - Personal Use Only
