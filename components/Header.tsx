@@ -232,58 +232,56 @@ export default function Header({ onOpenSettings }: HeaderProps) {
           </div>
         </div>
 
-        {/* Market Indices - 나스닥/환율, VIX, S&P500/US10Y 순 */}
-        <div className="flex gap-4 px-6 border-l border-r border-white/15">
-          {/* Column 1: NASDAQ, S&P500 */}
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between gap-4 min-w-[130px]">
-              <span className="text-[10px] tracking-widest text-blue-400/80">NASDAQ</span>
-              <span className="text-base font-display text-blue-400">
+        {/* Market Indices - 2x2 그리드 + VIX */}
+        <div className="flex gap-3 px-6 border-l border-r border-white/15">
+          {/* 2x2 Grid: NASDAQ/S&P500, USD/KRW/US10Y */}
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+            {/* Row 1 */}
+            <div className="flex items-center justify-between gap-3 min-w-[110px]">
+              <span className="text-[9px] tracking-widest text-blue-400/80">NASDAQ</span>
+              <span className="text-sm font-display text-blue-400">
                 {state.market.nasdaq ? state.market.nasdaq.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '---'}
               </span>
             </div>
-            <div className="flex items-center justify-between gap-4">
-              <span className="text-[10px] tracking-widest text-emerald-400/80">S&P 500</span>
-              <span className="text-base font-display text-emerald-400">
-                {state.market.sp500 ? state.market.sp500.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '---'}
-              </span>
-            </div>
-          </div>
-          
-          {/* Column 2: USD/KRW, US10Y */}
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between gap-4 min-w-[120px]">
-              <span className="text-[10px] tracking-widest text-white/60">USD/KRW</span>
-              <span className="text-base font-display text-white">
+            <div className="flex items-center justify-between gap-3 min-w-[100px]">
+              <span className="text-[9px] tracking-widest text-white/60">USD/KRW</span>
+              <span className="text-sm font-display text-white">
                 ₩{state.exchangeRate.toLocaleString()}
               </span>
             </div>
-            <div className="flex items-center justify-between gap-4">
-              <span className="text-[10px] tracking-widest text-celestial-gold/80">US 10Y</span>
-              <span className="text-base font-display text-celestial-gold">
+            {/* Row 2 */}
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-[9px] tracking-widest text-emerald-400/80">S&P 500</span>
+              <span className="text-sm font-display text-emerald-400">
+                {state.market.sp500 ? state.market.sp500.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '---'}
+              </span>
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-[9px] tracking-widest text-celestial-gold/80">US 10Y</span>
+              <span className="text-sm font-display text-celestial-gold">
                 {state.market.tnx ? state.market.tnx.toFixed(2) + '%' : '---'}
               </span>
             </div>
           </div>
 
-          {/* Column 3: VIX Box */}
-          <div className="inner-glass px-3 py-2 rounded border border-v64-danger/30 min-w-[130px]">
-            <div className="flex items-center justify-between gap-3 mb-1.5">
-              <span className="text-[10px] tracking-widest text-v64-danger/80">VIX</span>
+          {/* VIX Box */}
+          <div className="inner-glass px-3 py-1.5 rounded border border-v64-danger/30 min-w-[120px]">
+            <div className="flex items-center justify-between gap-2 mb-1">
+              <span className="text-[9px] tracking-widest text-v64-danger/80">VIX</span>
               <span className="text-base font-display text-v64-danger font-medium">
                 {vix.toFixed(2)}
               </span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 mb-1">
               <div className="flex-1 h-[3px] bg-white/10 rounded-full overflow-hidden">
                 <div 
                   className={`h-full transition-all duration-500 ${vixBarColor}`}
                   style={{ width: `${vixBarWidth}%` }}
                 />
               </div>
-              <span className="text-[9px] opacity-60">{vixLevel}</span>
+              <span className="text-[8px] opacity-60">{vixLevel}</span>
             </div>
-            <span className="text-[9px] text-celestial-gold/80 font-light mt-1 block text-right">
+            <span className="text-[8px] text-celestial-gold/80 font-light block text-right">
               {vixAction}
             </span>
           </div>

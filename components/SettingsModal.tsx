@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNexus } from '@/lib/context';
+import { exportData, importData, clearAllData } from '@/lib/storage';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -9,12 +10,13 @@ interface SettingsModalProps {
 }
 
 export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
-  const { state, setExchangeRate, toast } = useNexus();
+  const { state, setExchangeRate, toast, updateAssets } = useNexus();
   
   const [manualRate, setManualRate] = useState('');
   const [scriptUrl, setScriptUrl] = useState('');
   const [refreshInterval, setRefreshInterval] = useState(5);
   const [isLoaded, setIsLoaded] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 컴포넌트 마운트 시 localStorage에서 설정 로드
   useEffect(() => {
@@ -49,7 +51,6 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const handleSaveScriptUrl = () => {
     if (scriptUrl.trim()) {
       localStorage.setItem('nexus_script_url', scriptUrl.trim());
-      // 저장 확인
       const saved = localStorage.getItem('nexus_script_url');
       if (saved === scriptUrl.trim()) {
         toast('Google Script URL 저장됨', 'success');
@@ -68,47 +69,70 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     }
   };
 
+  // 실제 데이터 Export
   const handleExport = () => {
-    if (typeof window !== 'undefined') {
-      const data = localStorage.getItem('nexus_state');
-      if (data) {
-        const blob = new Blob([data], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `nexus_backup_${new Date().toISOString().split('T')[0]}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-        toast('데이터 내보내기 완료', 'success');
-      }
+    try {
+      const data = exportData(state);
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `nexus_backup_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast('데이터 내보내기 완료', 'success');
+    } catch (error) {
+      console.error('Export error:', error);
+      toast('내보내기 실패', 'danger');
     }
   };
 
+  // 실제 데이터 Import
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && typeof window !== 'undefined') {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        try {
-          const data = JSON.parse(event.target?.result as string);
-          localStorage.setItem('nexus_state', JSON.stringify(data));
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const jsonString = event.target?.result as string;
+        const imported = importData(jsonString);
+        
+        if (imported) {
+          // Context를 통해 state 업데이트
+          if (imported.assets) {
+            updateAssets(imported.assets);
+          }
           toast('데이터 가져오기 완료. 새로고침합니다.', 'success');
-          setTimeout(() => window.location.reload(), 1000);
-        } catch {
+          setTimeout(() => window.location.reload(), 1500);
+        } else {
           toast('잘못된 파일 형식', 'danger');
         }
-      };
-      reader.readAsText(file);
+      } catch (error) {
+        console.error('Import error:', error);
+        toast('가져오기 실패: 파일 형식을 확인하세요', 'danger');
+      }
+    };
+    reader.readAsText(file);
+    
+    // 파일 입력 초기화
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
-  const handleReset = () => {
-    if (typeof window !== 'undefined' && confirm('모든 데이터를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
-      localStorage.removeItem('nexus_state');
-      localStorage.removeItem('nexus_script_url');
-      localStorage.removeItem('nexus_refresh_interval');
-      toast('데이터 초기화 완료. 새로고침합니다.', 'warning');
-      setTimeout(() => window.location.reload(), 1000);
+  const handleReset = async () => {
+    if (confirm('모든 데이터를 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) {
+      try {
+        await clearAllData();
+        toast('데이터 초기화 완료. 새로고침합니다.', 'warning');
+        setTimeout(() => window.location.reload(), 1000);
+      } catch (error) {
+        console.error('Reset error:', error);
+        toast('초기화 실패', 'danger');
+      }
     }
   };
 
@@ -202,15 +226,19 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               <button onClick={handleExport} className="celestial-btn text-[10px]">
                 <i className="fas fa-download mr-1" />EXPORT
               </button>
-              <label className="celestial-btn text-[10px] text-center cursor-pointer">
+              <label className="celestial-btn text-[10px] text-center cursor-pointer flex items-center justify-center">
                 <i className="fas fa-upload mr-1" />IMPORT
                 <input
+                  ref={fileInputRef}
                   type="file"
                   accept=".json"
                   className="hidden"
                   onChange={handleImport}
                 />
               </label>
+            </div>
+            <div className="text-[9px] text-white/30 mt-2">
+              자산, 배당 기록, 설정이 JSON 파일로 저장됩니다.
             </div>
           </div>
 

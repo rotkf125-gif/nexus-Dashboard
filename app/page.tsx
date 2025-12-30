@@ -12,8 +12,7 @@ import AssetModal from '@/components/AssetModal';
 import DividendModal from '@/components/DividendModal';
 import SettingsModal from '@/components/SettingsModal';
 import IncomeStream from '@/components/IncomeStream';
-import DPSTrend from '@/components/DPSTrend';
-import Learning from '@/components/Learning';
+import DividendAnalytics from '@/components/DividendAnalytics';
 
 function DashboardContent() {
   const { 
@@ -147,7 +146,7 @@ function DashboardContent() {
         </div>
       </div>
 
-      {/* Second Row: Income Stream + DPS Trend + Learning */}
+      {/* Second Row: Income Stream + Dividend Analytics */}
       <div className="grid grid-cols-1 xl:grid-cols-5 gap-5">
         {/* Income Stream (2/5) */}
         <div className="xl:col-span-2 glass-card p-5 border-accent-gold">
@@ -174,24 +173,14 @@ function DashboardContent() {
           <IncomeStream />
         </div>
 
-        {/* DPS Trend (2/5) */}
-        <div className="xl:col-span-2 glass-card p-5 border-accent-purple">
+        {/* Dividend Analytics (3/5) - DPS Trend + Learning 통합 */}
+        <div className="xl:col-span-3 glass-card p-5 border-accent-purple">
           <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
             <h2 className="text-lg font-display tracking-widest flex items-center gap-3 text-white">
-              <i className="fas fa-chart-area text-celestial-purple text-xs" /> DPS TREND
+              <i className="fas fa-chart-area text-celestial-purple text-xs" /> DIVIDEND ANALYTICS
             </h2>
           </div>
-          <DPSTrend />
-        </div>
-
-        {/* Learning (1/5) */}
-        <div className="glass-card p-5">
-          <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
-            <h2 className="text-base font-semibold text-white font-display tracking-widest flex items-center gap-2">
-              <i className="fas fa-brain text-white/60 text-xs" /> LEARNING
-            </h2>
-          </div>
-          <Learning />
+          <DividendAnalytics />
         </div>
       </div>
 
