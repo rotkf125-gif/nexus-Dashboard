@@ -201,7 +201,7 @@ export default function DividendAnalytics() {
           legend: { display: false },
           tooltip: {
             backgroundColor: 'rgba(10, 15, 41, 0.95)',
-            callbacks: { label: (ctx) => `$${ctx.parsed.y.toFixed(2)}` },
+            callbacks: { label: (ctx) => `$${ctx.parsed.y?.toFixed(2) ?? '0'}` },
           },
         },
       },
