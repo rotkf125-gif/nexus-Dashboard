@@ -175,22 +175,98 @@ export default function Header({ onOpenSettings }: HeaderProps) {
   };
 
   const handleExportFreedom = () => {
-    const data = {
-      timestamp: new Date().toISOString(),
-      totalValue,
-      totalCost,
-      returnPct: totalCost > 0 ? ((totalValue - totalCost) / totalCost * 100).toFixed(2) : 0,
-      exchangeRate: state.exchangeRate,
-      assets: state.assets.map(a => ({
+    // Assets 배열 (전체 자산)
+    const assetsData = state.assets.map(a => {
+      const value = a.qty * a.price;
+      const buyRate = a.buyRate || state.exchangeRate;
+      const valueKrw = Math.round(value * state.exchangeRate);
+      const fxPL = Math.round(value * (state.exchangeRate - buyRate));
+      
+      return {
         ticker: a.ticker,
         qty: a.qty,
         avg: a.avg,
         price: a.price,
-        value: a.qty * a.price,
-        returnPct: a.avg > 0 ? ((a.price - a.avg) / a.avg * 100).toFixed(2) : 0,
+        valueUsd: Number((value).toFixed(2)),
+        valueKrw: valueKrw,
+        fxRate: buyRate,
+        fxPL: fxPL,
         type: a.type,
         sector: a.sector,
-      })),
+      };
+    });
+
+    // Income Stream 배열 (INCOME 타입만)
+    const incomeAssets = state.assets.filter(a => a.type === 'INCOME');
+    const incomeStreamData = incomeAssets.map(asset => {
+      const tickerDividends = state.dividends.filter(d => d.ticker === asset.ticker);
+      
+      // 총 배당금 (세후 15%)
+      const totalDividend = tickerDividends.reduce((sum, d) => {
+        const gross = d.qty * d.dps;
+        return sum + gross * 0.85;
+      }, 0);
+
+      // 원금 / 평가금
+      const principal = asset.qty * asset.avg;
+      const valuation = asset.qty * asset.price;
+      const unrealizedPL = valuation - principal;
+
+      // Trade Return
+      const tradeReturn = state.tradeSums[asset.ticker] ?? 0;
+
+      // Total Return = Trade + 미실현 + 배당
+      const totalReturn = tradeReturn + unrealizedPL + totalDividend;
+
+      // Recovery %
+      const recoveryPct = principal > 0 ? (totalDividend / principal) * 100 : 0;
+
+      // 배당 예측 (최근 6개 기반)
+      const dpsHistory = tickerDividends
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .slice(0, 6)
+        .map(d => d.dps);
+      
+      const avgDps = dpsHistory.length > 0 
+        ? dpsHistory.reduce((sum, d) => sum + d, 0) / dpsHistory.length 
+        : 0;
+
+      return {
+        ticker: asset.ticker,
+        principal: Number(principal.toFixed(2)),
+        dividend: Number(totalDividend.toFixed(2)),
+        valuation: Number(valuation.toFixed(2)),
+        tradeReturn: Number(tradeReturn.toFixed(2)),
+        totalReturn: Number(totalReturn.toFixed(2)),
+        recoveryPct: Number(recoveryPct.toFixed(1)),
+        predictedDps: Number(avgDps.toFixed(2)),
+        dividendCount: tickerDividends.length,
+      };
+    });
+
+    // 주간 배당 통계 (2025-10-23 이후)
+    const startDate = new Date('2025-10-23');
+    const now = new Date();
+    const weeksSinceStart = Math.max(1, Math.ceil((now.getTime() - startDate.getTime()) / (7 * 24 * 60 * 60 * 1000)));
+    const recentDividends = state.dividends.filter(d => new Date(d.date) >= startDate);
+    const totalAfterTax = recentDividends.reduce((sum, d) => sum + d.qty * d.dps * 0.85, 0);
+    const weeklyAvg = totalAfterTax / weeksSinceStart;
+
+    const data = {
+      timestamp: new Date().toISOString(),
+      summary: {
+        totalValue: Number(totalValue.toFixed(2)),
+        totalCost: Number(totalCost.toFixed(2)),
+        returnPct: totalCost > 0 ? Number(((totalValue - totalCost) / totalCost * 100).toFixed(2)) : 0,
+        totalValueKrw: Math.round(totalValue * state.exchangeRate),
+        exchangeRate: state.exchangeRate,
+      },
+      assets: assetsData,
+      incomeStream: {
+        assets: incomeStreamData,
+        weeklyAvg: Number(weeklyAvg.toFixed(2)),
+        totalDividend: Number(incomeStreamData.reduce((sum, a) => sum + a.dividend, 0).toFixed(2)),
+      },
       market: state.market,
     };
     
