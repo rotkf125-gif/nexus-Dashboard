@@ -16,6 +16,7 @@ interface NexusContextType {
   updateMarket: (market: Partial<MarketData>) => void;
   setExchangeRate: (rate: number) => void;
   setTradeSums: (ticker: string, amount: number) => void;
+  setStrategy: (strategy: string) => void;
   syncFromSheet: () => Promise<void>;
   refreshPrices: () => Promise<void>;
   setTheme: (theme: 'dark' | 'light') => void;
@@ -201,6 +202,10 @@ export function NexusProvider({ children }: { children: ReactNode }) {
       ...prev,
       tradeSums: { ...prev.tradeSums, [ticker]: amount },
     }));
+  }, []);
+
+  const setStrategy = useCallback((strategy: string) => {
+    setState(prev => ({ ...prev, strategy }));
   }, []);
 
   // useRef로 현재 assets 참조 (무한 루프 방지)
@@ -416,6 +421,7 @@ export function NexusProvider({ children }: { children: ReactNode }) {
         updateMarket,
         setExchangeRate,
         setTradeSums,
+        setStrategy,
         syncFromSheet,
         refreshPrices,
         setTheme,

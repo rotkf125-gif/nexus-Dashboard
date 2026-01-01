@@ -1,23 +1,26 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useNexus } from '@/lib/context';
 
 export default function StrategyBar() {
-  const [strategy, setStrategy] = useState('');
+  const { state, setStrategy } = useNexus();
+  const [localStrategy, setLocalStrategy] = useState('');
   const [saved, setSaved] = useState(false);
 
+  // Context에서 strategy 로드
   useEffect(() => {
-    const savedStrategy = localStorage.getItem('nexus_strategy') || '';
-    setStrategy(savedStrategy);
-  }, []);
+    setLocalStrategy(state.strategy || '');
+  }, [state.strategy]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  // Debounced 저장
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
+    setLocalStrategy(value);
     setStrategy(value);
-    localStorage.setItem('nexus_strategy', value);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
-  };
+  }, [setStrategy]);
 
   return (
     <div className="glass-card p-4">
@@ -27,7 +30,7 @@ export default function StrategyBar() {
           STRATEGY & PLAN
         </span>
         <textarea
-          value={strategy}
+          value={localStrategy}
           onChange={handleChange}
           className="flex-1 bg-black/20 border border-white/10 rounded px-3 py-2 text-[11px] text-white/80 font-light resize-none focus:outline-none focus:border-celestial-purple/40 placeholder-white/30 h-[36px]"
           placeholder="현재 투자 전략, 계획, 메모를 입력하세요... (예: PLTY/HOOY 배당 재투자, VIX 30 이상시 현금 비중 확대)"
