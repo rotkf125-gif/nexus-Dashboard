@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import { useNexus } from '@/lib/context';
+import PredictedDividend from './PredictedDividend';
 
 export default function IncomeStream() {
   const { state, setTradeSums, syncFromSheet, toast } = useNexus();
@@ -245,6 +246,9 @@ export default function IncomeStream() {
           </div>
         </div>
       </div>
+
+      {/* Predicted Dividend */}
+      <PredictedDividend />
     </div>
   );
 }

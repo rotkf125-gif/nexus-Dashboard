@@ -7,12 +7,13 @@ import StrategyBar from '@/components/StrategyBar';
 import AssetTable from '@/components/AssetTable';
 import StarCore from '@/components/StarCore';
 import Sidebar from '@/components/Sidebar';
-import WhatIfSimulator from '@/components/WhatIfSimulator';
+import SimulationHub from '@/components/SimulationHub';
 import AssetModal from '@/components/AssetModal';
 import DividendModal from '@/components/DividendModal';
 import SettingsModal from '@/components/SettingsModal';
 import IncomeStream from '@/components/IncomeStream';
 import DividendAnalytics from '@/components/DividendAnalytics';
+import PerformanceArena from '@/components/PerformanceArena';
 
 function DashboardContent() {
   const { 
@@ -135,14 +136,14 @@ function DashboardContent() {
           </div>
         </div>
 
-        {/* What-If Simulator (1/5) */}
+        {/* Simulation Hub (1/5) - What-If, Rebalance, Correlation */}
         <div className="glass-card p-5 border-accent-success">
           <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
             <h2 className="text-base font-semibold text-white font-display tracking-widest flex items-center gap-2">
-              <i className="fas fa-flask text-v64-success" /> WHAT-IF
+              <i className="fas fa-flask text-v64-success" /> SIMULATION
             </h2>
           </div>
-          <WhatIfSimulator />
+          <SimulationHub />
         </div>
       </div>
 
@@ -184,9 +185,12 @@ function DashboardContent() {
         </div>
       </div>
 
+      {/* Third Row: Performance Arena */}
+      <PerformanceArena />
+
       {/* Footer */}
       <footer className="text-center text-[10px] opacity-30 py-4 tracking-[0.3em]">
-        CELESTIAL NEXUS V64.2 // NEXT.JS EDITION
+        CELESTIAL NEXUS V65.0 // NEXT.JS EDITION
       </footer>
     </div>
   );
