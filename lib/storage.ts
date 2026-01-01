@@ -215,6 +215,68 @@ export async function clearAllData(): Promise<void> {
   }
 }
 
+// ═══════════════════════════════════════════════════════════════
+// SNAPSHOT HISTORY (30분 간격 히스토리 저장)
+// ═══════════════════════════════════════════════════════════════
+
+export async function saveSnapshot(state: NexusState): Promise<boolean> {
+  if (!isBrowser) return false;
+
+  try {
+    const userId = getUserId();
+    
+    // 총 평가금/원금 계산
+    let totalValue = 0;
+    let totalCost = 0;
+    state.assets.forEach(a => {
+      totalValue += a.qty * a.price;
+      totalCost += a.qty * a.avg;
+    });
+    const returnPct = totalCost > 0 ? ((totalValue - totalCost) / totalCost) * 100 : 0;
+
+    const { error } = await supabase
+      .from('portfolio_snapshots')
+      .insert({
+        user_id: userId,
+        total_value: totalValue,
+        total_cost: totalCost,
+        return_pct: returnPct,
+        exchange_rate: state.exchangeRate,
+        assets: state.assets,
+        market: state.market,
+      });
+
+    if (error) throw error;
+    console.log('📸 Snapshot saved:', new Date().toLocaleTimeString());
+    return true;
+  } catch (error) {
+    console.error('Failed to save snapshot:', error);
+    return false;
+  }
+}
+
+// 스냅샷 히스토리 조회
+export async function loadSnapshots(limit: number = 48): Promise<any[]> {
+  if (!isBrowser) return [];
+
+  try {
+    const userId = getUserId();
+    
+    const { data, error } = await supabase
+      .from('portfolio_snapshots')
+      .select('*')
+      .eq('user_id', userId)
+      .order('timestamp', { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Failed to load snapshots:', error);
+    return [];
+  }
+}
+
 // Export data as JSON
 export function exportData(state: Partial<NexusState>): string {
   return JSON.stringify({

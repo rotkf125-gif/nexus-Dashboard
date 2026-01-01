@@ -1,4 +1,3 @@
-[README.md](https://github.com/user-attachments/files/24377474/README.md)
 # 🌟 NEXUS CELESTIAL V64.2 - Next.js Edition
 
 개인 투자 포트폴리오 대시보드 (Celestial Glass 테마)

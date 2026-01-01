@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
 import { NexusState, Asset, Dividend, MarketData } from './types';
-import { loadState, saveState, loadStateFromSupabase, saveStateToSupabase } from './storage';
+import { loadState, saveState, loadStateFromSupabase, saveStateToSupabase, saveSnapshot } from './storage';
 import { DEFAULT_EXCHANGE_RATE } from './config';
 
 interface NexusContextType {
@@ -75,6 +75,7 @@ export function NexusProvider({ children }: { children: ReactNode }) {
 
   // Debounce timer ref
   const saveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const snapshotIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Load from Supabase on mount
   useEffect(() => {
@@ -96,6 +97,33 @@ export function NexusProvider({ children }: { children: ReactNode }) {
     
     loadData();
   }, []);
+
+  // 30분 간격 스냅샷 저장
+  const stateRef = useRef(state);
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+
+    // 초기 스냅샷 저장 (로드 후 1분 뒤)
+    const initialTimeout = setTimeout(() => {
+      saveSnapshot(stateRef.current as any);
+    }, 60 * 1000);
+
+    // 30분 간격 스냅샷
+    snapshotIntervalRef.current = setInterval(() => {
+      saveSnapshot(stateRef.current as any);
+    }, 30 * 60 * 1000); // 30분
+
+    return () => {
+      clearTimeout(initialTimeout);
+      if (snapshotIntervalRef.current) {
+        clearInterval(snapshotIntervalRef.current);
+      }
+    };
+  }, [isLoaded]); // state 변경마다 재실행 방지
 
   // Save to Supabase on state change (debounced)
   useEffect(() => {
