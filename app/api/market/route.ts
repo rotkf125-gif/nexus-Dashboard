@@ -1,20 +1,27 @@
 // ═══════════════════════════════════════════════════════════════
-// NEXUS V64.2 - Market Indices API Route
-// NASDAQ, S&P 500, VIX, US10Y, USD/KRW 한번에 조회
-// 프리마켓/애프터마켓 지원
+// NEXUS V65.0 - Market Indices API Route (24H Real-time)
+// NASDAQ, S&P 500, VIX, US10Y, USD/KRW
+// 정규장 + 프리마켓 + 애프터마켓 + 선물 지원
 // ═══════════════════════════════════════════════════════════════
 
 import { NextResponse } from 'next/server';
 
+// 현물 + 선물 티커 (장외 시간에는 선물 사용)
 const INDICES = [
-  { key: 'nasdaq', ticker: '^IXIC' },
-  { key: 'sp500', ticker: '^GSPC' },
-  { key: 'vix', ticker: '^VIX' },
-  { key: 'tnx', ticker: '^TNX' },
-  { key: 'krw', ticker: 'KRW=X' },
+  { key: 'nasdaq', spot: '^IXIC', futures: 'NQ=F' },
+  { key: 'sp500', spot: '^GSPC', futures: 'ES=F' },
+  { key: 'vix', spot: '^VIX', futures: 'VX=F' },
+  { key: 'tnx', spot: '^TNX', futures: null }, // 금리는 선물 없음
+  { key: 'krw', spot: 'KRW=X', futures: null }, // 환율은 24시간 거래
 ];
 
-async function fetchPrice(ticker: string): Promise<{ price: number | null; marketState: string }> {
+interface FetchResult {
+  price: number | null;
+  marketState: string;
+  source: 'spot' | 'futures' | 'pre' | 'post';
+}
+
+async function fetchPrice(ticker: string): Promise<FetchResult> {
   try {
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1m&range=1d`;
     
@@ -22,56 +29,93 @@ async function fetchPrice(ticker: string): Promise<{ price: number | null; marke
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       },
-      next: { revalidate: 30 },
+      cache: 'no-store', // 캐시 비활성화 (실시간)
     });
 
-    if (!response.ok) return { price: null, marketState: 'CLOSED' };
+    if (!response.ok) return { price: null, marketState: 'CLOSED', source: 'spot' };
 
     const data = await response.json();
     const meta = data.chart?.result?.[0]?.meta;
     
-    if (!meta) return { price: null, marketState: 'CLOSED' };
+    if (!meta) return { price: null, marketState: 'CLOSED', source: 'spot' };
 
-    // 시장 상태에 따른 가격 선택
     const marketState = meta.marketState || 'REGULAR';
     let price = meta.regularMarketPrice;
+    let source: 'spot' | 'futures' | 'pre' | 'post' = 'spot';
 
-    // 프리마켓/애프터마켓 가격이 있으면 사용
+    // 프리마켓 가격
     if (marketState === 'PRE' && meta.preMarketPrice) {
       price = meta.preMarketPrice;
-    } else if (marketState === 'POST' && meta.postMarketPrice) {
+      source = 'pre';
+    } 
+    // 애프터마켓 가격
+    else if (marketState === 'POST' && meta.postMarketPrice) {
       price = meta.postMarketPrice;
-    } else if (marketState === 'PREPRE' || marketState === 'POSTPOST') {
-      // 프리프리/포스트포스트 상태에서는 마지막 종가 사용
-      price = meta.previousClose || meta.regularMarketPrice;
+      source = 'post';
     }
 
-    return { price, marketState };
+    return { price, marketState, source };
   } catch {
-    return { price: null, marketState: 'ERROR' };
+    return { price: null, marketState: 'ERROR', source: 'spot' };
   }
+}
+
+async function fetchIndexData(idx: { key: string; spot: string; futures: string | null }) {
+  // 1차: 현물 시세 조회
+  const spotResult = await fetchPrice(idx.spot);
+  
+  // 정규장/프리마켓/애프터마켓이면 현물 사용
+  if (spotResult.price && ['REGULAR', 'PRE', 'POST'].includes(spotResult.marketState)) {
+    return {
+      key: idx.key,
+      value: spotResult.price,
+      marketState: spotResult.marketState,
+      source: spotResult.source,
+    };
+  }
+
+  // 2차: 장외 시간에 선물 데이터 조회
+  if (idx.futures) {
+    const futuresResult = await fetchPrice(idx.futures);
+    if (futuresResult.price) {
+      return {
+        key: idx.key,
+        value: futuresResult.price,
+        marketState: spotResult.marketState,
+        source: 'futures' as const,
+      };
+    }
+  }
+
+  // 3차: fallback - 마지막 현물 가격
+  return {
+    key: idx.key,
+    value: spotResult.price || 0,
+    marketState: spotResult.marketState,
+    source: spotResult.source,
+  };
 }
 
 export async function GET() {
   try {
     const results = await Promise.all(
-      INDICES.map(async (idx) => {
-        const { price, marketState } = await fetchPrice(idx.ticker);
-        return { key: idx.key, value: price, marketState };
-      })
+      INDICES.map(idx => fetchIndexData(idx))
     );
 
     const market: Record<string, number> = {};
+    const sources: Record<string, string> = {};
     let currentMarketState = 'CLOSED';
     
-    results.forEach(({ key, value, marketState }) => {
+    results.forEach(({ key, value, marketState, source }) => {
       market[key] = value || 0;
+      sources[key] = source;
       if (key === 'nasdaq') currentMarketState = marketState;
     });
 
     return NextResponse.json({
       ...market,
       marketState: currentMarketState,
+      sources, // 디버깅용: 각 지수의 데이터 소스
       timestamp: Date.now(),
     });
   } catch (error) {

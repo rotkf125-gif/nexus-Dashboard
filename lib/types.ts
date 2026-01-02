@@ -31,6 +31,7 @@ export interface MarketData {
   vix: number;
   tnx: number;
   krw: number;
+  marketState?: 'PRE' | 'REGULAR' | 'POST' | 'CLOSED';
 }
 
 export interface TradeSums {

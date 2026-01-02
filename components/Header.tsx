@@ -308,8 +308,60 @@ export default function Header({ onOpenSettings }: HeaderProps) {
           </div>
         </div>
 
-        {/* Market Indices - 2x2 그리드 + VIX */}
+        {/* Market Indices - 2x2 그리드 + VIX + Market State */}
         <div className="flex gap-3 px-6 border-l border-r border-white/15">
+          {/* Market State Badge */}
+          <div className="flex flex-col justify-center items-center min-w-[80px]">
+            {(() => {
+              // 서머타임 체크 (3월 둘째 일요일 ~ 11월 첫째 일요일)
+              const now = new Date();
+              const year = now.getFullYear();
+              const marchSecondSunday = new Date(year, 2, 8 + (7 - new Date(year, 2, 1).getDay()) % 7);
+              const novFirstSunday = new Date(year, 10, 1 + (7 - new Date(year, 10, 1).getDay()) % 7);
+              const isDST = now >= marchSecondSunday && now < novFirstSunday;
+              
+              // 한국 시간 기준 거래 시간 (서머타임 적용)
+              const marketTimes = isDST ? {
+                pre: '17:00 - 22:30',
+                regular: '22:30 - 05:00',
+                post: '05:00 - 07:00',
+              } : {
+                pre: '18:00 - 23:30',
+                regular: '23:30 - 06:00',
+                post: '06:00 - 08:00',
+              };
+
+              const currentTime = state.market.marketState === 'REGULAR' ? marketTimes.regular
+                : state.market.marketState === 'PRE' ? marketTimes.pre
+                : state.market.marketState === 'POST' ? marketTimes.post
+                : '---';
+
+              return (
+                <>
+                  <div className={`px-2 py-1 rounded text-[9px] font-medium tracking-wider ${
+                    state.market.marketState === 'REGULAR' 
+                      ? 'bg-v64-success/20 text-v64-success border border-v64-success/30' 
+                      : state.market.marketState === 'PRE'
+                        ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                        : state.market.marketState === 'POST'
+                          ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                          : 'bg-white/10 text-white/50 border border-white/20'
+                  }`}>
+                    {state.market.marketState === 'REGULAR' && '🟢 정규장'}
+                    {state.market.marketState === 'PRE' && '🔵 프리마켓'}
+                    {state.market.marketState === 'POST' && '🟣 애프터'}
+                    {state.market.marketState === 'CLOSED' && '⚫ 휴장'}
+                    {!state.market.marketState && '⚫ ---'}
+                  </div>
+                  <span className="text-[7px] opacity-50 mt-1">KST {currentTime}</span>
+                  <span className={`text-[6px] mt-0.5 ${isDST ? 'text-celestial-gold' : 'text-white/30'}`}>
+                    {isDST ? '☀️ DST' : '❄️ STD'}
+                  </span>
+                </>
+              );
+            })()}
+          </div>
+
           {/* 2x2 Grid: NASDAQ/S&P500, USD/KRW/US10Y */}
           <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
             {/* Row 1 */}
