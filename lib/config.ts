@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// NEXUS V64.2 - Configuration Constants
+// NEXUS V65.1 - Configuration Constants
 // ═══════════════════════════════════════════════════════════════
 
 import { SectorInfo, VIXLevel, Asset } from './types';

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import { useNexus } from '@/lib/context';
 import { Chart, LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend, BarController, BarElement } from 'chart.js';
 
@@ -15,12 +15,9 @@ const TICKER_COLORS = [
   'rgba(244, 143, 177, 0.8)',
 ];
 
-type TabType = 'dps' | 'learning';
-
 export default function DividendAnalytics() {
   const { state } = useNexus();
   const { assets, dividends } = state;
-  const [activeTab, setActiveTab] = useState<TabType>('dps');
   
   // Chart refs
   const dpsChartRef = useRef<HTMLCanvasElement>(null);
@@ -91,7 +88,7 @@ export default function DividendAnalytics() {
 
   // DPS Trend 차트
   useEffect(() => {
-    if (!dpsChartRef.current || activeTab !== 'dps') return;
+    if (!dpsChartRef.current) return;
 
     if (dpsChartInstance.current) {
       dpsChartInstance.current.destroy();
@@ -136,7 +133,7 @@ export default function DividendAnalytics() {
         scales: {
           x: {
             grid: { color: 'rgba(255, 255, 255, 0.05)' },
-            ticks: { color: 'rgba(255, 255, 255, 0.5)', font: { size: 9 }, maxTicksLimit: 8 },
+            ticks: { color: 'rgba(255, 255, 255, 0.5)', font: { size: 9 }, maxTicksLimit: 6 },
           },
           y: {
             grid: { color: 'rgba(255, 255, 255, 0.05)' },
@@ -160,11 +157,11 @@ export default function DividendAnalytics() {
     return () => {
       if (dpsChartInstance.current) dpsChartInstance.current.destroy();
     };
-  }, [dpsData, incomeAssets, activeTab]);
+  }, [dpsData, incomeAssets]);
 
   // Learning 차트 (월별 배당)
   useEffect(() => {
-    if (!learningChartRef.current || activeTab !== 'learning') return;
+    if (!learningChartRef.current) return;
 
     if (learningChartInstance.current) {
       learningChartInstance.current.destroy();
@@ -190,7 +187,7 @@ export default function DividendAnalytics() {
         scales: {
           x: {
             grid: { display: false },
-            ticks: { color: 'rgba(255, 255, 255, 0.5)', font: { size: 9 } },
+            ticks: { color: 'rgba(255, 255, 255, 0.5)', font: { size: 8 } },
           },
           y: {
             grid: { color: 'rgba(255, 255, 255, 0.05)' },
@@ -210,7 +207,7 @@ export default function DividendAnalytics() {
     return () => {
       if (learningChartInstance.current) learningChartInstance.current.destroy();
     };
-  }, [monthlyPattern, activeTab]);
+  }, [monthlyPattern]);
 
   if (incomeAssets.length === 0) {
     return (
@@ -222,100 +219,74 @@ export default function DividendAnalytics() {
   }
 
   return (
-    <div className="space-y-3">
-      {/* Tab Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex gap-1">
-          <button
-            onClick={() => setActiveTab('dps')}
-            className={`px-3 py-1.5 text-[10px] tracking-widest rounded transition ${
-              activeTab === 'dps' 
-                ? 'bg-celestial-cyan/20 text-celestial-cyan border border-celestial-cyan/30' 
-                : 'bg-white/5 text-white/50 border border-white/10 hover:bg-white/10'
-            }`}
-          >
-            DPS TREND
-          </button>
-          <button
-            onClick={() => setActiveTab('learning')}
-            className={`px-3 py-1.5 text-[10px] tracking-widest rounded transition ${
-              activeTab === 'learning' 
-                ? 'bg-celestial-purple/20 text-celestial-purple border border-celestial-purple/30' 
-                : 'bg-white/5 text-white/50 border border-white/10 hover:bg-white/10'
-            }`}
-          >
-            LEARNING
-          </button>
-        </div>
-        
-        {/* Legend */}
-        {activeTab === 'dps' && (
-          <div className="flex items-center gap-3 text-[9px] font-light">
-            {incomeAssets.slice(0, 4).map((asset, i) => (
+    <div className="grid grid-cols-2 gap-4">
+      {/* Left: DPS Trend */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] tracking-widest text-celestial-cyan">DPS TREND</span>
+          <div className="flex items-center gap-2 text-[8px] font-light">
+            {incomeAssets.slice(0, 3).map((asset, i) => (
               <span key={asset.ticker} className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: TICKER_COLORS[i] }} />
+                <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: TICKER_COLORS[i] }} />
                 <span className="opacity-60">{asset.ticker}</span>
               </span>
             ))}
           </div>
-        )}
+        </div>
+        
+        <div style={{ height: 150 }}>
+          <canvas ref={dpsChartRef} />
+        </div>
+        
+        {/* Average DPS Cards */}
+        <div className="grid grid-cols-2 gap-2">
+          {avgDpsData.slice(0, 2).map((item, i) => {
+            const isGold = i % 2 === 1;
+            return (
+              <div key={item.ticker} className={`inner-glass p-2 rounded text-center ${isGold ? 'border border-celestial-gold/20' : ''}`}>
+                <div className={`text-[8px] tracking-widest mb-0.5 ${isGold ? 'text-celestial-gold/50' : 'opacity-50'}`}>
+                  {item.ticker} AVG
+                </div>
+                <div className={`text-[11px] font-display ${isGold ? 'text-celestial-gold' : 'text-white'}`}>
+                  ${item.avgDps.toFixed(4)}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
-      {/* DPS Trend Tab */}
-      {activeTab === 'dps' && (
-        <>
-          <div style={{ height: 180 }}>
-            <canvas ref={dpsChartRef} />
+      {/* Right: Learning */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] tracking-widest text-celestial-purple">LEARNING</span>
+          <span className="text-[8px] opacity-40">Monthly Pattern</span>
+        </div>
+        
+        <div style={{ height: 150 }}>
+          <canvas ref={learningChartRef} />
+        </div>
+        
+        {/* Learning Stats */}
+        <div className="grid grid-cols-3 gap-1.5">
+          <div className="inner-glass p-2 rounded text-center">
+            <div className="text-[7px] tracking-widest mb-0.5 opacity-50">RECORDS</div>
+            <div className="text-[10px] font-display text-white">{dividends.length}</div>
           </div>
-          
-          {/* Average DPS Cards */}
-          <div className="grid grid-cols-2 gap-2">
-            {avgDpsData.slice(0, 4).map((item, i) => {
-              const isGold = i % 2 === 1;
-              return (
-                <div key={item.ticker} className={`inner-glass p-2.5 rounded text-center ${isGold ? 'border border-celestial-gold/20' : ''}`}>
-                  <div className={`text-[9px] tracking-widest mb-0.5 ${isGold ? 'text-celestial-gold/50' : 'opacity-50'}`}>
-                    {item.ticker} AVG DPS
-                  </div>
-                  <div className={`text-sm font-display ${isGold ? 'text-celestial-gold' : 'text-white'}`}>
-                    ${item.avgDps.toFixed(4)}
-                  </div>
-                  <div className="text-[8px] opacity-40">{item.count}회</div>
-                </div>
-              );
-            })}
+          <div className="inner-glass p-2 rounded text-center border border-celestial-purple/20">
+            <div className="text-[7px] tracking-widest mb-0.5 text-celestial-purple/50">ACCURACY</div>
+            <div className="text-[10px] font-display text-celestial-purple">{predictionAccuracy.accuracy.toFixed(0)}%</div>
           </div>
-        </>
-      )}
-
-      {/* Learning Tab */}
-      {activeTab === 'learning' && (
-        <>
-          <div style={{ height: 180 }}>
-            <canvas ref={learningChartRef} />
-          </div>
-          
-          {/* Learning Stats */}
-          <div className="grid grid-cols-3 gap-2">
-            <div className="inner-glass p-2.5 rounded text-center">
-              <div className="text-[9px] tracking-widest mb-0.5 opacity-50">TOTAL RECORDS</div>
-              <div className="text-sm font-display text-white">{dividends.length}</div>
-            </div>
-            <div className="inner-glass p-2.5 rounded text-center border border-celestial-purple/20">
-              <div className="text-[9px] tracking-widest mb-0.5 text-celestial-purple/50">PREDICTION</div>
-              <div className="text-sm font-display text-celestial-purple">{predictionAccuracy.accuracy.toFixed(1)}%</div>
-            </div>
-            <div className="inner-glass p-2.5 rounded text-center">
-              <div className="text-[9px] tracking-widest mb-0.5 opacity-50">AVG MONTHLY</div>
-              <div className="text-sm font-display text-v64-success">
-                ${monthlyPattern.length > 0 
-                  ? (monthlyPattern.reduce((s, [, v]) => s + v, 0) / monthlyPattern.length).toFixed(2) 
-                  : '0.00'}
-              </div>
+          <div className="inner-glass p-2 rounded text-center">
+            <div className="text-[7px] tracking-widest mb-0.5 opacity-50">AVG/MO</div>
+            <div className="text-[10px] font-display text-v64-success">
+              ${monthlyPattern.length > 0 
+                ? (monthlyPattern.reduce((s, [, v]) => s + v, 0) / monthlyPattern.length).toFixed(0) 
+                : '0'}
             </div>
           </div>
-        </>
-      )}
+        </div>
+      </div>
     </div>
   );
 }

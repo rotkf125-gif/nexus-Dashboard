@@ -65,14 +65,30 @@ export default function IncomeStream() {
     });
   }, [incomeAssets, dividends, tradeSums]);
 
-  // Weekly Summary 계산 (2025-10-23 이후)
+  // Weekly Summary 계산 (현재 보유 수량 기반 예상 주간 배당)
   const weeklySummary = useMemo(() => {
     const startDate = new Date('2025-10-23');
     const now = new Date();
     const weeksSinceStart = Math.max(1, Math.ceil((now.getTime() - startDate.getTime()) / (7 * 24 * 60 * 60 * 1000)));
 
-    const recentDividends = dividends.filter(d => new Date(d.date) >= startDate);
+    // 현재 보유 수량 기반 예상 주간 배당 계산
+    let estimatedWeekly = 0;
+    incomeAssets.forEach(asset => {
+      const tickerDividends = dividends.filter(d => d.ticker === asset.ticker);
+      if (tickerDividends.length > 0) {
+        // 최근 6개 DPS 평균
+        const recentDps = tickerDividends
+          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+          .slice(0, 6)
+          .map(d => d.dps);
+        const avgDps = recentDps.reduce((sum, d) => sum + d, 0) / recentDps.length;
+        // 현재 보유 수량 × 평균 DPS × 세후 85%
+        estimatedWeekly += asset.qty * avgDps * 0.85;
+      }
+    });
 
+    // 실제 과거 주간 배당 (MIN/MAX 계산용)
+    const recentDividends = dividends.filter(d => new Date(d.date) >= startDate);
     const weeklyTotals: number[] = [];
     recentDividends.forEach(d => {
       const weekIndex = Math.floor((new Date(d.date).getTime() - startDate.getTime()) / (7 * 24 * 60 * 60 * 1000));
@@ -80,14 +96,21 @@ export default function IncomeStream() {
       weeklyTotals[weekIndex] += d.qty * d.dps * 0.85;
     });
 
-    const totalAfterTax = recentDividends.reduce((sum, d) => sum + d.qty * d.dps * 0.85, 0);
-    const weeklyAvg = weeksSinceStart > 0 ? totalAfterTax / weeksSinceStart : 0;
     const validWeeks = weeklyTotals.filter(w => w > 0);
     const weeklyMin = validWeeks.length > 0 ? Math.min(...validWeeks) : 0;
     const weeklyMax = validWeeks.length > 0 ? Math.max(...validWeeks) : 0;
 
-    return { weeklyAvg, weeklyMin, weeklyMax };
-  }, [dividends]);
+    // 과거 평균도 계산 (참고용)
+    const totalAfterTax = recentDividends.reduce((sum, d) => sum + d.qty * d.dps * 0.85, 0);
+    const historicalAvg = weeksSinceStart > 0 ? totalAfterTax / weeksSinceStart : 0;
+
+    return { 
+      weeklyAvg: estimatedWeekly, // 현재 수량 기반 예상값
+      historicalAvg, // 과거 평균 (참고용)
+      weeklyMin, 
+      weeklyMax 
+    };
+  }, [dividends, incomeAssets]);
 
   // 최근 배당 로그 (최근 5개)
   const recentLogs = useMemo(() => {

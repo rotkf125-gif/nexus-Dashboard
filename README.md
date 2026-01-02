@@ -1,4 +1,4 @@
-# 🌟 NEXUS CELESTIAL V65.0 - Next.js Edition
+# 🌟 NEXUS CELESTIAL V65.1 - Next.js Edition
 
 개인 투자 포트폴리오 대시보드 (Celestial Glass 테마)
 
@@ -9,6 +9,35 @@
 | **Live Site** | https://nexus-dashboard-beige.vercel.app |
 | **GitHub** | https://github.com/rotkf125-gif/nexus-dashboard |
 | **Database** | Supabase (PostgreSQL) |
+
+---
+
+## ✨ V65.1 신규 기능
+
+### 📊 Performance Arena - 실시간 벤치마크
+- Yahoo Finance 1년 차트 기반 **실시간 YTD 수익률** 계산
+- SPY, QQQ, DIA, IWM 벤치마크 vs 포트폴리오 비교
+- 연초 가격 / 현재 가격 표시
+- 새로고침 버튼으로 최신 데이터 갱신
+
+### 🔗 Correlation Insight - 섹터 분산도 기반
+- **ETF별 실제 섹터 구성** 데이터 내장 (PLTY, HOOY, QYLD, JEPI, SCHD 등)
+- **Diversification Score**: HHI 기반 분산도 점수 (0~100)
+- **Sector Exposure**: 포트폴리오 전체 섹터 비중 시각화
+- **Market Correlation**: S&P500/NASDAQ와의 상관계수 계산
+- **Risk Profile**: 성장주/방어주/경기민감주 비중 분석
+
+### 📈 Income Stream - EST.WEEKLY 개선
+- 기존: 과거 배당 평균 (고정 수량)
+- **변경: 현재 보유 수량 × 최근 6개 DPS 평균 × 세후 85%**
+
+### 📊 Dividend Analytics - 레이아웃 개선
+- 기존: DPS TREND / LEARNING 탭 전환
+- **변경: 좌우 반반 동시 표시**
+
+### 🗑️ 레거시 파일 정리
+- `DPSTrend.tsx`, `Learning.tsx` 삭제 (DividendAnalytics에 통합됨)
+- 모든 파일 버전 주석 V65.1 업데이트
 
 ---
 

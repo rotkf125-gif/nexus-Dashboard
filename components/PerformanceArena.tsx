@@ -1,19 +1,24 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNexus } from '@/lib/context';
 
 interface BenchmarkData {
   name: string;
   ticker: string;
   ytdReturn: number;
+  currentPrice: number;
+  yearStartPrice: number;
   color: string;
 }
 
 export default function PerformanceArena() {
-  const { state } = useNexus();
-  const { assets, market } = state;
+  const { state, toast } = useNexus();
+  const { assets } = state;
   const [isExpanded, setIsExpanded] = useState(false);
+  const [benchmarks, setBenchmarks] = useState<BenchmarkData[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<number | null>(null);
 
   // 포트폴리오 수익률 계산
   const portfolioStats = useMemo(() => {
@@ -30,37 +35,37 @@ export default function PerformanceArena() {
     return { totalCost, totalValue, returnPct };
   }, [assets]);
 
-  // 벤치마크 데이터 (실제로는 API에서 가져와야 함, 여기서는 추정값 사용)
-  const benchmarks = useMemo<BenchmarkData[]>(() => {
-    // 시장 지수 기반 추정 (실제 YTD는 API 필요)
-    // 여기서는 현재 지수값 기반으로 임의 추정
-    return [
-      { 
-        name: 'S&P 500', 
-        ticker: 'SPY', 
-        ytdReturn: 8.5, // 예시값
-        color: '#81C784' 
-      },
-      { 
-        name: 'NASDAQ', 
-        ticker: 'QQQ', 
-        ytdReturn: 12.3, // 예시값
-        color: '#64B5F6' 
-      },
-      { 
-        name: 'Dow Jones', 
-        ticker: 'DIA', 
-        ytdReturn: 5.2, // 예시값
-        color: '#FFB74D' 
-      },
-      { 
-        name: 'Russell 2000', 
-        ticker: 'IWM', 
-        ytdReturn: 3.8, // 예시값
-        color: '#BA68C8' 
-      },
-    ];
-  }, [market]);
+  // 벤치마크 데이터 가져오기
+  const fetchBenchmarks = async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch('/api/benchmark');
+      if (res.ok) {
+        const data = await res.json();
+        setBenchmarks(data.benchmarks || []);
+        setLastUpdated(data.timestamp);
+      }
+    } catch (error) {
+      console.error('Failed to fetch benchmarks:', error);
+      toast('벤치마크 데이터 로드 실패', 'warning');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 컴포넌트 마운트 시 데이터 로드
+  useEffect(() => {
+    if (assets.length > 0) {
+      fetchBenchmarks();
+    }
+  }, [assets.length]);
+
+  // 확장 시 데이터 새로고침
+  useEffect(() => {
+    if (isExpanded && benchmarks.length === 0) {
+      fetchBenchmarks();
+    }
+  }, [isExpanded]);
 
   // 최고 수익률 (차트 스케일용)
   const maxReturn = useMemo(() => {
@@ -74,6 +79,8 @@ export default function PerformanceArena() {
 
   // 순위 계산
   const ranking = useMemo(() => {
+    if (benchmarks.length === 0) return 1;
+    
     const all = [
       { name: 'MY PORTFOLIO', return: portfolioStats.returnPct },
       ...benchmarks.map(b => ({ name: b.name, return: b.ytdReturn }))
@@ -96,6 +103,7 @@ export default function PerformanceArena() {
         <h2 className="text-lg font-display tracking-widest flex items-center gap-3 text-white">
           <i className="fas fa-trophy text-celestial-gold text-xs" />
           PERFORMANCE ARENA
+          {isLoading && <i className="fas fa-spinner spinner text-xs opacity-50" />}
         </h2>
 
         {/* Quick Stats */}
@@ -115,7 +123,7 @@ export default function PerformanceArena() {
             </div>
             <div className="border-l border-white/20 pl-4">
               <span className="opacity-40 mr-2">RANK</span>
-              <span className="text-celestial-gold">#{ranking}/5</span>
+              <span className="text-celestial-gold">#{ranking}/{benchmarks.length + 1}</span>
             </div>
           </div>
           <i className={`fas fa-chevron-${isExpanded ? 'up' : 'down'} text-xs opacity-40`} />
@@ -128,7 +136,15 @@ export default function PerformanceArena() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Left: Bar Chart */}
             <div className="space-y-3">
-              <div className="text-[10px] opacity-40 tracking-widest mb-3">RETURN COMPARISON</div>
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-[10px] opacity-40 tracking-widest">YTD RETURN COMPARISON</span>
+                <button 
+                  onClick={(e) => { e.stopPropagation(); fetchBenchmarks(); }}
+                  className="text-[9px] opacity-50 hover:opacity-80 flex items-center gap-1"
+                >
+                  <i className="fas fa-sync-alt" /> 새로고침
+                </button>
+              </div>
               
               {/* My Portfolio */}
               <div className="inner-glass p-3 rounded-lg border border-celestial-gold/30">
@@ -155,10 +171,13 @@ export default function PerformanceArena() {
               </div>
 
               {/* Benchmarks */}
-              {benchmarks.map((b) => (
+              {benchmarks.length > 0 ? benchmarks.map((b) => (
                 <div key={b.ticker} className="inner-glass p-3 rounded-lg">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-[10px] opacity-70">{b.name}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] opacity-70">{b.name}</span>
+                      <span className="text-[8px] opacity-40">({b.ticker})</span>
+                    </div>
                     <span className={`text-[11px] font-mono ${
                       b.ytdReturn >= 0 ? 'text-v64-success' : 'text-v64-danger'
                     }`}>
@@ -175,8 +194,17 @@ export default function PerformanceArena() {
                       }}
                     />
                   </div>
+                  <div className="flex justify-between text-[8px] opacity-40 mt-1">
+                    <span>연초 ${b.yearStartPrice?.toFixed(2) || '---'}</span>
+                    <span>현재 ${b.currentPrice?.toFixed(2) || '---'}</span>
+                  </div>
                 </div>
-              ))}
+              )) : (
+                <div className="text-center py-8 opacity-50">
+                  <i className="fas fa-chart-bar text-2xl mb-2" />
+                  <div className="text-[10px]">벤치마크 데이터 로딩 중...</div>
+                </div>
+              )}
             </div>
 
             {/* Right: Stats & Analysis */}
@@ -213,7 +241,7 @@ export default function PerformanceArena() {
                   <div>
                     <div className="text-[9px] text-celestial-purple tracking-widest mb-1">CURRENT RANKING</div>
                     <div className="text-2xl font-display text-white">
-                      #{ranking} <span className="text-sm opacity-40">/ 5</span>
+                      #{ranking} <span className="text-sm opacity-40">/ {benchmarks.length + 1}</span>
                     </div>
                   </div>
                   <div className="text-4xl">
@@ -228,10 +256,13 @@ export default function PerformanceArena() {
                 </div>
               </div>
 
-              {/* Disclaimer */}
-              <div className="text-[8px] opacity-30 text-center">
-                * 벤치마크 데이터는 예시값입니다. 실제 YTD 수익률과 다를 수 있습니다.
-              </div>
+              {/* Last Updated */}
+              {lastUpdated && (
+                <div className="text-[8px] opacity-30 text-center">
+                  * {new Date().getFullYear()}년 YTD 실시간 데이터 | 
+                  업데이트: {new Date(lastUpdated).toLocaleTimeString('ko-KR')}
+                </div>
+              )}
             </div>
           </div>
         </div>

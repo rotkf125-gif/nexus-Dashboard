@@ -190,7 +190,7 @@ function DashboardContent() {
 
       {/* Footer */}
       <footer className="text-center text-[10px] opacity-30 py-4 tracking-[0.3em]">
-        CELESTIAL NEXUS V65.0 // NEXT.JS EDITION
+        CELESTIAL NEXUS V65.1 // NEXT.JS EDITION
       </footer>
     </div>
   );
