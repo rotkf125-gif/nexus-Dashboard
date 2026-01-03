@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNexus } from '@/lib/context';
 import { supabase, getCurrentUserId } from '@/lib/supabase';
+import { getMarketStateInfo, isDST, MarketState } from '@/lib/utils';
 import AuthModal from './AuthModal';
 
 interface HeaderProps {
@@ -313,76 +314,26 @@ export default function Header({ onOpenSettings }: HeaderProps) {
           {/* Market State Badge */}
           <div className="flex flex-col justify-center items-center min-w-[85px]">
             {(() => {
-              // 서머타임 체크 (3월 둘째 일요일 ~ 11월 첫째 일요일)
-              const now = new Date();
-              const year = now.getFullYear();
-              const marchSecondSunday = new Date(year, 2, 8 + (7 - new Date(year, 2, 1).getDay()) % 7);
-              const novFirstSunday = new Date(year, 10, 1 + (7 - new Date(year, 10, 1).getDay()) % 7);
-              const isDST = now >= marchSecondSunday && now < novFirstSunday;
-              
-              // 한국 시간 (KST = UTC+9)
-              const kstHour = now.getUTCHours() + 9;
-              const kstHourNormalized = kstHour >= 24 ? kstHour - 24 : kstHour;
-              const kstDay = now.getUTCDay(); // 0=일, 6=토
-              const isWeekend = kstDay === 0 || kstDay === 6;
-              
-              // 한국 주간 거래 시간 (평일 10:00~17:00 KST)
-              const isKoreanDayTrading = !isWeekend && kstHourNormalized >= 10 && kstHourNormalized < 17;
-              
-              // 한국 시간 기준 거래 시간 (서머타임 적용)
-              const marketTimes = isDST ? {
-                pre: '17:00-22:30',
-                regular: '22:30-05:00',
-                post: '05:00-07:00',
-                day: '10:00-17:00',
-              } : {
-                pre: '18:00-23:30',
-                regular: '23:30-06:00',
-                post: '06:00-08:00',
-                day: '10:00-17:00',
-              };
+              const marketState = (state.market.marketState || 'CLOSED') as MarketState;
+              const marketInfo = getMarketStateInfo(marketState);
+              const dstActive = isDST();
 
-              // API에서 받은 marketState
-              const apiState = state.market.marketState;
-              
-              // 표시할 상태 및 시간
-              let displayState = apiState;
-              let displayTime = '---';
-              
-              if (apiState === 'REGULAR') {
-                displayTime = marketTimes.regular;
-              } else if (apiState === 'PRE') {
-                displayTime = marketTimes.pre;
-              } else if (apiState === 'POST') {
-                displayTime = marketTimes.post;
-              } else if (isKoreanDayTrading) {
-                displayState = 'DAY';
-                displayTime = marketTimes.day;
-              }
+              const stateColors = {
+                green: 'bg-v64-success/20 text-v64-success border border-v64-success/30',
+                blue: 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
+                purple: 'bg-purple-500/20 text-purple-400 border border-purple-500/30',
+                orange: 'bg-orange-500/20 text-orange-400 border border-orange-500/30',
+                gray: 'bg-white/10 text-white/50 border border-white/20',
+              };
 
               return (
                 <>
-                  <div className={`px-2 py-1 rounded text-[9px] font-medium tracking-wider ${
-                    displayState === 'REGULAR' 
-                      ? 'bg-v64-success/20 text-v64-success border border-v64-success/30' 
-                      : displayState === 'PRE'
-                        ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                        : displayState === 'POST'
-                          ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
-                          : displayState === 'DAY'
-                            ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30'
-                            : 'bg-white/10 text-white/50 border border-white/20'
-                  }`}>
-                    {displayState === 'REGULAR' && '🟢 정규장'}
-                    {displayState === 'PRE' && '🔵 프리마켓'}
-                    {displayState === 'POST' && '🟣 애프터'}
-                    {displayState === 'DAY' && '🟠 주간거래'}
-                    {displayState === 'CLOSED' && '⚫ 휴장'}
-                    {!displayState && '⚫ ---'}
+                  <div className={`px-2 py-1 rounded text-[9px] font-medium tracking-wider ${stateColors[marketInfo.color as keyof typeof stateColors]}`}>
+                    {marketInfo.label}
                   </div>
-                  <span className="text-[7px] opacity-50 mt-1">KST {displayTime}</span>
-                  <span className={`text-[6px] mt-0.5 ${isDST ? 'text-celestial-gold' : 'text-white/30'}`}>
-                    {isDST ? '☀️ DST' : '❄️ STD'}
+                  <span className="text-[7px] opacity-50 mt-1">KST {marketInfo.time}</span>
+                  <span className={`text-[6px] mt-0.5 ${dstActive ? 'text-celestial-gold' : 'text-white/30'}`}>
+                    {dstActive ? '☀️ DST' : '❄️ STD'}
                   </span>
                 </>
               );

@@ -5,6 +5,7 @@
 import { Asset, Dividend, TimelineEntry, TradeSums, NexusState } from './types';
 import { DEFAULT_ASSETS, DEFAULT_EXCHANGE_RATE } from './config';
 import { supabase, getUserId } from './supabase';
+import { toKSTISOString, getKSTNow } from './utils';
 
 // Check if we're in browser
 const isBrowser = typeof window !== 'undefined';
@@ -224,7 +225,7 @@ export async function saveSnapshot(state: NexusState): Promise<boolean> {
 
   try {
     const userId = getUserId();
-    
+
     // 총 평가금/원금 계산
     let totalValue = 0;
     let totalCost = 0;
@@ -234,10 +235,14 @@ export async function saveSnapshot(state: NexusState): Promise<boolean> {
     });
     const returnPct = totalCost > 0 ? ((totalValue - totalCost) / totalCost) * 100 : 0;
 
+    // KST 타임스탬프 명시적 설정
+    const kstTimestamp = toKSTISOString();
+
     const { error } = await supabase
       .from('portfolio_snapshots')
       .insert({
         user_id: userId,
+        timestamp: kstTimestamp,
         total_value: totalValue,
         total_cost: totalCost,
         return_pct: returnPct,
@@ -247,7 +252,9 @@ export async function saveSnapshot(state: NexusState): Promise<boolean> {
       });
 
     if (error) throw error;
-    console.log('📸 Snapshot saved:', new Date().toLocaleTimeString());
+
+    const kstNow = getKSTNow();
+    console.log('📸 Snapshot saved (KST):', kstNow.toLocaleTimeString('ko-KR'));
     return true;
   } catch (error) {
     console.error('Failed to save snapshot:', error);
