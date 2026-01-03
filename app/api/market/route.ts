@@ -1,10 +1,12 @@
 // ═══════════════════════════════════════════════════════════════
-// NEXUS V65.0 - Market Indices API Route (24H Real-time)
+// NEXUS V65.1 - Market Indices API Route (24H Real-time)
 // NASDAQ, S&P 500, VIX, US10Y, USD/KRW
 // 정규장 + 프리마켓 + 애프터마켓 + 선물 지원
+// KST 기반 정확한 시장 상태 계산
 // ═══════════════════════════════════════════════════════════════
 
 import { NextResponse } from 'next/server';
+import { getMarketState } from '@/lib/utils';
 
 // 현물 + 선물 티커 (장외 시간에는 선물 사용)
 const INDICES = [
@@ -104,13 +106,14 @@ export async function GET() {
 
     const market: Record<string, number> = {};
     const sources: Record<string, string> = {};
-    let currentMarketState = 'CLOSED';
-    
-    results.forEach(({ key, value, marketState, source }) => {
+
+    results.forEach(({ key, value, source }) => {
       market[key] = value || 0;
       sources[key] = source;
-      if (key === 'nasdaq') currentMarketState = marketState;
     });
+
+    // KST 기준으로 정확한 시장 상태 계산
+    const currentMarketState = getMarketState();
 
     return NextResponse.json({
       ...market,
