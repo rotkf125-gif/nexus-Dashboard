@@ -8,6 +8,7 @@ import AssetTable from '@/components/AssetTable';
 import StarCore from '@/components/StarCore';
 import Sidebar from '@/components/Sidebar';
 import SimulationHub from '@/components/SimulationHub';
+import RiskAnalytics from '@/components/RiskAnalytics';
 import AssetModal from '@/components/AssetModal';
 import DividendModal from '@/components/DividendModal';
 import SettingsModal from '@/components/SettingsModal';
@@ -16,6 +17,7 @@ import FreedomModal from '@/components/FreedomModal';
 import IncomeStream from '@/components/IncomeStream';
 import DividendAnalytics from '@/components/DividendAnalytics';
 import PerformanceArena from '@/components/PerformanceArena';
+import HistoricPerformance from '@/components/HistoricPerformance';
 
 function DashboardContent() {
   const { 
@@ -146,14 +148,20 @@ function DashboardContent() {
           </div>
         </div>
 
-        {/* Simulation Hub (1/5) - What-If, Rebalance, Correlation */}
-        <div className="glass-card p-5 border-accent-success">
-          <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
-            <h2 className="text-base font-semibold text-white font-display tracking-widest flex items-center gap-2">
-              <i className="fas fa-flask text-v64-success" /> SIMULATION
-            </h2>
+        {/* Right Column: Simulation Hub + Risk Analytics */}
+        <div className="flex flex-col gap-5">
+          {/* Simulation Hub (What-If, Rebalance) */}
+          <div className="glass-card p-5 border-accent-success">
+            <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
+              <h2 className="text-base font-semibold text-white font-display tracking-widest flex items-center gap-2">
+                <i className="fas fa-flask text-v64-success" /> SIMULATION
+              </h2>
+            </div>
+            <SimulationHub />
           </div>
-          <SimulationHub />
+
+          {/* Risk Analytics (분리된 별도 박스) */}
+          <RiskAnalytics />
         </div>
       </div>
 
@@ -198,9 +206,12 @@ function DashboardContent() {
       {/* Third Row: Performance Arena */}
       <PerformanceArena />
 
+      {/* Fourth Row: Historic Performance */}
+      <HistoricPerformance />
+
       {/* Footer */}
       <footer className="text-center text-[10px] opacity-30 py-4 tracking-[0.3em]">
-        CELESTIAL NEXUS V65.1 // NEXT.JS EDITION
+        CELESTIAL NEXUS V65.2 // NEXT.JS EDITION
       </footer>
     </div>
   );

@@ -3,17 +3,15 @@
 import { useState } from 'react';
 import WhatIfSimulator from './WhatIfSimulator';
 import RebalanceSimulator from './RebalanceSimulator';
-import CorrelationInsight from './CorrelationInsight';
 
-type TabType = 'whatif' | 'rebalance' | 'correlation';
+type TabType = 'whatif' | 'rebalance';
 
 export default function SimulationHub() {
   const [activeTab, setActiveTab] = useState<TabType>('whatif');
 
   const tabs: { id: TabType; label: string; icon: string }[] = [
     { id: 'whatif', label: 'WHAT-IF', icon: 'flask' },
-    { id: 'rebalance', label: 'REBAL', icon: 'balance-scale' },
-    { id: 'correlation', label: 'CORREL', icon: 'project-diagram' },
+    { id: 'rebalance', label: 'REBALANCE', icon: 'balance-scale' },
   ];
 
   return (
@@ -40,7 +38,6 @@ export default function SimulationHub() {
       <div className="flex-1 overflow-y-auto custom-scrollbar">
         {activeTab === 'whatif' && <WhatIfSimulator />}
         {activeTab === 'rebalance' && <RebalanceSimulator />}
-        {activeTab === 'correlation' && <CorrelationInsight />}
       </div>
     </div>
   );

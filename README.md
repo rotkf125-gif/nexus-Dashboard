@@ -12,31 +12,36 @@
 
 ---
 
-## ✨ V65.2 코드 아키텍처 최적화
+## ✨ V65.2 신규 기능
 
-### 🏗️ 구조 개선
-- **lib/utils.ts**: 공통 유틸리티 함수 분리 (formatUSD, calculatePortfolioStats 등)
-- **lib/hooks/**: 커스텀 훅 폴더 신규 생성
-  - `usePortfolio.ts`: 포트폴리오 계산 로직
-  - `useModal.ts`: 모달 상태 관리
-  - `useToast.ts`: 토스트 알림
-  - `usePriceRefresh.ts`: 가격 새로고침 로직
+### 📈 Historic Performance
+- **30분 스냅샷 기반** 포트폴리오 변화 라인 차트
+- 기간 선택: **24시간 / 1주 / 1개월**
+- 듀얼 Y축: 총 자산(좌측) + 수익률%(우측)
+- 기간별 변화량 및 변화율 표시
 
-### 📦 타입 시스템 강화
-- API 응답 타입 추가 (PriceResponse, BenchmarkResponse 등)
-- 컴포넌트 Prop 타입 정의 (ModalProps, AssetModalProps)
-- 시뮬레이션 타입 (WhatIfScenario, RebalanceTarget, CorrelationData)
+### 🛡️ Risk Analytics (Risk Score + Correlation 통합)
+- **반원 게이지**로 종합 리스크 점수 (0-100) 시각화
+- 4가지 요인별 점수 바:
+  - 분산도 (HHI 기반)
+  - 섹터 집중도
+  - VIX 변동성
+  - 단일 종목 집중도
+- 리스크 레벨: LOW / MODERATE / HIGH / EXTREME
+- 기존 Sector Exposure, Market Correlation, Risk Profile 유지
+- **SimulationHub와 별도 박스로 분리**
 
-### ⚙️ 설정 중앙화
-- `TYPE_ORDER`, `TYPE_INFO` config로 이동
-- `API_ENDPOINTS` 상수화
-- `REFRESH_INTERVALS` 설정
-- `getVixLevel()`, `getChartColor()` 헬퍼 함수
+### 📱 Widget Mode (Android)
+- **API Endpoint**: `GET /api/widget?uid=xxx`
+- Tasker / KWGT 호환 JSON 응답
+- 응답 데이터: totalValue, totalValueKRW, todayReturnPct, topHoldings
+- Settings에서 UID/API URL 복사 기능
+- CORS 지원
 
-### 🔧 컴포넌트 최적화
-- StarCore.tsx: utils/config import 적용
-- AssetTable.tsx: 중복 TYPE_INFO 제거
-- PerformanceArena.tsx: API_ENDPOINTS 활용
+### 🔧 구조 변경
+- `SimulationHub`: 3탭 → 2탭 (What-If, Rebalance)
+- `CorrelationInsight.tsx` → `RiskAnalytics.tsx`로 통합
+- 새 타입 추가: HistoricPeriod, RiskMetrics, RiskLevel, WidgetData
 
 ---
 
@@ -71,10 +76,9 @@
 
 ## ✨ V65.0 신규 기능
 
-### 🎯 Simulation Hub (3탭 통합)
+### 🎯 Simulation Hub (2탭)
 - **What-If**: 추가 매수 시뮬레이션
 - **Rebalance**: 목표 비중 설정 및 매수/매도 제안
-- **Correlation**: 시장 요인별 상관관계 분석 (NASDAQ, S&P500, VIX, US10Y, USD/KRW)
 
 ### 📊 Performance Arena
 - 포트폴리오 vs 벤치마크 비교 (SPY, QQQ, DIA, IWM)
@@ -174,6 +178,7 @@ nexus-next/
 │   └── api/
 │       ├── market/route.ts   # 지수 API (24H)
 │       ├── benchmark/route.ts# 벤치마크 API
+│       ├── widget/route.ts   # Android Widget API
 │       └── price/[ticker]/route.ts
 ├── components/
 │   ├── Header.tsx            # 헤더 (Auth, Market State)
@@ -184,11 +189,12 @@ nexus-next/
 │   ├── PredictedDividend.tsx # 배당 예측
 │   ├── DividendAnalytics.tsx # DPS + Learning 통합
 │   ├── DividendModal.tsx     # 배당 기록
-│   ├── SimulationHub.tsx     # 시뮬레이션 탭 컨테이너
+│   ├── SimulationHub.tsx     # 시뮬레이션 탭 (What-If, Rebalance)
 │   ├── WhatIfSimulator.tsx   # What-If
 │   ├── RebalanceSimulator.tsx# 리밸런싱
-│   ├── CorrelationInsight.tsx# 상관관계 분석
+│   ├── RiskAnalytics.tsx     # Risk Score + 상관관계 분석
 │   ├── PerformanceArena.tsx  # 벤치마크 비교
+│   ├── HistoricPerformance.tsx # 히스토릭 퍼포먼스 차트
 │   ├── SettingsModal.tsx     # 설정 (Export/Import)
 │   ├── Sidebar.tsx           # 차트 사이드바
 │   ├── StarCore.tsx          # 도넛 차트
@@ -332,6 +338,25 @@ CREATE POLICY "Allow all snapshots" ON portfolio_snapshots
 - `POST`: 애프터마켓
 - `CLOSED`: 장 마감
 
+### GET /api/widget?uid=xxx
+Android Tasker/KWGT 위젯용 API
+```json
+{
+  "timestamp": 1704412800000,
+  "totalValue": 12500.50,
+  "totalValueKRW": 18125725,
+  "todayReturn": 125.30,
+  "todayReturnPct": 1.01,
+  "topHoldings": [
+    { "ticker": "PLTY", "value": 5200, "returnPct": 2.5 },
+    { "ticker": "HOOY", "value": 3800, "returnPct": 1.2 },
+    { "ticker": "SPY", "value": 3500, "returnPct": 0.8 }
+  ],
+  "marketState": "REGULAR",
+  "exchangeRate": 1450
+}
+```
+
 ---
 
 ## 📤 Freedom Export 데이터 구조
@@ -468,7 +493,7 @@ npm install
 
 | 버전 | 날짜 | 주요 변경 |
 |------|------|----------|
-| V65.2 | 2025-01-04 | 코드 아키텍처 최적화, utils/hooks 분리, 타입 시스템 강화 |
+| V65.2 | 2025-01-05 | Historic Performance, Risk Analytics (Risk Score + Correlation 통합), Widget API (Android) |
 | V65.1 | 2025-01-03 | 실시간 벤치마크, 섹터 분산도 기반 상관관계 |
 | V65.0 | 2025-01-02 | SimulationHub, PerformanceArena, Type그룹화, KST Market State, 30분 스냅샷 |
 | V64.2 | 2024-12 | Celestial Glass 테마, Supabase 연동 |

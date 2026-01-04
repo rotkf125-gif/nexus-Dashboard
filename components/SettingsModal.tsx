@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNexus } from '@/lib/context';
 import { exportData, importData, clearAllData } from '@/lib/storage';
+import { getUserId } from '@/lib/supabase';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -239,6 +240,64 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             </div>
             <div className="text-[9px] text-white/30 mt-2">
               자산, 배당 기록, 설정이 JSON 파일로 저장됩니다.
+            </div>
+          </div>
+
+          {/* Widget API */}
+          <div className="inner-glass p-4 rounded-xl border border-celestial-cyan/20">
+            <label className="text-[10px] text-celestial-cyan block mb-2 tracking-widest font-medium">
+              <i className="fas fa-mobile-alt mr-1" />
+              ANDROID WIDGET
+            </label>
+            <div className="space-y-2">
+              <div>
+                <div className="text-[9px] text-white/40 mb-1">User ID</div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={typeof window !== 'undefined' ? getUserId() : ''}
+                    readOnly
+                    className="glass-input py-2 flex-1 text-[10px] font-mono rounded-lg bg-white/5"
+                  />
+                  <button
+                    onClick={() => {
+                      if (typeof window !== 'undefined') {
+                        navigator.clipboard.writeText(getUserId());
+                        toast('UID 복사됨', 'success');
+                      }
+                    }}
+                    className="celestial-btn text-[10px] px-3"
+                  >
+                    <i className="fas fa-copy" />
+                  </button>
+                </div>
+              </div>
+              <div>
+                <div className="text-[9px] text-white/40 mb-1">API Endpoint</div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={typeof window !== 'undefined' ? `${window.location.origin}/api/widget?uid=${getUserId()}` : ''}
+                    readOnly
+                    className="glass-input py-2 flex-1 text-[9px] font-mono rounded-lg bg-white/5"
+                  />
+                  <button
+                    onClick={() => {
+                      if (typeof window !== 'undefined') {
+                        navigator.clipboard.writeText(`${window.location.origin}/api/widget?uid=${getUserId()}`);
+                        toast('API URL 복사됨', 'success');
+                      }
+                    }}
+                    className="celestial-btn text-[10px] px-3"
+                  >
+                    <i className="fas fa-copy" />
+                  </button>
+                </div>
+              </div>
+              <div className="text-[8px] text-white/30 mt-2 leading-relaxed">
+                Tasker 또는 KWGT에서 위 URL을 호출하여 포트폴리오 데이터를 가져올 수 있습니다.
+                <br />응답: totalValue, totalValueKRW, todayReturnPct, topHoldings 등
+              </div>
             </div>
           </div>
 

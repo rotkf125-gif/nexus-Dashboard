@@ -183,3 +183,51 @@ export interface PortfolioSnapshot {
   assets: Asset[];
   market: MarketData;
 }
+
+// ═══════════════════════════════════════════════════════════════
+// HISTORIC PERFORMANCE TYPES
+// ═══════════════════════════════════════════════════════════════
+
+export type HistoricPeriod = '24h' | '1w' | '1m';
+
+export interface HistoricDataPoint {
+  timestamp: string;
+  totalValue: number;
+  totalCost: number;
+  returnPct: number;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RISK ANALYTICS TYPES
+// ═══════════════════════════════════════════════════════════════
+
+export type RiskLevel = 'LOW' | 'MODERATE' | 'HIGH' | 'EXTREME';
+
+export interface RiskMetrics {
+  overallScore: number;
+  diversificationScore: number;
+  sectorConcentration: number;
+  volatilityScore: number;
+  concentrationRisk: number;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// WIDGET API TYPES
+// ═══════════════════════════════════════════════════════════════
+
+export interface WidgetHolding {
+  ticker: string;
+  value: number;
+  returnPct: number;
+}
+
+export interface WidgetData {
+  timestamp: number;
+  totalValue: number;
+  totalValueKRW: number;
+  todayReturn: number;
+  todayReturnPct: number;
+  topHoldings: WidgetHolding[];
+  marketState: string;
+  exchangeRate: number;
+}
