@@ -3,7 +3,8 @@
     "allow": [
       "Bash(tree:*)",
       "Bash(npm run build:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(ls -la \"C:\\\\Users\\\\user\\\\Desktop\\\\nexus-next\\\\components\"\" | grep -v \"^total \")"
     ]
   }
 }
