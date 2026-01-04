@@ -87,8 +87,8 @@ export default function FreedomModal({ isOpen, onClose }: FreedomModalProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9999]">
-      <div className="glass-card w-[700px] max-h-[85vh] flex flex-col fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[9999]">
+      <div className="glass-card w-[700px] max-h-[85vh] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex justify-between items-center p-6 border-b border-white/10">
           <h3 className="font-semibold text-white text-base tracking-widest font-display">

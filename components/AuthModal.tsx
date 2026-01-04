@@ -151,8 +151,8 @@ export default function AuthModal({ isOpen, onClose, onAuthChange }: AuthModalPr
   const currentUserId = getCurrentUserId();
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9999]">
-      <div className="glass-card p-6 w-full max-w-md fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[9999]">
+      <div className="glass-card p-6 w-full max-w-md relative">
         {/* Close Button */}
         <button
           onClick={onClose}
