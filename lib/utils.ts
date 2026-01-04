@@ -80,9 +80,9 @@ export function toKSTISOString(date: Date = new Date()): string {
 /**
  * 미국 주식 시장 상태 계산 (KST 기준)
  */
-export type MarketStateType = 'PRE' | 'REGULAR' | 'POST' | 'DAY' | 'CLOSED';
+export type MarketState = 'PRE' | 'REGULAR' | 'POST' | 'DAY' | 'CLOSED';
 
-export function getMarketState(): MarketStateType {
+export function getMarketState(): MarketState {
   const now = new Date();
   const kstHour = now.getUTCHours() + 9;
   const kstHourNormalized = kstHour >= 24 ? kstHour - 24 : kstHour;
@@ -135,7 +135,7 @@ export function getMarketState(): MarketStateType {
 /**
  * 시장 상태에 따른 표시 정보 반환
  */
-export function getMarketStateInfo(state: MarketStateType) {
+export function getMarketStateInfo(state: MarketState) {
   const dst = isDST();
 
   const marketTimes = dst ? {
