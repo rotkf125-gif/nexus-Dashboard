@@ -5,6 +5,7 @@ import { useNexus } from '@/lib/context';
 import { supabase, getCurrentUserId } from '@/lib/supabase';
 import { getMarketStateInfo, isDST, MarketState } from '@/lib/utils';
 import AuthModal from './AuthModal';
+import FreedomModal from './FreedomModal';
 
 interface HeaderProps {
   onOpenSettings: () => void;
@@ -17,6 +18,7 @@ export default function Header({ onOpenSettings }: HeaderProps) {
   const [syncTime, setSyncTime] = useState('--');
   const [connectionStatus, setConnectionStatus] = useState<'offline' | 'loading' | 'online'>('offline');
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [freedomModalOpen, setFreedomModalOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
   
   const liveIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -442,10 +444,17 @@ export default function Header({ onOpenSettings }: HeaderProps) {
             </button>
             <button
               onClick={handleExportFreedom}
-              className="celestial-btn celestial-btn-gold text-[9px]"
-              title="Freedom v30"
+              className="celestial-btn text-[9px]"
+              title="Export to Clipboard"
             >
-              <i className="fas fa-bolt mr-1" />FREEDOM
+              <i className="fas fa-copy" />
+            </button>
+            <button
+              onClick={() => setFreedomModalOpen(true)}
+              className="celestial-btn celestial-btn-gold text-[9px]"
+              title="Freedom AI Analysis"
+            >
+              <i className="fas fa-robot mr-1" />AI
             </button>
             <button
               onClick={onOpenSettings}
@@ -462,6 +471,12 @@ export default function Header({ onOpenSettings }: HeaderProps) {
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
         onAuthChange={setUser}
+      />
+
+      {/* Freedom AI Modal */}
+      <FreedomModal
+        isOpen={freedomModalOpen}
+        onClose={() => setFreedomModalOpen(false)}
       />
     </header>
   );
