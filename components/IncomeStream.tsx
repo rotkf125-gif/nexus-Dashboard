@@ -67,48 +67,37 @@ export default function IncomeStream() {
 
   // Weekly Summary 계산 (현재 보유 수량 기반 예상 주간 배당)
   const weeklySummary = useMemo(() => {
-    const startDate = new Date('2025-10-23');
-    const now = new Date();
-    const weeksSinceStart = Math.max(1, Math.ceil((now.getTime() - startDate.getTime()) / (7 * 24 * 60 * 60 * 1000)));
+    // 현재 보유 수량 기반 MIN/AVG/MAX 계산
+    let estimatedMin = 0;
+    let estimatedAvg = 0;
+    let estimatedMax = 0;
 
-    // 현재 보유 수량 기반 예상 주간 배당 계산
-    let estimatedWeekly = 0;
     incomeAssets.forEach(asset => {
       const tickerDividends = dividends.filter(d => d.ticker === asset.ticker);
       if (tickerDividends.length > 0) {
-        // 최근 6개 DPS 평균
+        // 최근 6개 DPS 추출
         const recentDps = tickerDividends
           .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
           .slice(0, 6)
           .map(d => d.dps);
-        const avgDps = recentDps.reduce((sum, d) => sum + d, 0) / recentDps.length;
-        // 현재 보유 수량 × 평균 DPS × 세후 85%
-        estimatedWeekly += asset.qty * avgDps * 0.85;
+
+        if (recentDps.length > 0) {
+          const minDps = Math.min(...recentDps);
+          const maxDps = Math.max(...recentDps);
+          const avgDps = recentDps.reduce((sum, d) => sum + d, 0) / recentDps.length;
+
+          // 현재 보유 수량 × DPS × 세후 85%
+          estimatedMin += asset.qty * minDps * 0.85;
+          estimatedAvg += asset.qty * avgDps * 0.85;
+          estimatedMax += asset.qty * maxDps * 0.85;
+        }
       }
     });
 
-    // 실제 과거 주간 배당 (MIN/MAX 계산용)
-    const recentDividends = dividends.filter(d => new Date(d.date) >= startDate);
-    const weeklyTotals: number[] = [];
-    recentDividends.forEach(d => {
-      const weekIndex = Math.floor((new Date(d.date).getTime() - startDate.getTime()) / (7 * 24 * 60 * 60 * 1000));
-      if (!weeklyTotals[weekIndex]) weeklyTotals[weekIndex] = 0;
-      weeklyTotals[weekIndex] += d.qty * d.dps * 0.85;
-    });
-
-    const validWeeks = weeklyTotals.filter(w => w > 0);
-    const weeklyMin = validWeeks.length > 0 ? Math.min(...validWeeks) : 0;
-    const weeklyMax = validWeeks.length > 0 ? Math.max(...validWeeks) : 0;
-
-    // 과거 평균도 계산 (참고용)
-    const totalAfterTax = recentDividends.reduce((sum, d) => sum + d.qty * d.dps * 0.85, 0);
-    const historicalAvg = weeksSinceStart > 0 ? totalAfterTax / weeksSinceStart : 0;
-
-    return { 
-      weeklyAvg: estimatedWeekly, // 현재 수량 기반 예상값
-      historicalAvg, // 과거 평균 (참고용)
-      weeklyMin, 
-      weeklyMax 
+    return {
+      weeklyMin: estimatedMin,
+      weeklyAvg: estimatedAvg,
+      weeklyMax: estimatedMax,
     };
   }, [dividends, incomeAssets]);
 
@@ -174,11 +163,11 @@ export default function IncomeStream() {
 
               {/* Stats Grid */}
               <div className="space-y-1 text-[10px] mb-3">
-                {/* Row 1: PRINCIPAL | DIVIDEND */}
+                {/* Row 1: QTY | DIVIDEND */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex justify-between items-center">
-                    <span className="opacity-40 tracking-wider">PRINCIPAL</span>
-                    <span className="text-white/80">${stat.principal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    <span className="opacity-40 tracking-wider">QTY</span>
+                    <span className="text-celestial-cyan font-medium">{stat.qty}주</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="opacity-40 tracking-wider">DIVIDEND</span>
@@ -186,23 +175,29 @@ export default function IncomeStream() {
                   </div>
                 </div>
 
-                {/* Row 2: VALUATION | TRADE R. */}
+                {/* Row 2: PRINCIPAL | VALUATION */}
                 <div className="grid grid-cols-2 gap-4">
+                  <div className="flex justify-between items-center">
+                    <span className="opacity-40 tracking-wider">PRINCIPAL</span>
+                    <span className="text-white/80">${stat.principal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
                   <div className="flex justify-between items-center">
                     <span className="opacity-40 tracking-wider">VALUATION</span>
                     <span className="text-white/80">${stat.valuation.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="opacity-40 tracking-wider">TRADE R.</span>
-                    <span 
-                      className={`cursor-pointer hover:opacity-80 ${stat.tradeReturn >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}
-                      onClick={() => handleEditTradeReturn(stat.ticker, stat.tradeReturn)}
-                      title="클릭하여 수정"
-                    >
-                      {stat.tradeReturn >= 0 ? '+' : ''}${stat.tradeReturn.toFixed(2)}
-                      <i className="fas fa-pen text-[7px] ml-1 opacity-40" />
-                    </span>
-                  </div>
+                </div>
+
+                {/* Row 3: TRADE R. */}
+                <div className="flex justify-between items-center">
+                  <span className="opacity-40 tracking-wider">TRADE R.</span>
+                  <span
+                    className={`cursor-pointer hover:opacity-80 ${stat.tradeReturn >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}
+                    onClick={() => handleEditTradeReturn(stat.ticker, stat.tradeReturn)}
+                    title="클릭하여 수정"
+                  >
+                    {stat.tradeReturn >= 0 ? '+' : ''}${stat.tradeReturn.toFixed(2)}
+                    <i className="fas fa-pen text-[7px] ml-1 opacity-40" />
+                  </span>
                 </div>
               </div>
 
@@ -233,13 +228,13 @@ export default function IncomeStream() {
           <div className="text-[9px] text-celestial-purple tracking-[0.2em] mb-0.5 font-light">
             EST. WEEKLY
           </div>
-          <div className="text-[7px] opacity-40 mb-1">(since 2025-10-23)</div>
+          <div className="text-[7px] opacity-40 mb-1">(현재 수량 × 최근 6회 DPS)</div>
           <div className="text-lg font-display font-light text-white">
             ${weeklySummary.weeklyAvg.toFixed(2)}
           </div>
           <div className="flex justify-between mt-1 text-[9px] font-light opacity-60">
-            <span>MIN: <span className="text-white">${weeklySummary.weeklyMin.toFixed(2)}</span></span>
-            <span>MAX: <span className="text-white">${weeklySummary.weeklyMax.toFixed(2)}</span></span>
+            <span>MIN: <span className="text-v64-danger">${weeklySummary.weeklyMin.toFixed(2)}</span></span>
+            <span>MAX: <span className="text-v64-success">${weeklySummary.weeklyMax.toFixed(2)}</span></span>
           </div>
         </div>
 
