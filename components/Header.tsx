@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNexus } from '@/lib/context';
-import { supabase, getCurrentUserId } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { getMarketStateInfo, isDST, MarketState } from '@/lib/utils';
+import { Asset } from '@/lib/types'; // Asset 타입 import 필요
+
 interface HeaderProps {
   onOpenSettings: () => void;
   onOpenAuth: () => void;
@@ -165,113 +167,98 @@ export default function Header({ onOpenSettings, onOpenAuth, onOpenFreedom }: He
     vixBarColor = 'bg-v64-danger';
   }
 
-  const handleToggleLive = () => {
-    setIsLive(!isLive);
-    if (!isLive) {
-      toast('실시간 모드 활성화', 'success');
-    } else {
-      toast('실시간 모드 비활성화', 'info');
-    }
-  };
-
+  // ═══════════════════════════════════════════════════════════════
+  // EXPORT FUNCTION (Refactored with FreedomModal Logic)
+  // ═══════════════════════════════════════════════════════════════
   const handleExportFreedom = () => {
-    // Assets 배열 (전체 자산)
+    // 1. 그룹 분석 함수 (FreedomModal과 동일 로직)
+    const groupBy = (assets: Asset[], key: 'sector' | 'type') => {
+      const groups: Record<string, { value: number; cost: number; count: number }> = {};
+      assets.forEach(a => {
+        const groupKey = a[key] || 'Other';
+        if (!groups[groupKey]) groups[groupKey] = { value: 0, cost: 0, count: 0 };
+        groups[groupKey].value += a.price * a.qty;
+        groups[groupKey].cost += a.avg * a.qty;
+        groups[groupKey].count += 1;
+      });
+      return Object.entries(groups).map(([name, data]) => ({
+        name,
+        weight: totalValue > 0 ? (data.value / totalValue * 100).toFixed(1) + '%' : '0%',
+        returnPct: data.cost > 0 ? ((data.value - data.cost) / data.cost * 100).toFixed(2) + '%' : '0%',
+        valueUsd: Math.round(data.value),
+        assetCount: data.count
+      })).sort((a, b) => parseFloat(b.weight) - parseFloat(a.weight));
+    };
+
+    // 2. 그룹 데이터 생성
+    const sectorStats = groupBy(state.assets, 'sector');
+    const typeStats = groupBy(state.assets, 'type');
+
+    // 3. 배당 데이터 분석
+    const now = new Date();
+    const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+    const recentDividends = state.dividends.filter(d => new Date(d.date) >= oneYearAgo);
+    const totalAnnualDividend = recentDividends.reduce((sum, d) => sum + (d.qty * d.dps), 0);
+    
+    // 4. 자산 상세 데이터
     const assetsData = state.assets.map(a => {
       const value = a.qty * a.price;
-      const buyRate = a.buyRate || state.exchangeRate;
-      const valueKrw = Math.round(value * state.exchangeRate);
-      const fxPL = Math.round(value * (state.exchangeRate - buyRate));
-      
+      const weight = totalValue > 0 ? (value / totalValue * 100).toFixed(2) + '%' : '0%';
       return {
         ticker: a.ticker,
+        type: a.type,
+        sector: a.sector,
         qty: a.qty,
         avg: a.avg,
         price: a.price,
-        valueUsd: Number((value).toFixed(2)),
-        valueKrw: valueKrw,
-        fxRate: buyRate,
-        fxPL: fxPL,
-        type: a.type,
-        sector: a.sector,
+        value: Number(value.toFixed(2)),
+        weight: weight,
+        returnPct: a.avg > 0 ? ((a.price - a.avg) / a.avg * 100).toFixed(2) + '%' : '0%',
       };
     });
 
-    // Income Stream 배열 (INCOME 타입만)
-    const incomeAssets = state.assets.filter(a => a.type === 'INCOME');
-    const incomeStreamData = incomeAssets.map(asset => {
-      const tickerDividends = state.dividends.filter(d => d.ticker === asset.ticker);
-      
-      // 총 배당금 (세후 15%)
-      const totalDividend = tickerDividends.reduce((sum, d) => {
-        const gross = d.qty * d.dps;
-        return sum + gross * 0.85;
-      }, 0);
+    // 5. 실현 손익
+    const totalRealizedPL = Object.values(state.tradeSums).reduce((acc, val) => acc + val, 0);
 
-      // 원금 / 평가금
-      const principal = asset.qty * asset.avg;
-      const valuation = asset.qty * asset.price;
-      const unrealizedPL = valuation - principal;
+    // 6. 타임라인 (최근 30일 추세)
+    const recentTrend = state.timeline.slice(-30).map(t => ({
+      date: t.date,
+      value: Math.round(t.value),
+      returnPct: t.cost > 0 ? ((t.value - t.cost) / t.cost * 100).toFixed(2) : 0
+    }));
 
-      // Trade Return
-      const tradeReturn = state.tradeSums[asset.ticker] ?? 0;
-
-      // Total Return = Trade + 미실현 + 배당
-      const totalReturn = tradeReturn + unrealizedPL + totalDividend;
-
-      // Recovery %
-      const recoveryPct = principal > 0 ? (totalDividend / principal) * 100 : 0;
-
-      // 배당 예측 (최근 6개 기반)
-      const dpsHistory = tickerDividends
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-        .slice(0, 6)
-        .map(d => d.dps);
-      
-      const avgDps = dpsHistory.length > 0 
-        ? dpsHistory.reduce((sum, d) => sum + d, 0) / dpsHistory.length 
-        : 0;
-
-      return {
-        ticker: asset.ticker,
-        principal: Number(principal.toFixed(2)),
-        dividend: Number(totalDividend.toFixed(2)),
-        valuation: Number(valuation.toFixed(2)),
-        tradeReturn: Number(tradeReturn.toFixed(2)),
-        totalReturn: Number(totalReturn.toFixed(2)),
-        recoveryPct: Number(recoveryPct.toFixed(1)),
-        predictedDps: Number(avgDps.toFixed(2)),
-        dividendCount: tickerDividends.length,
-      };
-    });
-
-    // 주간 배당 통계 (2025-10-23 이후)
-    const startDate = new Date('2025-10-23');
-    const now = new Date();
-    const weeksSinceStart = Math.max(1, Math.ceil((now.getTime() - startDate.getTime()) / (7 * 24 * 60 * 60 * 1000)));
-    const recentDividends = state.dividends.filter(d => new Date(d.date) >= startDate);
-    const totalAfterTax = recentDividends.reduce((sum, d) => sum + d.qty * d.dps * 0.85, 0);
-    const weeklyAvg = totalAfterTax / weeksSinceStart;
-
+    // 7. 최종 JSON 구성 (External AI Prompt Ready)
     const data = {
-      timestamp: new Date().toISOString(),
+      meta: {
+        timestamp: new Date().toISOString(),
+        platform: "NEXUS Dashboard V65.1",
+        userStrategy: state.strategy || 'Unspecified',
+      },
       summary: {
         totalValue: Number(totalValue.toFixed(2)),
         totalCost: Number(totalCost.toFixed(2)),
-        returnPct: totalCost > 0 ? Number(((totalValue - totalCost) / totalCost * 100).toFixed(2)) : 0,
-        totalValueKrw: Math.round(totalValue * state.exchangeRate),
+        totalRealizedPL: Number(totalRealizedPL.toFixed(2)),
+        unrealizedReturnPct: totalCost > 0 ? Number(((totalValue - totalCost) / totalCost * 100).toFixed(2)) + '%' : '0%',
         exchangeRate: state.exchangeRate,
+        cashHoldings: 0,
+      },
+      groups: {
+        bySector: sectorStats,
+        byType: typeStats,
+      },
+      income: {
+        annualTotal: Number(totalAnnualDividend.toFixed(2)),
+        payingAssetsCount: new Set(recentDividends.map(d => d.ticker)).size,
+      },
+      history: {
+        recentTrend: recentTrend,
       },
       assets: assetsData,
-      incomeStream: {
-        assets: incomeStreamData,
-        weeklyAvg: Number(weeklyAvg.toFixed(2)),
-        totalDividend: Number(incomeStreamData.reduce((sum, a) => sum + a.dividend, 0).toFixed(2)),
-      },
       market: state.market,
     };
     
     navigator.clipboard.writeText(JSON.stringify(data, null, 2));
-    toast('Freedom 데이터 복사됨', 'success');
+    toast('상세 분석 데이터 복사됨', 'success');
   };
 
   const formatUSD = (n: number) => '$' + n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -462,7 +449,6 @@ export default function Header({ onOpenSettings, onOpenAuth, onOpenFreedom }: He
           </div>
         </div>
       </div>
-
-      </header>
+    </header>
   );
 }
