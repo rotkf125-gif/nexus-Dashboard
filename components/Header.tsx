@@ -4,21 +4,18 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNexus } from '@/lib/context';
 import { supabase, getCurrentUserId } from '@/lib/supabase';
 import { getMarketStateInfo, isDST, MarketState } from '@/lib/utils';
-import AuthModal from './AuthModal';
-import FreedomModal from './FreedomModal';
-
 interface HeaderProps {
   onOpenSettings: () => void;
+  onOpenAuth: () => void;
+  onOpenFreedom: () => void;
 }
 
-export default function Header({ onOpenSettings }: HeaderProps) {
+export default function Header({ onOpenSettings, onOpenAuth, onOpenFreedom }: HeaderProps) {
   const { state, refreshPrices, toast } = useNexus();
   const [clock, setClock] = useState('--:--');
   const [isLive, setIsLive] = useState(false);
   const [syncTime, setSyncTime] = useState('--');
   const [connectionStatus, setConnectionStatus] = useState<'offline' | 'loading' | 'online'>('offline');
-  const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [freedomModalOpen, setFreedomModalOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
   
   const liveIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -429,7 +426,7 @@ export default function Header({ onOpenSettings }: HeaderProps) {
               </button>
             ) : (
               <button
-                onClick={() => setAuthModalOpen(true)}
+                onClick={onOpenAuth}
                 className="celestial-btn text-[9px]"
                 title="Login"
               >
@@ -450,7 +447,7 @@ export default function Header({ onOpenSettings }: HeaderProps) {
               <i className="fas fa-copy" />
             </button>
             <button
-              onClick={() => setFreedomModalOpen(true)}
+              onClick={onOpenFreedom}
               className="celestial-btn celestial-btn-gold text-[9px]"
               title="Freedom AI Analysis"
             >
@@ -466,18 +463,6 @@ export default function Header({ onOpenSettings }: HeaderProps) {
         </div>
       </div>
 
-      {/* Auth Modal */}
-      <AuthModal
-        isOpen={authModalOpen}
-        onClose={() => setAuthModalOpen(false)}
-        onAuthChange={setUser}
-      />
-
-      {/* Freedom AI Modal */}
-      <FreedomModal
-        isOpen={freedomModalOpen}
-        onClose={() => setFreedomModalOpen(false)}
-      />
-    </header>
+      </header>
   );
 }

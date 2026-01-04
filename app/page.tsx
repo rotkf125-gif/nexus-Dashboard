@@ -11,6 +11,8 @@ import SimulationHub from '@/components/SimulationHub';
 import AssetModal from '@/components/AssetModal';
 import DividendModal from '@/components/DividendModal';
 import SettingsModal from '@/components/SettingsModal';
+import AuthModal from '@/components/AuthModal';
+import FreedomModal from '@/components/FreedomModal';
 import IncomeStream from '@/components/IncomeStream';
 import DividendAnalytics from '@/components/DividendAnalytics';
 import PerformanceArena from '@/components/PerformanceArena';
@@ -33,6 +35,8 @@ function DashboardContent() {
   } = useNexus();
 
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
+  const [freedomOpen, setFreedomOpen] = useState(false);
 
   // INCOME 자산에서 배당 카운트다운 계산
   const incomeAssets = state.assets.filter(a => a.type === 'INCOME');
@@ -57,9 +61,15 @@ function DashboardContent() {
       />
       <DividendModal isOpen={dividendModalOpen} onClose={closeDividendModal} />
       <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} onAuthChange={() => {}} />
+      <FreedomModal isOpen={freedomOpen} onClose={() => setFreedomOpen(false)} />
 
       {/* Header */}
-      <Header onOpenSettings={() => setSettingsOpen(true)} />
+      <Header
+        onOpenSettings={() => setSettingsOpen(true)}
+        onOpenAuth={() => setAuthOpen(true)}
+        onOpenFreedom={() => setFreedomOpen(true)}
+      />
 
       {/* Strategy Bar */}
       <StrategyBar />
