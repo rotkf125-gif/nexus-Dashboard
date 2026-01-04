@@ -2,18 +2,9 @@
 
 import { useState, useMemo } from 'react';
 import { useNexus } from '@/lib/context';
-import { SECTORS, TYPE_COLORS, CHART_COLORS } from '@/lib/config';
-import { Asset } from '@/lib/types';
-
-// Type 순서 및 정보
-const TYPE_ORDER = ['CORE', 'GROWTH', 'VALUE', 'SPECULATIVE', 'INCOME'] as const;
-const TYPE_INFO: Record<string, { label: string; icon: string; description: string }> = {
-  INCOME: { label: 'INCOME', icon: 'coins', description: '배당/인컴 자산' },
-  CORE: { label: 'CORE', icon: 'shield-alt', description: '핵심 보유 자산' },
-  GROWTH: { label: 'GROWTH', icon: 'rocket', description: '성장 투자 자산' },
-  VALUE: { label: 'VALUE', icon: 'gem', description: '가치 투자 자산' },
-  SPECULATIVE: { label: 'SPECULATIVE', icon: 'dice', description: '투기성 자산' },
-};
+import { SECTORS, TYPE_COLORS, CHART_COLORS, TYPE_ORDER, TYPE_INFO, getChartColor } from '@/lib/config';
+import { Asset, AssetWithIndex, AssetType } from '@/lib/types';
+import { formatUSD, getReturnColorClass, getPriceChangeIndicator, groupAssetsByType } from '@/lib/utils';
 
 export default function AssetTable() {
   const { state, removeAsset, openEditAssetModal, updateAssets } = useNexus();
@@ -26,23 +17,13 @@ export default function AssetTable() {
   // 접힌 섹션 상태
   const [collapsedTypes, setCollapsedTypes] = useState<Set<string>>(new Set());
 
-  const formatUSD = (n: number) => '$' + n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-  // Type별로 자산 그룹화
+  // Type별로 자산 그룹화 (with originalIndex)
   const groupedAssets = useMemo(() => {
-    const groups: Record<string, { assets: Array<Asset & { originalIndex: number }>; totalValue: number; totalCost: number }> = {};
-    
-    assets.forEach((asset, index) => {
-      const type = asset.type || 'CORE';
-      if (!groups[type]) {
-        groups[type] = { assets: [], totalValue: 0, totalCost: 0 };
-      }
-      groups[type].assets.push({ ...asset, originalIndex: index });
-      groups[type].totalValue += asset.qty * asset.price;
-      groups[type].totalCost += asset.qty * asset.avg;
-    });
-    
-    return groups;
+    const assetsWithIndex: AssetWithIndex[] = assets.map((asset, index) => ({
+      ...asset,
+      originalIndex: index,
+    }));
+    return groupAssetsByType(assetsWithIndex);
   }, [assets]);
 
   const getDeltaHtml = (current: number, previous: number) => {

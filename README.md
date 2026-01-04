@@ -1,4 +1,4 @@
-# 🌟 NEXUS CELESTIAL V65.1 - Next.js Edition
+# 🌟 NEXUS CELESTIAL V65.2 - Next.js Edition
 
 개인 투자 포트폴리오 대시보드 (Celestial Glass 테마)
 
@@ -9,6 +9,34 @@
 | **Live Site** | https://nexus-dashboard-beige.vercel.app |
 | **GitHub** | https://github.com/rotkf125-gif/nexus-dashboard |
 | **Database** | Supabase (PostgreSQL) |
+
+---
+
+## ✨ V65.2 코드 아키텍처 최적화
+
+### 🏗️ 구조 개선
+- **lib/utils.ts**: 공통 유틸리티 함수 분리 (formatUSD, calculatePortfolioStats 등)
+- **lib/hooks/**: 커스텀 훅 폴더 신규 생성
+  - `usePortfolio.ts`: 포트폴리오 계산 로직
+  - `useModal.ts`: 모달 상태 관리
+  - `useToast.ts`: 토스트 알림
+  - `usePriceRefresh.ts`: 가격 새로고침 로직
+
+### 📦 타입 시스템 강화
+- API 응답 타입 추가 (PriceResponse, BenchmarkResponse 등)
+- 컴포넌트 Prop 타입 정의 (ModalProps, AssetModalProps)
+- 시뮬레이션 타입 (WhatIfScenario, RebalanceTarget, CorrelationData)
+
+### ⚙️ 설정 중앙화
+- `TYPE_ORDER`, `TYPE_INFO` config로 이동
+- `API_ENDPOINTS` 상수화
+- `REFRESH_INTERVALS` 설정
+- `getVixLevel()`, `getChartColor()` 헬퍼 함수
+
+### 🔧 컴포넌트 최적화
+- StarCore.tsx: utils/config import 적용
+- AssetTable.tsx: 중복 TYPE_INFO 제거
+- PerformanceArena.tsx: API_ENDPOINTS 활용
 
 ---
 
@@ -145,6 +173,7 @@ nexus-next/
 │   ├── layout.tsx            # 루트 레이아웃
 │   └── api/
 │       ├── market/route.ts   # 지수 API (24H)
+│       ├── benchmark/route.ts# 벤치마크 API
 │       └── price/[ticker]/route.ts
 ├── components/
 │   ├── Header.tsx            # 헤더 (Auth, Market State)
@@ -168,8 +197,15 @@ nexus-next/
 │   ├── supabase.ts           # Supabase 클라이언트
 │   ├── storage.ts            # 하이브리드 스토리지 + 스냅샷
 │   ├── context.tsx           # 전역 상태 관리
-│   ├── types.ts              # TypeScript 타입
-│   └── config.ts             # 기본 설정
+│   ├── types.ts              # TypeScript 타입 (API/컴포넌트)
+│   ├── config.ts             # 설정 상수 + 헬퍼 함수
+│   ├── utils.ts              # 공통 유틸리티 함수
+│   └── hooks/                # 커스텀 훅
+│       ├── index.ts
+│       ├── usePortfolio.ts   # 포트폴리오 계산
+│       ├── useModal.ts       # 모달 상태 관리
+│       ├── useToast.ts       # 토스트 알림
+│       └── usePriceRefresh.ts# 가격 새로고침
 └── styles/
     └── globals.css           # Celestial Glass 테마
 ```
@@ -432,6 +468,8 @@ npm install
 
 | 버전 | 날짜 | 주요 변경 |
 |------|------|----------|
+| V65.2 | 2025-01-04 | 코드 아키텍처 최적화, utils/hooks 분리, 타입 시스템 강화 |
+| V65.1 | 2025-01-03 | 실시간 벤치마크, 섹터 분산도 기반 상관관계 |
 | V65.0 | 2025-01-02 | SimulationHub, PerformanceArena, Type그룹화, KST Market State, 30분 스냅샷 |
 | V64.2 | 2024-12 | Celestial Glass 테마, Supabase 연동 |
 

@@ -1,9 +1,10 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
-import { NexusState, Asset, Dividend, MarketData } from './types';
+import { NexusState, Asset, Dividend, MarketData, ThemeType } from './types';
 import { loadState, saveState, loadStateFromSupabase, saveStateToSupabase, saveSnapshot } from './storage';
-import { DEFAULT_EXCHANGE_RATE } from './config';
+import { DEFAULT_EXCHANGE_RATE, API_ENDPOINTS, REFRESH_INTERVALS } from './config';
+import { isValidGoogleScriptUrl } from './utils';
 
 interface NexusContextType {
   state: NexusState;
@@ -216,12 +217,12 @@ export function NexusProvider({ children }: { children: ReactNode }) {
 
   const refreshPrices = useCallback(async () => {
     if (state.isFetching) return;
-    
+
     setState(prev => ({ ...prev, isFetching: true }));
-    
+
     try {
       // Fetch market data
-      const marketRes = await fetch('/api/market');
+      const marketRes = await fetch(API_ENDPOINTS.MARKET);
       if (marketRes.ok) {
         const marketData = await marketRes.json();
         updateMarket(marketData);
@@ -237,12 +238,14 @@ export function NexusProvider({ children }: { children: ReactNode }) {
       const updatedAssets = await Promise.all(
         currentAssets.map(async (asset) => {
           try {
-            const res = await fetch(`/api/price/${asset.ticker}`);
+            const res = await fetch(API_ENDPOINTS.PRICE(asset.ticker));
             if (res.ok) {
               const data = await res.json();
               return { ...asset, price: data.price };
             }
-          } catch {}
+          } catch {
+            // Keep original price on error
+          }
           return asset;
         })
       );
@@ -257,7 +260,7 @@ export function NexusProvider({ children }: { children: ReactNode }) {
     } catch {
       setState(prev => ({ ...prev, isFetching: false }));
     }
-  }, [state.isFetching, updateMarket]); // state.assets 제거!
+  }, [state.isFetching, updateMarket]);
 
   const setTheme = useCallback((theme: 'dark' | 'light') => {
     setState(prev => ({ ...prev, theme }));
@@ -292,17 +295,14 @@ export function NexusProvider({ children }: { children: ReactNode }) {
 
   const syncFromSheet = useCallback(async () => {
     const scriptUrl = localStorage.getItem('nexus_script_url');
-    
-    // 디버깅
-    console.log('nexus_script_url:', scriptUrl);
-    
+
     if (!scriptUrl || scriptUrl.trim() === '') {
       toast('설정에서 Google Script URL을 입력하세요', 'warning');
       return;
     }
 
     // URL 유효성 검사
-    if (!scriptUrl.startsWith('https://script.google.com/')) {
+    if (!isValidGoogleScriptUrl(scriptUrl)) {
       toast('잘못된 Google Script URL 형식', 'danger');
       return;
     }

@@ -2,14 +2,26 @@
 // NEXUS V65.1 - Type Definitions
 // ═══════════════════════════════════════════════════════════════
 
+// ═══════════════════════════════════════════════════════════════
+// CORE TYPES
+// ═══════════════════════════════════════════════════════════════
+
+export type AssetType = 'CORE' | 'INCOME' | 'GROWTH' | 'VALUE' | 'SPECULATIVE';
+export type ThemeType = 'dark' | 'light';
+export type MarketState = 'PRE' | 'REGULAR' | 'POST' | 'CLOSED' | 'DAY';
+
 export interface Asset {
   ticker: string;
   qty: number;
   avg: number;
   price: number;
-  type: 'CORE' | 'INCOME' | 'GROWTH' | 'VALUE' | 'SPECULATIVE';
+  type: AssetType;
   sector: string;
   buyRate: number;
+}
+
+export interface AssetWithIndex extends Asset {
+  originalIndex: number;
 }
 
 export interface Dividend {
@@ -31,7 +43,7 @@ export interface MarketData {
   vix: number;
   tnx: number;
   krw: number;
-  marketState?: 'PRE' | 'REGULAR' | 'POST' | 'CLOSED' | 'DAY';
+  marketState?: MarketState;
 }
 
 export interface TradeSums {
@@ -46,16 +58,20 @@ export interface NexusState {
   tradeSums: TradeSums;
   scriptUrl: string;
   strategy: string;
-  theme: 'dark' | 'light';
+  theme: ThemeType;
   market: MarketData;
   previousMarket: MarketData;
-  previousPrices: { [ticker: string]: number };
+  previousPrices: Record<string, number>;
   lastSync: number | null;
   compactMode: boolean;
   vixAlertDismissed: boolean;
   isLive: boolean;
   isFetching: boolean;
 }
+
+// ═══════════════════════════════════════════════════════════════
+// CONFIG TYPES
+// ═══════════════════════════════════════════════════════════════
 
 export interface SectorInfo {
   emoji: string;
@@ -68,4 +84,102 @@ export interface VIXLevel {
   color: string;
   action: string;
   label: string;
+}
+
+export interface TypeInfo {
+  label: string;
+  icon: string;
+  description: string;
+  color: string;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// API RESPONSE TYPES
+// ═══════════════════════════════════════════════════════════════
+
+export interface PriceResponse {
+  ticker: string;
+  price: number;
+  change?: number;
+  changePercent?: number;
+  timestamp?: number;
+}
+
+export interface MarketResponse extends MarketData {
+  timestamp: number;
+}
+
+export interface BenchmarkData {
+  name: string;
+  ticker: string;
+  ytdReturn: number;
+  currentPrice: number;
+  yearStartPrice: number;
+  color: string;
+}
+
+export interface BenchmarkResponse {
+  benchmarks: BenchmarkData[];
+  timestamp: number;
+}
+
+export interface SheetSyncResponse {
+  dividends: Dividend[];
+  tradeSums?: TradeSums;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// COMPONENT PROP TYPES
+// ═══════════════════════════════════════════════════════════════
+
+export interface ModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export interface AssetModalProps extends ModalProps {
+  onSave: (asset: Asset) => void;
+  editingAsset: Asset | null;
+  editingIndex: number | null;
+  exchangeRate: number;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SIMULATION TYPES
+// ═══════════════════════════════════════════════════════════════
+
+export interface WhatIfScenario {
+  ticker: string;
+  priceChange: number;
+  qtyChange: number;
+}
+
+export interface RebalanceTarget {
+  ticker: string;
+  currentWeight: number;
+  targetWeight: number;
+  action: 'BUY' | 'SELL' | 'HOLD';
+  amount: number;
+}
+
+export interface CorrelationData {
+  ticker1: string;
+  ticker2: string;
+  correlation: number;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SNAPSHOT TYPES
+// ═══════════════════════════════════════════════════════════════
+
+export interface PortfolioSnapshot {
+  id: string;
+  user_id: string;
+  timestamp: string;
+  total_value: number;
+  total_cost: number;
+  return_pct: number;
+  exchange_rate: number;
+  assets: Asset[];
+  market: MarketData;
 }

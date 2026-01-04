@@ -1,40 +1,32 @@
 'use client';
 
-import { useNexus } from '@/lib/context';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import { Chart, DoughnutController, ArcElement, Tooltip } from 'chart.js';
+import { useNexus } from '@/lib/context';
+import { CHART_COLORS } from '@/lib/config';
+import { formatUSD, calculatePortfolioStats, getReturnGlowClass } from '@/lib/utils';
 
 Chart.register(DoughnutController, ArcElement, Tooltip);
-
-const COLORS = [
-  '#90CAF9', '#FFD700', '#B39DDB', '#81C784', '#F48FB1',
-  '#FFB74D', '#80DEEA', '#A5D6A7', '#90A4AE', '#CE93D8',
-];
 
 export default function StarCore() {
   const { state } = useNexus();
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstance = useRef<Chart | null>(null);
 
-  // Calculate totals
-  let totalValue = 0, totalCost = 0;
-  state.assets.forEach(a => {
-    totalValue += a.qty * a.price;
-    totalCost += a.qty * a.avg;
-  });
-  
-  const returnVal = totalValue - totalCost;
-  const returnPct = totalCost > 0 ? ((returnVal / totalCost) * 100) : 0;
-  const colorClass = returnVal >= 0 ? 'text-celestial-success glow-success' : 'text-celestial-danger glow-danger';
-  const sign = returnVal >= 0 ? '+' : '';
+  // Calculate totals using memoized utility
+  const stats = useMemo(
+    () => calculatePortfolioStats(state.assets, state.exchangeRate),
+    [state.assets, state.exchangeRate]
+  );
 
-  const formatUSD = (n: number) => '$' + n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const colorClass = getReturnGlowClass(stats.returnPct);
+  const sign = stats.returnValue >= 0 ? '+' : '';
 
   useEffect(() => {
     if (!chartRef.current) return;
 
     const data = state.assets.filter(a => a.qty * a.price > 0);
-    
+
     if (chartInstance.current) {
       chartInstance.current.destroy();
     }
@@ -45,7 +37,7 @@ export default function StarCore() {
         labels: data.map(a => a.ticker),
         datasets: [{
           data: data.map(a => a.qty * a.price),
-          backgroundColor: data.map((_, i) => COLORS[i % COLORS.length]),
+          backgroundColor: data.map((_, i) => CHART_COLORS[i % CHART_COLORS.length]),
           borderWidth: 0,
         }],
       },
@@ -74,10 +66,10 @@ export default function StarCore() {
       <div className="star-core-center">
         <div className="text-[9px] tracking-[0.2em] text-white/50 font-light mb-2">TOTAL VALUE</div>
         <div className="text-3xl font-display font-light tracking-tight text-white">
-          {formatUSD(totalValue)}
+          {formatUSD(stats.totalValue)}
         </div>
         <div className={`text-base font-light mt-1 ${colorClass}`}>
-          {sign}{returnPct.toFixed(2)}%
+          {sign}{stats.returnPct.toFixed(2)}%
         </div>
         
         {/* Chart overlay */}

@@ -2,44 +2,29 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useNexus } from '@/lib/context';
-
-interface BenchmarkData {
-  name: string;
-  ticker: string;
-  ytdReturn: number;
-  currentPrice: number;
-  yearStartPrice: number;
-  color: string;
-}
+import { BenchmarkData } from '@/lib/types';
+import { API_ENDPOINTS } from '@/lib/config';
+import { calculatePortfolioStats, getReturnColorClass } from '@/lib/utils';
 
 export default function PerformanceArena() {
   const { state, toast } = useNexus();
-  const { assets } = state;
+  const { assets, exchangeRate } = state;
   const [isExpanded, setIsExpanded] = useState(false);
   const [benchmarks, setBenchmarks] = useState<BenchmarkData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<number | null>(null);
 
-  // 포트폴리오 수익률 계산
-  const portfolioStats = useMemo(() => {
-    let totalCost = 0;
-    let totalValue = 0;
-
-    assets.forEach(a => {
-      totalCost += a.qty * a.avg;
-      totalValue += a.qty * a.price;
-    });
-
-    const returnPct = totalCost > 0 ? ((totalValue - totalCost) / totalCost) * 100 : 0;
-
-    return { totalCost, totalValue, returnPct };
-  }, [assets]);
+  // 포트폴리오 수익률 계산 (using utility)
+  const portfolioStats = useMemo(
+    () => calculatePortfolioStats(assets, exchangeRate),
+    [assets, exchangeRate]
+  );
 
   // 벤치마크 데이터 가져오기
   const fetchBenchmarks = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/benchmark');
+      const res = await fetch(API_ENDPOINTS.BENCHMARK);
       if (res.ok) {
         const data = await res.json();
         setBenchmarks(data.benchmarks || []);
