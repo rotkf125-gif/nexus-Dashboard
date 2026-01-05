@@ -77,7 +77,7 @@ function DashboardContent() {
       <StrategyBar />
 
       {/* Main Grid: Assets (4/5) + What-If (1/5) */}
-      <div className="grid grid-cols-1 xl:grid-cols-5 gap-5">
+      <div className="grid grid-cols-1 xl:grid-cols-5 gap-5 items-stretch">
         {/* Assets Section (4/5) */}
         <div className="xl:col-span-4 glass-card glass-card-primary p-6">
           <div className="flex justify-between items-end mb-4 pb-2 border-b border-white/10">
@@ -149,19 +149,23 @@ function DashboardContent() {
         </div>
 
         {/* Right Column: Simulation Hub + Risk Analytics */}
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-5 min-h-0">
           {/* Simulation Hub (What-If, Rebalance) */}
-          <div className="glass-card p-5 border-accent-success">
-            <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
+          <div className="glass-card p-5 border-accent-success flex-1 min-h-0 flex flex-col overflow-hidden">
+            <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3 flex-shrink-0">
               <h2 className="text-base font-semibold text-white font-display tracking-widest flex items-center gap-2">
                 <i className="fas fa-flask text-v64-success" /> SIMULATION
               </h2>
             </div>
-            <SimulationHub />
+            <div className="flex-1 overflow-y-auto custom-scrollbar min-h-0">
+              <SimulationHub />
+            </div>
           </div>
 
           {/* Risk Analytics (분리된 별도 박스) */}
-          <RiskAnalytics />
+          <div className="flex-1 min-h-0 overflow-hidden">
+            <RiskAnalytics />
+          </div>
         </div>
       </div>
 

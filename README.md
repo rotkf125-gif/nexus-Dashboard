@@ -1,4 +1,4 @@
-# 🌟 NEXUS CELESTIAL V65.2 - Next.js Edition
+# 🌟 NEXUS CELESTIAL V65.3 - Next.js Edition
 
 개인 투자 포트폴리오 대시보드 (Celestial Glass 테마)
 
@@ -9,6 +9,20 @@
 | **Live Site** | https://nexus-dashboard-beige.vercel.app |
 | **GitHub** | https://github.com/rotkf125-gif/nexus-dashboard |
 | **Database** | Supabase (PostgreSQL) |
+
+---
+
+## ✨ V65.3 변경 사항
+
+### 📐 레이아웃 최적화
+- **메인 그리드 높이 동기화**: Assets 섹션과 오른쪽 열(Simulation + Risk Analytics) 높이 일치
+- **박스 균등 분배**: Simulation Hub와 Risk Analytics가 공간을 균등하게 나눠 사용
+- **스크롤 영역 개선**: 각 박스 내부에서 독립적 스크롤 지원
+- **홈페이지 길이 최적화**: 불필요한 세로 공간 제거
+
+### 🔧 구조 변경
+- `page.tsx`: 메인 그리드에 `items-stretch` 적용
+- `RiskAnalytics.tsx`: `h-full flex flex-col` + 스크롤 컨테이너 추가
 
 ---
 
@@ -493,6 +507,7 @@ npm install
 
 | 버전 | 날짜 | 주요 변경 |
 |------|------|----------|
+| V65.3 | 2025-01-05 | 레이아웃 최적화 (Assets/Simulation/Risk 높이 동기화) |
 | V65.2 | 2025-01-05 | Historic Performance, Risk Analytics (Risk Score + Correlation 통합), Widget API (Android) |
 | V65.1 | 2025-01-03 | 실시간 벤치마크, 섹터 분산도 기반 상관관계 |
 | V65.0 | 2025-01-02 | SimulationHub, PerformanceArena, Type그룹화, KST Market State, 30분 스냅샷 |
