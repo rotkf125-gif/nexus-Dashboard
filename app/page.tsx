@@ -126,23 +126,26 @@ function DashboardContent() {
             </div>
           )}
 
-          {/* StarCore + Sidebar 가로 배치 */}
-          <div className="flex flex-col lg:flex-row gap-6 mb-5">
-            {/* Star Core */}
-            <div className="flex-shrink-0 flex items-center justify-center">
-              <StarCore />
+          {/* Stellar Assets 내부: 1/4 + 3/4 세로 분할 */}
+          <div className="flex flex-col h-[600px]">
+            {/* StarCore + Sidebar 가로 배치 (1/4 = 150px) */}
+            <div className="flex flex-col lg:flex-row gap-4 items-center h-[150px] flex-shrink-0">
+              {/* Star Core */}
+              <div className="flex-shrink-0 flex items-center justify-center">
+                <StarCore />
+              </div>
+
+              {/* Sidebar - 가로로 확장 */}
+              <div className="flex-1 min-w-0">
+                <Sidebar horizontal />
+              </div>
             </div>
 
-            {/* Sidebar - 가로로 확장 */}
-            <div className="flex-1">
-              <Sidebar horizontal />
-            </div>
-          </div>
-
-          {/* Asset Table - Sidebar 밑에 통합 */}
-          <div className="border-t border-white/10 pt-4">
-            <div className="overflow-y-auto custom-scrollbar max-h-[350px]">
-              <AssetTable />
+            {/* Asset Table (3/4 = 나머지 공간) */}
+            <div className="flex-1 border-t border-white/10 pt-4 mt-4 min-h-0">
+              <div className="overflow-y-auto custom-scrollbar h-full">
+                <AssetTable />
+              </div>
             </div>
           </div>
         </div>

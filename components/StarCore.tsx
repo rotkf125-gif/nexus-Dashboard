@@ -64,17 +64,17 @@ export default function StarCore() {
     <div className="star-core-container">
       <div className="star-glow" />
       <div className="star-core-center">
-        <div className="text-[9px] tracking-[0.2em] text-white/50 font-light mb-2">TOTAL VALUE</div>
-        <div className="text-3xl font-display font-light tracking-tight text-white">
+        <div className="text-[8px] tracking-[0.15em] text-white/50 font-light mb-1">TOTAL VALUE</div>
+        <div className="text-xl font-display font-light tracking-tight text-white">
           {formatUSD(stats.totalValue)}
         </div>
-        <div className={`text-base font-light mt-1 ${colorClass}`}>
+        <div className={`text-xs font-light mt-0.5 ${colorClass}`}>
           {sign}{stats.returnPct.toFixed(2)}%
         </div>
-        
+
         {/* Chart overlay */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div style={{ width: 200, height: 200 }}>
+          <div style={{ width: 120, height: 120 }}>
             <canvas ref={chartRef} />
           </div>
         </div>

@@ -332,27 +332,28 @@ body {
 /* ─── STAR CORE ─── */
 .star-core-container {
   position: relative;
-  width: 320px;
-  height: 320px;
+  width: 180px;
+  height: 180px;
   margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .star-glow {
   position: absolute;
-  inset: 45px;
+  inset: 25px;
   border-radius: 50%;
   background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(224,247,250,0.1) 60%, transparent 70%);
-  filter: blur(25px);
+  filter: blur(18px);
   animation: starPulse 5s ease-in-out infinite alternate;
 }
 
 .star-core-center {
   position: relative;
-  width: 240px;
-  height: 240px;
+  width: 140px;
+  height: 140px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.01);
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -361,7 +362,7 @@ body {
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(5px);
-  box-shadow: inset 0 0 40px rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 0 30px rgba(255, 255, 255, 0.05);
   z-index: 20;
 }
 
