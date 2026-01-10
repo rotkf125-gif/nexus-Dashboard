@@ -15,16 +15,15 @@ import SettingsModal from '@/components/SettingsModal';
 import AuthModal from '@/components/AuthModal';
 import FreedomModal from '@/components/FreedomModal';
 import IncomeStream from '@/components/IncomeStream';
-import DividendAnalytics from '@/components/DividendAnalytics';
 import PerformanceArena from '@/components/PerformanceArena';
 import HistoricPerformance from '@/components/HistoricPerformance';
 
 function DashboardContent() {
-  const { 
-    assetModalOpen, 
-    closeAssetModal, 
-    saveAssetFromModal, 
-    editingAsset, 
+  const {
+    assetModalOpen,
+    closeAssetModal,
+    saveAssetFromModal,
+    editingAsset,
     editingIndex,
     openAddAssetModal,
     dividendModalOpen,
@@ -76,9 +75,9 @@ function DashboardContent() {
       {/* Strategy Bar */}
       <StrategyBar />
 
-      {/* Main Grid: Assets (4/5) + What-If (1/5) */}
-      <div className="grid grid-cols-1 xl:grid-cols-5 gap-5 items-stretch">
-        {/* Assets Section (4/5) */}
+      {/* Row 1: Stellar Assets (StarCore + Sidebar 가로) + Simulation */}
+      <div className="grid grid-cols-1 xl:grid-cols-5 gap-5">
+        {/* Stellar Assets (4/5) - StarCore + Sidebar 가로 배치 */}
         <div className="xl:col-span-4 glass-card glass-card-primary p-6">
           <div className="flex justify-between items-end mb-4 pb-2 border-b border-white/10">
             <h2 className="text-lg font-display tracking-widest flex items-center gap-3 text-white">
@@ -87,9 +86,9 @@ function DashboardContent() {
             <div className="flex items-center gap-4">
               {/* Compact Mode Toggle */}
               <label className="compact-toggle">
-                <input 
-                  type="checkbox" 
-                  id="compact-toggle" 
+                <input
+                  type="checkbox"
+                  id="compact-toggle"
                   checked={state.compactMode}
                   onChange={(e) => setCompactMode(e.target.checked)}
                 />
@@ -127,95 +126,86 @@ function DashboardContent() {
             </div>
           )}
 
+          {/* StarCore + Sidebar 가로 배치 */}
           <div className="flex flex-col lg:flex-row gap-6">
-            {/* Left Panel: Star Core + Sidebar */}
-            <div className="lg:w-[340px] flex-shrink-0 flex flex-col gap-4">
-              {/* Star Core */}
-              <div className="flex flex-col items-center">
-                <StarCore />
-              </div>
-              
-              {/* Sidebar: Weight, Sector, Type, Rankings */}
-              <Sidebar />
+            {/* Star Core */}
+            <div className="flex-shrink-0 flex items-center justify-center">
+              <StarCore />
             </div>
 
-            {/* Table */}
-            <div className="flex-1 flex flex-col rounded bg-white/5 border border-white/5 min-h-[500px]">
-              <div className="flex-1 overflow-y-auto custom-scrollbar">
-                <AssetTable />
-              </div>
+            {/* Sidebar - 가로로 확장 */}
+            <div className="flex-1">
+              <Sidebar horizontal />
             </div>
           </div>
         </div>
 
-        {/* Right Column: Simulation Hub + Risk Analytics */}
-        <div className="flex flex-col gap-5 min-h-0">
-          {/* Simulation Hub (What-If, Rebalance) */}
-          <div className="glass-card p-5 border-accent-success flex-1 min-h-0 flex flex-col overflow-hidden">
-            <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3 flex-shrink-0">
-              <h2 className="text-base font-semibold text-white font-display tracking-widest flex items-center gap-2">
-                <i className="fas fa-flask text-v64-success" /> SIMULATION
-              </h2>
-            </div>
-            <div className="flex-1 overflow-y-auto custom-scrollbar min-h-0">
-              <SimulationHub />
-            </div>
+        {/* Simulation Hub (1/5) */}
+        <div className="glass-card p-5 border-accent-success flex flex-col">
+          <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3 flex-shrink-0">
+            <h2 className="text-base font-semibold text-white font-display tracking-widest flex items-center gap-2">
+              <i className="fas fa-flask text-v64-success" /> SIMULATION
+            </h2>
           </div>
-
-          {/* Risk Analytics (분리된 별도 박스) */}
-          <div className="flex-1 min-h-0 overflow-hidden">
-            <RiskAnalytics />
+          <div className="flex-1 overflow-y-auto custom-scrollbar min-h-0">
+            <SimulationHub />
           </div>
         </div>
       </div>
 
-      {/* Second Row: Income Stream + Dividend Analytics */}
-      <div className="grid grid-cols-1 xl:grid-cols-5 gap-5">
-        {/* Income Stream (2/5) */}
-        <div className="xl:col-span-2 glass-card p-5 border-accent-gold">
-          <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
-            <h2 className="text-lg font-display tracking-widest flex items-center gap-3 text-white">
-              <i className="fas fa-coins text-celestial-gold text-xs" /> INCOME STREAM
-            </h2>
-            <div className="flex gap-2">
-              <button 
-                onClick={syncFromSheet}
-                className="celestial-btn text-[10px]" 
-                style={{ borderColor: 'rgba(105,240,174,0.4)', color: '#69F0AE' }}
-              >
-                SYNC
-              </button>
-              <button
-                onClick={openDividendModal}
-                className="celestial-btn celestial-btn-gold text-[10px]"
-              >
-                RECORD
-              </button>
-            </div>
-          </div>
-          <IncomeStream />
+      {/* Row 2: Assets Table (풀 너비) */}
+      <div className="glass-card p-5">
+        <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
+          <h2 className="text-lg font-display tracking-widest flex items-center gap-3 text-white">
+            <i className="fas fa-table text-celestial-cyan text-xs" /> ASSET TABLE
+          </h2>
         </div>
-
-        {/* Dividend Analytics (3/5) - DPS Trend + Learning 통합 */}
-        <div className="xl:col-span-3 glass-card p-5 border-accent-purple">
-          <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
-            <h2 className="text-lg font-display tracking-widest flex items-center gap-3 text-white">
-              <i className="fas fa-chart-area text-celestial-purple text-xs" /> DIVIDEND ANALYTICS
-            </h2>
-          </div>
-          <DividendAnalytics />
+        <div className="overflow-y-auto custom-scrollbar max-h-[400px]">
+          <AssetTable />
         </div>
       </div>
 
-      {/* Third Row: Performance Arena */}
-      <PerformanceArena />
+      {/* Row 3: Risk Analytics (가로 배치) */}
+      <RiskAnalytics horizontal />
 
-      {/* Fourth Row: Historic Performance */}
-      <HistoricPerformance />
+      {/* Row 4: Income Stream (통합) */}
+      <div className="glass-card p-5 border-accent-gold">
+        <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
+          <h2 className="text-lg font-display tracking-widest flex items-center gap-3 text-white">
+            <i className="fas fa-coins text-celestial-gold text-xs" /> INCOME STREAM
+          </h2>
+          <div className="flex gap-2">
+            <button
+              onClick={syncFromSheet}
+              className="celestial-btn text-[10px]"
+              style={{ borderColor: 'rgba(105,240,174,0.4)', color: '#69F0AE' }}
+            >
+              SYNC
+            </button>
+            <button
+              onClick={openDividendModal}
+              className="celestial-btn celestial-btn-gold text-[10px]"
+            >
+              RECORD
+            </button>
+          </div>
+        </div>
+        <IncomeStream showAnalytics />
+      </div>
+
+      {/* Row 5: Performance Arena (1/4) + Historic Performance (3/4) */}
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-5">
+        <div className="xl:col-span-1">
+          <PerformanceArena compact />
+        </div>
+        <div className="xl:col-span-3">
+          <HistoricPerformance />
+        </div>
+      </div>
 
       {/* Footer */}
       <footer className="text-center text-[10px] opacity-30 py-4 tracking-[0.3em]">
-        CELESTIAL NEXUS V65.2 // NEXT.JS EDITION
+        CELESTIAL NEXUS V65.3 // NEXT.JS EDITION
       </footer>
     </div>
   );

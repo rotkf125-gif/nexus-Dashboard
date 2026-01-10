@@ -4,12 +4,15 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNexus } from '@/lib/context';
 import { BenchmarkData } from '@/lib/types';
 import { API_ENDPOINTS } from '@/lib/config';
-import { calculatePortfolioStats, getReturnColorClass } from '@/lib/utils';
+import { calculatePortfolioStats } from '@/lib/utils';
 
-export default function PerformanceArena() {
+interface PerformanceArenaProps {
+  compact?: boolean;
+}
+
+export default function PerformanceArena({ compact = false }: PerformanceArenaProps) {
   const { state, toast } = useNexus();
   const { assets, exchangeRate } = state;
-  const [isExpanded, setIsExpanded] = useState(false);
   const [benchmarks, setBenchmarks] = useState<BenchmarkData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<number | null>(null);
@@ -45,13 +48,6 @@ export default function PerformanceArena() {
     }
   }, [assets.length]);
 
-  // 확장 시 데이터 새로고침
-  useEffect(() => {
-    if (isExpanded && benchmarks.length === 0) {
-      fetchBenchmarks();
-    }
-  }, [isExpanded]);
-
   // 최고 수익률 (차트 스케일용)
   const maxReturn = useMemo(() => {
     const allReturns = [portfolioStats.returnPct, ...benchmarks.map(b => b.ytdReturn)];
@@ -65,12 +61,12 @@ export default function PerformanceArena() {
   // 순위 계산
   const ranking = useMemo(() => {
     if (benchmarks.length === 0) return 1;
-    
+
     const all = [
       { name: 'MY PORTFOLIO', return: portfolioStats.returnPct },
       ...benchmarks.map(b => ({ name: b.name, return: b.ytdReturn }))
     ].sort((a, b) => b.return - a.return);
-    
+
     return all.findIndex(item => item.name === 'MY PORTFOLIO') + 1;
   }, [portfolioStats, benchmarks]);
 
@@ -78,10 +74,92 @@ export default function PerformanceArena() {
     return null;
   }
 
+  // 컴팩트 모드 (세로 레이아웃, 1/4 너비용)
+  if (compact) {
+    return (
+      <div className="glass-card p-5 border-accent-purple h-full flex flex-col">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
+          <h2 className="text-sm font-display tracking-widest flex items-center gap-2 text-white">
+            <i className="fas fa-trophy text-celestial-gold text-xs" />
+            PERFORMANCE
+          </h2>
+          {isLoading && <i className="fas fa-spinner spinner text-xs opacity-50" />}
+        </div>
+
+        {/* Quick Stats */}
+        <div className="space-y-3 flex-1">
+          {/* YTD Return */}
+          <div className="inner-glass p-3 rounded-lg">
+            <div className="text-[8px] opacity-40 tracking-widest mb-1">YTD RETURN</div>
+            <div className={`text-2xl font-display ${portfolioStats.returnPct >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}>
+              {portfolioStats.returnPct >= 0 ? '+' : ''}{portfolioStats.returnPct.toFixed(2)}%
+            </div>
+          </div>
+
+          {/* Alpha Cards */}
+          <div className="grid grid-cols-2 gap-2">
+            <div className="inner-glass p-2 rounded-lg text-center">
+              <div className="text-[7px] opacity-40 tracking-widest mb-0.5">VS S&P</div>
+              <div className={`text-sm font-display ${alphaVsSP500 >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}>
+                {alphaVsSP500 >= 0 ? '+' : ''}{alphaVsSP500.toFixed(1)}%p
+              </div>
+            </div>
+            <div className="inner-glass p-2 rounded-lg text-center">
+              <div className="text-[7px] opacity-40 tracking-widest mb-0.5">VS QQQ</div>
+              <div className={`text-sm font-display ${alphaVsNasdaq >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}>
+                {alphaVsNasdaq >= 0 ? '+' : ''}{alphaVsNasdaq.toFixed(1)}%p
+              </div>
+            </div>
+          </div>
+
+          {/* Ranking */}
+          <div className="inner-glass p-3 rounded-lg border border-celestial-purple/20">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-[8px] text-celestial-purple tracking-widest mb-1">RANKING</div>
+                <div className="text-xl font-display text-white">
+                  #{ranking} <span className="text-xs opacity-40">/ {benchmarks.length + 1}</span>
+                </div>
+              </div>
+              <div className="text-3xl">
+                {ranking === 1 ? '🥇' : ranking === 2 ? '🥈' : ranking === 3 ? '🥉' : '📊'}
+              </div>
+            </div>
+          </div>
+
+          {/* Benchmarks Mini */}
+          <div className="space-y-2">
+            <div className="text-[8px] opacity-40 tracking-widest">BENCHMARKS</div>
+            {benchmarks.slice(0, 4).map((b) => (
+              <div key={b.ticker} className="flex items-center justify-between text-[10px]">
+                <span className="opacity-60">{b.ticker}</span>
+                <span className={b.ytdReturn >= 0 ? 'text-v64-success' : 'text-v64-danger'}>
+                  {b.ytdReturn >= 0 ? '+' : ''}{b.ytdReturn.toFixed(1)}%
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Refresh Button */}
+        <button
+          onClick={fetchBenchmarks}
+          className="mt-3 text-[9px] opacity-50 hover:opacity-80 flex items-center justify-center gap-1"
+        >
+          <i className="fas fa-sync-alt" /> 새로고침
+        </button>
+      </div>
+    );
+  }
+
+  // 기존 확장 가능 레이아웃
+  const [isExpanded, setIsExpanded] = useState(false);
+
   return (
     <div className="glass-card p-5 border-accent-purple">
       {/* Header - Always Visible */}
-      <div 
+      <div
         className="flex justify-between items-center cursor-pointer"
         onClick={() => setIsExpanded(!isExpanded)}
       >
@@ -123,14 +201,14 @@ export default function PerformanceArena() {
             <div className="space-y-3">
               <div className="flex justify-between items-center mb-3">
                 <span className="text-[10px] opacity-40 tracking-widest">YTD RETURN COMPARISON</span>
-                <button 
+                <button
                   onClick={(e) => { e.stopPropagation(); fetchBenchmarks(); }}
                   className="text-[9px] opacity-50 hover:opacity-80 flex items-center gap-1"
                 >
                   <i className="fas fa-sync-alt" /> 새로고침
                 </button>
               </div>
-              
+
               {/* My Portfolio */}
               <div className="inner-glass p-3 rounded-lg border border-celestial-gold/30">
                 <div className="flex justify-between items-center mb-2">
@@ -142,11 +220,11 @@ export default function PerformanceArena() {
                   </span>
                 </div>
                 <div className="relative h-3 bg-white/10 rounded-full overflow-hidden">
-                  <div 
+                  <div
                     className={`absolute top-0 h-full rounded-full transition-all ${
                       portfolioStats.returnPct >= 0 ? 'bg-gradient-to-r from-celestial-gold/50 to-celestial-gold' : 'bg-v64-danger'
                     }`}
-                    style={{ 
+                    style={{
                       width: `${Math.min(100, (Math.abs(portfolioStats.returnPct) / maxReturn) * 100)}%`,
                       left: portfolioStats.returnPct >= 0 ? '0' : 'auto',
                       right: portfolioStats.returnPct < 0 ? '0' : 'auto',
@@ -170,9 +248,9 @@ export default function PerformanceArena() {
                     </span>
                   </div>
                   <div className="relative h-2 bg-white/10 rounded-full overflow-hidden">
-                    <div 
+                    <div
                       className="absolute top-0 h-full rounded-full transition-all"
-                      style={{ 
+                      style={{
                         width: `${Math.min(100, (Math.abs(b.ytdReturn) / maxReturn) * 100)}%`,
                         backgroundColor: b.color,
                         opacity: 0.7,
@@ -244,7 +322,7 @@ export default function PerformanceArena() {
               {/* Last Updated */}
               {lastUpdated && (
                 <div className="text-[8px] opacity-30 text-center">
-                  * {new Date().getFullYear()}년 YTD 실시간 데이터 | 
+                  * {new Date().getFullYear()}년 YTD 실시간 데이터 |
                   업데이트: {new Date(lastUpdated).toLocaleTimeString('ko-KR')}
                 </div>
               )}

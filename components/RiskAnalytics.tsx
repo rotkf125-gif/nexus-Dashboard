@@ -123,7 +123,11 @@ function getRiskLabel(level: RiskLevel): string {
   return labels[level];
 }
 
-export default function RiskAnalytics() {
+interface RiskAnalyticsProps {
+  horizontal?: boolean;
+}
+
+export default function RiskAnalytics({ horizontal = false }: RiskAnalyticsProps) {
   const { state } = useNexus();
   const { assets, market } = state;
   const gaugeRef = useRef<HTMLCanvasElement>(null);
@@ -296,12 +300,12 @@ export default function RiskAnalytics() {
 
   if (assets.length === 0) {
     return (
-      <div className="glass-card p-5 h-full flex flex-col">
-        <div className="flex items-center gap-2 mb-4 border-b border-white/10 pb-3 flex-shrink-0">
+      <div className="glass-card p-5">
+        <div className="flex items-center gap-2 mb-4 border-b border-white/10 pb-3">
           <i className="fas fa-shield-alt text-celestial-cyan" />
           <h3 className="font-display text-sm tracking-widest text-white/90">RISK ANALYTICS</h3>
         </div>
-        <div className="text-center py-8 opacity-50 flex-1 flex flex-col justify-center">
+        <div className="text-center py-8 opacity-50">
           <i className="fas fa-chart-pie text-2xl mb-3 opacity-30" />
           <div className="text-[10px]">자산을 추가하세요</div>
         </div>
@@ -309,6 +313,147 @@ export default function RiskAnalytics() {
     );
   }
 
+  // 가로 레이아웃
+  if (horizontal) {
+    return (
+      <div className="glass-card p-5">
+        <div className="flex items-center gap-2 mb-4 border-b border-white/10 pb-3">
+          <i className="fas fa-shield-alt text-celestial-cyan" />
+          <h3 className="font-display text-lg tracking-widest text-white/90">RISK ANALYTICS</h3>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+          {/* Risk Score Gauge (1/5) */}
+          <div className="flex flex-col items-center justify-center">
+            <canvas
+              ref={gaugeRef}
+              width={180}
+              height={110}
+              className="max-w-full"
+            />
+          </div>
+
+          {/* Risk Factors (1/5) */}
+          <div className="space-y-2">
+            <div className="text-[9px] tracking-widest opacity-60 mb-2">RISK FACTORS</div>
+            {[
+              { label: '분산도', score: riskMetrics.diversificationScore, icon: 'chart-pie' },
+              { label: '섹터 집중', score: riskMetrics.sectorConcentration, icon: 'layer-group' },
+              { label: '변동성', score: riskMetrics.volatilityScore, icon: 'chart-line' },
+              { label: '종목 집중', score: riskMetrics.concentrationRisk, icon: 'bullseye' },
+            ].map(factor => (
+              <div key={factor.label} className="inner-glass p-2 rounded-lg">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[8px] opacity-50">
+                    <i className={`fas fa-${factor.icon} mr-1`} />
+                    {factor.label}
+                  </span>
+                  <span className={`text-[10px] font-mono ${
+                    factor.score >= 70 ? 'text-v64-success' :
+                    factor.score >= 40 ? 'text-celestial-gold' : 'text-v64-danger'
+                  }`}>
+                    {factor.score}
+                  </span>
+                </div>
+                <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all ${
+                      factor.score >= 70 ? 'bg-v64-success' :
+                      factor.score >= 40 ? 'bg-celestial-gold' : 'bg-v64-danger'
+                    }`}
+                    style={{ width: `${factor.score}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Sector Exposure (1/5) */}
+          <div className="inner-glass p-3 rounded-lg">
+            <div className="text-[9px] opacity-40 tracking-widest mb-2">SECTOR EXPOSURE</div>
+            <div className="space-y-2">
+              {topSectors.map(([sector, weight]) => (
+                <div key={sector} className="flex items-center gap-2">
+                  <span className="text-[11px] w-5">{getSectorIcon(sector)}</span>
+                  <span className="text-[9px] opacity-70 w-20 truncate">{sector}</span>
+                  <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-celestial-cyan/50 to-celestial-cyan rounded-full"
+                      style={{ width: `${weight * 100}%` }}
+                    />
+                  </div>
+                  <span className="text-[9px] font-mono w-10 text-right">{(weight * 100).toFixed(1)}%</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Market Correlation + Risk Profile (1/5) */}
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-2">
+              <div className="inner-glass p-2 rounded-lg text-center">
+                <div className="text-[8px] opacity-40 tracking-widest mb-1">VS S&P 500</div>
+                <div className={`text-base font-display ${
+                  marketCorrelations.spy >= 0.7 ? 'text-v64-success' : 'text-celestial-gold'
+                }`}>
+                  {marketCorrelations.spy.toFixed(2)}
+                </div>
+              </div>
+              <div className="inner-glass p-2 rounded-lg text-center">
+                <div className="text-[8px] opacity-40 tracking-widest mb-1">VS NASDAQ</div>
+                <div className={`text-base font-display ${
+                  marketCorrelations.qqq >= 0.7 ? 'text-v64-success' : 'text-celestial-gold'
+                }`}>
+                  {marketCorrelations.qqq.toFixed(2)}
+                </div>
+              </div>
+            </div>
+            <div className="inner-glass p-2 rounded-lg">
+              <div className="text-[8px] opacity-40 tracking-widest mb-2">RISK PROFILE</div>
+              <div className="grid grid-cols-3 gap-1 text-center">
+                <div>
+                  <div className="text-[10px] text-blue-400 font-mono">{(riskProfile.techExposure * 100).toFixed(0)}%</div>
+                  <div className="text-[7px] opacity-40">Tech</div>
+                </div>
+                <div>
+                  <div className="text-[10px] text-v64-success font-mono">{(riskProfile.defensiveExposure * 100).toFixed(0)}%</div>
+                  <div className="text-[7px] opacity-40">방어</div>
+                </div>
+                <div>
+                  <div className="text-[10px] text-celestial-gold font-mono">{(riskProfile.cyclicalExposure * 100).toFixed(0)}%</div>
+                  <div className="text-[7px] opacity-40">경기</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Insight (1/5) */}
+          <div className="inner-glass p-3 rounded-lg border border-celestial-purple/20 flex flex-col justify-center">
+            <div className="text-[9px] text-celestial-purple tracking-widest mb-2">
+              <i className="fas fa-lightbulb mr-1" />
+              INSIGHT
+            </div>
+            <div className="text-[9px] text-white/70 leading-relaxed">
+              {riskMetrics.overallScore >= 70 ? (
+                <>포트폴리오가 <span className="text-v64-success">안정적</span>으로 분산되어 있습니다. 현재 전략을 유지하세요.</>
+              ) : riskMetrics.overallScore >= 50 ? (
+                <>전반적으로 <span className="text-celestial-gold">양호</span>하지만, 일부 섹터 집중도를 점검하세요.</>
+              ) : riskMetrics.overallScore >= 30 ? (
+                <>리스크가 <span className="text-v64-warning">높은 편</span>입니다. 분산 투자를 고려하세요.</>
+              ) : (
+                <>리스크가 <span className="text-v64-danger">매우 높습니다</span>. 포트폴리오 재조정을 권장합니다.</>
+              )}
+              {market.vix > 25 && (
+                <> 현재 VIX({market.vix?.toFixed(1)})가 높아 시장 변동성에 주의가 필요합니다.</>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 세로 레이아웃 (기존)
   return (
     <div className="glass-card p-5 h-full flex flex-col">
       {/* Header */}

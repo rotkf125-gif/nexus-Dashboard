@@ -7,7 +7,11 @@ import { Chart, DoughnutController, ArcElement, Tooltip } from 'chart.js';
 
 Chart.register(DoughnutController, ArcElement, Tooltip);
 
-export default function Sidebar() {
+interface SidebarProps {
+  horizontal?: boolean;
+}
+
+export default function Sidebar({ horizontal = false }: SidebarProps) {
   const { state } = useNexus();
   const { assets } = state;
   const sectorChartRef = useRef<HTMLCanvasElement>(null);
@@ -17,7 +21,7 @@ export default function Sidebar() {
   const calculations = useMemo(() => {
     // 총 가치
     const totalValue = assets.reduce((sum, a) => sum + (a.qty * a.price), 0);
-    
+
     // Weight별 정렬
     const assetWeights = assets
       .map(a => ({
@@ -34,7 +38,7 @@ export default function Sidebar() {
       const value = a.qty * a.price;
       const cost = a.qty * a.avg;
       const ret = cost > 0 ? ((value - cost) / cost) * 100 : 0;
-      
+
       if (!sectorData[sector]) {
         sectorData[sector] = { value: 0, return: 0 };
       }
@@ -149,6 +153,133 @@ export default function Sidebar() {
     };
   }, []);
 
+  // 가로 레이아웃
+  if (horizontal) {
+    return (
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* WEIGHT BARS */}
+        <div className="inner-glass p-3 rounded">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-[9px] tracking-widest opacity-60">PORTFOLIO WEIGHT</span>
+            <span className="text-[9px] opacity-40">{calculations.assetCount} ASSETS</span>
+          </div>
+          <div className="space-y-1.5 max-h-[140px] overflow-y-auto custom-scrollbar">
+            {calculations.assetWeights.map((item, i) => (
+              <div key={item.ticker} className="flex items-center gap-2">
+                <span className="text-[10px] w-12 truncate">{item.ticker}</span>
+                <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all"
+                    style={{
+                      width: `${item.weight}%`,
+                      backgroundColor: CHART_COLORS[i % CHART_COLORS.length],
+                    }}
+                  />
+                </div>
+                <span className="text-[9px] w-10 text-right opacity-60">
+                  {item.weight.toFixed(1)}%
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* SECTOR ANALYSIS */}
+        <div className="inner-glass p-3 rounded">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-[9px] tracking-widest opacity-60 flex items-center gap-1">
+              <i className="fas fa-chart-pie text-celestial-purple text-[8px]" /> SECTOR
+            </span>
+            <span className="text-[9px] opacity-40">{calculations.sectorCount} SECTORS</span>
+          </div>
+          <div className="flex gap-3">
+            <div style={{ width: 80, height: 80 }}>
+              <canvas ref={sectorChartRef} />
+            </div>
+            <div className="flex-1 space-y-1 max-h-[80px] overflow-y-auto custom-scrollbar text-[9px]">
+              {calculations.sectors.map((s, i) => (
+                <div key={s.name} className="flex items-center justify-between">
+                  <div className="flex items-center gap-1">
+                    <span
+                      className="w-2 h-2 rounded-full"
+                      style={{ backgroundColor: CHART_COLORS[i % CHART_COLORS.length] }}
+                    />
+                    <span className="opacity-70">{s.emoji} {s.name}</span>
+                  </div>
+                  <span className="opacity-50">{s.weight.toFixed(0)}%</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* TYPE + RANKINGS Combined */}
+        <div className="inner-glass p-3 rounded">
+          <div className="text-[9px] tracking-widest opacity-60 mb-2">TYPE DISTRIBUTION</div>
+          <div className="grid grid-cols-2 gap-2 mb-3">
+            <div className="inner-glass p-2 text-center rounded border border-white/5">
+              <div className="text-[8px] opacity-40 tracking-widest">CORE</div>
+              <div className="text-sm font-display">
+                ${calculations.coreValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+              </div>
+              <div className="text-[9px] opacity-50">{calculations.corePct.toFixed(1)}%</div>
+            </div>
+            <div className="inner-glass p-2 text-center rounded border border-celestial-gold/20">
+              <div className="text-[8px] text-celestial-gold/60 tracking-widest">INCOME</div>
+              <div className="text-sm font-display text-celestial-gold">
+                ${calculations.incomeValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+              </div>
+              <div className="text-[9px] text-celestial-gold">{calculations.incomePct.toFixed(1)}%</div>
+            </div>
+          </div>
+        </div>
+
+        {/* TOP/BOTTOM 3 RANKINGS */}
+        <div className="inner-glass p-3 rounded">
+          <div className="flex gap-3">
+            <div className="ranking-section flex-1">
+              <div className="ranking-title text-[9px]">
+                <i className="fas fa-trophy text-celestial-gold" /> TOP 3
+              </div>
+              <div className="space-y-1">
+                {calculations.top3.length > 0 ? (
+                  calculations.top3.map((item) => (
+                    <div key={item.ticker} className="ranking-item flex justify-between text-[9px]">
+                      <span>{item.ticker}</span>
+                      <span className="text-v64-success">+{item.returnPct.toFixed(1)}%</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="ranking-item text-white/30 text-[9px]">--</div>
+                )}
+              </div>
+            </div>
+            <div className="ranking-section flex-1">
+              <div className="ranking-title text-[9px]">
+                <i className="fas fa-exclamation-triangle text-v64-danger" /> BOTTOM 3
+              </div>
+              <div className="space-y-1">
+                {calculations.bottom3.length > 0 ? (
+                  calculations.bottom3.map((item) => (
+                    <div key={item.ticker} className="ranking-item flex justify-between text-[9px]">
+                      <span>{item.ticker}</span>
+                      <span className={item.returnPct >= 0 ? 'text-v64-success' : 'text-v64-danger'}>
+                        {item.returnPct >= 0 ? '+' : ''}{item.returnPct.toFixed(1)}%
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="ranking-item text-white/30 text-[9px]">--</div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 세로 레이아웃 (기존)
   return (
     <div className="space-y-4">
       {/* WEIGHT BARS */}
@@ -238,7 +369,7 @@ export default function Sidebar() {
           </div>
           <div className="space-y-1">
             {calculations.top3.length > 0 ? (
-              calculations.top3.map((item, i) => (
+              calculations.top3.map((item) => (
                 <div key={item.ticker} className="ranking-item flex justify-between">
                   <span>{item.ticker}</span>
                   <span className="text-v64-success">+{item.returnPct.toFixed(1)}%</span>
@@ -255,7 +386,7 @@ export default function Sidebar() {
           </div>
           <div className="space-y-1">
             {calculations.bottom3.length > 0 ? (
-              calculations.bottom3.map((item, i) => (
+              calculations.bottom3.map((item) => (
                 <div key={item.ticker} className="ranking-item flex justify-between">
                   <span>{item.ticker}</span>
                   <span className={item.returnPct >= 0 ? 'text-v64-success' : 'text-v64-danger'}>
