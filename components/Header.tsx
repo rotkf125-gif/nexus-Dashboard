@@ -273,7 +273,7 @@ export default function Header({ onOpenSettings, onOpenAuth, onOpenFreedom }: He
           </div>
           <div>
             <h1 className="text-2xl font-bold tracking-[0.2em] font-display text-white text-glow">CELESTIAL</h1>
-            <div className="text-[10px] tracking-[0.3em] opacity-60 mt-1">NEXUS INTELLIGENCE V65.0</div>
+            <div className="text-[10px] tracking-[0.3em] opacity-90 mt-1">NEXUS INTELLIGENCE V65.0</div>
           </div>
         </div>
 
@@ -281,17 +281,17 @@ export default function Header({ onOpenSettings, onOpenAuth, onOpenFreedom }: He
         <div className="flex items-center gap-6 px-6 border-l border-white/10">
           {/* USD */}
           <div className="text-center">
-            <div className="text-[8px] uppercase tracking-widest mb-1 opacity-50">평가금($)</div>
+            <div className="text-[8px] uppercase tracking-widest mb-1 opacity-80">평가금($)</div>
             <div className="text-2xl font-light tracking-tight text-gradient-cyan">{formatUSD(totalValue)}</div>
             <div className={`text-[10px] mt-0.5 ${colorClass}`}>({sign}{formatUSD(Math.abs(returnVal))})</div>
-            <div className="text-[9px] mt-1 opacity-40">원금: {formatUSD(totalCost)}</div>
+            <div className="text-[9px] mt-1 opacity-80">원금: {formatUSD(totalCost)}</div>
           </div>
           {/* KRW */}
           <div className="text-center">
-            <div className="text-[8px] uppercase tracking-widest mb-1 opacity-50">평가금(₩)</div>
+            <div className="text-[8px] uppercase tracking-widest mb-1 opacity-80">평가금(₩)</div>
             <div className="text-2xl font-light tracking-tight text-gradient-gold">₩{totalValueKrw.toLocaleString()}</div>
             <div className={`text-[10px] mt-0.5 ${colorClassKrw}`}>({signKrw}₩{Math.abs(returnKrw).toLocaleString()})</div>
-            <div className="text-[9px] mt-1 opacity-40">원금: ₩{totalCostKrw.toLocaleString()}</div>
+            <div className="text-[9px] mt-1 opacity-80">원금: ₩{totalCostKrw.toLocaleString()}</div>
           </div>
         </div>
 
@@ -317,7 +317,7 @@ export default function Header({ onOpenSettings, onOpenAuth, onOpenFreedom }: He
                   <div className={`px-2 py-1 rounded text-[9px] font-medium tracking-wider ${stateColors[marketInfo.color as keyof typeof stateColors]}`}>
                     {marketInfo.label}
                   </div>
-                  <span className="text-[7px] opacity-50 mt-1">KST {marketInfo.time}</span>
+                  <span className="text-[7px] opacity-80 mt-1">KST {marketInfo.time}</span>
                   <span className={`text-[6px] mt-0.5 ${dstActive ? 'text-celestial-gold' : 'text-white/30'}`}>
                     {dstActive ? '☀️ DST' : '❄️ STD'}
                   </span>
@@ -371,7 +371,7 @@ export default function Header({ onOpenSettings, onOpenAuth, onOpenFreedom }: He
                   style={{ width: `${vixBarWidth}%` }}
                 />
               </div>
-              <span className="text-[8px] opacity-60">{vixLevel}</span>
+              <span className="text-[8px] opacity-90">{vixLevel}</span>
             </div>
             <span className="text-[8px] text-celestial-gold/80 font-light block text-right">
               {vixAction}
@@ -389,13 +389,13 @@ export default function Header({ onOpenSettings, onOpenAuth, onOpenFreedom }: He
                 <span className="text-[9px] text-v64-success">{user.email?.split('@')[0]}</span>
               </div>
             ) : (
-              <span className="text-[9px] opacity-40">Guest</span>
+              <span className="text-[9px] opacity-80">Guest</span>
             )}
             <span className={`status-dot ${connectionStatus}`} />
-            <span className="text-[10px] tracking-widest font-light opacity-60">
+            <span className="text-[10px] tracking-widest font-light opacity-90">
               {connectionStatus === 'loading' ? 'SYNC...' : connectionStatus === 'online' ? 'ONLINE' : 'OFFLINE'}
             </span>
-            <span className="text-[9px] opacity-40">{syncTime}</span>
+            <span className="text-[9px] opacity-80">{syncTime}</span>
             <div className="text-lg font-display font-light w-20 text-center">{clock}</div>
           </div>
           <div className="flex gap-1.5">

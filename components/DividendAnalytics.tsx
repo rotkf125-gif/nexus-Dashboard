@@ -219,35 +219,35 @@ export default function DividendAnalytics() {
   }
 
   return (
-    <div className="grid grid-cols-2 gap-4">
-      {/* Left: DPS Trend */}
+    <div className="flex flex-col gap-4">
+      {/* Top: DPS Trend */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-[10px] tracking-widest text-celestial-cyan">DPS TREND</span>
-          <div className="flex items-center gap-2 text-[8px] font-light">
+          <span className="text-[12px] tracking-widest text-celestial-cyan">DPS TREND</span>
+          <div className="flex items-center gap-3 text-[10px] font-light">
             {incomeAssets.slice(0, 3).map((asset, i) => (
-              <span key={asset.ticker} className="flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: TICKER_COLORS[i] }} />
-                <span className="opacity-60">{asset.ticker}</span>
+              <span key={asset.ticker} className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: TICKER_COLORS[i] }} />
+                <span className="text-white/80">{asset.ticker}</span>
               </span>
             ))}
           </div>
         </div>
-        
-        <div style={{ height: 150 }}>
+
+        <div style={{ height: 140 }}>
           <canvas ref={dpsChartRef} />
         </div>
-        
+
         {/* Average DPS Cards */}
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-3">
           {avgDpsData.slice(0, 2).map((item, i) => {
             const isGold = i % 2 === 1;
             return (
-              <div key={item.ticker} className={`inner-glass p-2 rounded text-center ${isGold ? 'border border-celestial-gold/20' : ''}`}>
-                <div className={`text-[8px] tracking-widest mb-0.5 ${isGold ? 'text-celestial-gold/50' : 'opacity-50'}`}>
+              <div key={item.ticker} className={`inner-glass p-2.5 rounded text-center ${isGold ? 'border border-celestial-gold/30' : ''}`}>
+                <div className={`text-[10px] tracking-widest mb-1 ${isGold ? 'text-celestial-gold/80' : 'text-white/80'}`}>
                   {item.ticker} AVG
                 </div>
-                <div className={`text-[11px] font-display ${isGold ? 'text-celestial-gold' : 'text-white'}`}>
+                <div className={`text-sm font-display ${isGold ? 'text-celestial-gold' : 'text-white'}`}>
                   ${item.avgDps.toFixed(4)}
                 </div>
               </div>
@@ -256,32 +256,32 @@ export default function DividendAnalytics() {
         </div>
       </div>
 
-      {/* Right: Learning */}
+      {/* Bottom: Learning */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-[10px] tracking-widest text-celestial-purple">LEARNING</span>
-          <span className="text-[8px] opacity-40">Monthly Pattern</span>
+          <span className="text-[12px] tracking-widest text-celestial-purple">LEARNING</span>
+          <span className="text-[10px] text-white/80">Monthly Pattern</span>
         </div>
-        
-        <div style={{ height: 150 }}>
+
+        <div style={{ height: 140 }}>
           <canvas ref={learningChartRef} />
         </div>
-        
+
         {/* Learning Stats */}
-        <div className="grid grid-cols-3 gap-1.5">
-          <div className="inner-glass p-2 rounded text-center">
-            <div className="text-[7px] tracking-widest mb-0.5 opacity-50">RECORDS</div>
-            <div className="text-[10px] font-display text-white">{dividends.length}</div>
+        <div className="grid grid-cols-3 gap-2">
+          <div className="inner-glass p-2.5 rounded text-center">
+            <div className="text-[9px] tracking-widest mb-1 text-white/80">RECORDS</div>
+            <div className="text-[12px] font-display text-white">{dividends.length}</div>
           </div>
-          <div className="inner-glass p-2 rounded text-center border border-celestial-purple/20">
-            <div className="text-[7px] tracking-widest mb-0.5 text-celestial-purple/50">ACCURACY</div>
-            <div className="text-[10px] font-display text-celestial-purple">{predictionAccuracy.accuracy.toFixed(0)}%</div>
+          <div className="inner-glass p-2.5 rounded text-center border border-celestial-purple/30">
+            <div className="text-[9px] tracking-widest mb-1 text-celestial-purple/80">ACCURACY</div>
+            <div className="text-[12px] font-display text-celestial-purple">{predictionAccuracy.accuracy.toFixed(0)}%</div>
           </div>
-          <div className="inner-glass p-2 rounded text-center">
-            <div className="text-[7px] tracking-widest mb-0.5 opacity-50">AVG/MO</div>
-            <div className="text-[10px] font-display text-v64-success">
-              ${monthlyPattern.length > 0 
-                ? (monthlyPattern.reduce((s, [, v]) => s + v, 0) / monthlyPattern.length).toFixed(0) 
+          <div className="inner-glass p-2.5 rounded text-center">
+            <div className="text-[9px] tracking-widest mb-1 text-white/80">AVG/MO</div>
+            <div className="text-[12px] font-display text-v64-success">
+              ${monthlyPattern.length > 0
+                ? (monthlyPattern.reduce((s, [, v]) => s + v, 0) / monthlyPattern.length).toFixed(0)
                 : '0'}
             </div>
           </div>

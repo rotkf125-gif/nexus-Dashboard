@@ -90,7 +90,7 @@ export default function AssetTable() {
     return (
       <div className="empty-state py-16">
         <i className="fas fa-satellite text-4xl mb-4 opacity-30" />
-        <div className="text-center text-sm opacity-50">
+        <div className="text-center text-sm opacity-80">
           아직 추가된 자산이 없습니다<br />
           <span className="text-celestial-gold">&quot;IGNITE STAR&quot;</span> 버튼으로<br />
           첫 자산을 추가하세요
@@ -133,7 +133,7 @@ export default function AssetTable() {
       return (
         <tr 
           key={i} 
-          className={`transition-all border-b border-white/5 ${isDragging ? 'opacity-50' : ''} ${isDragOver ? 'bg-celestial-purple/20' : ''}`}
+          className={`transition-all border-b border-white/5 ${isDragging ? 'opacity-80' : ''} ${isDragOver ? 'bg-celestial-purple/20' : ''}`}
           draggable
           onDragStart={(e) => handleDragStart(e, i)}
           onDragOver={(e) => handleDragOver(e, i)}
@@ -149,7 +149,7 @@ export default function AssetTable() {
           <td className="p-2">
             <span className="font-display text-[11px]" style={{ color: tickerColor }}>{a.ticker}</span>
           </td>
-          <td className="p-2 text-right text-[10px] opacity-70">{a.qty}</td>
+          <td className="p-2 text-right text-[10px] opacity-90">{a.qty}</td>
           <td className="p-2 text-right text-[10px]">${a.price.toFixed(2)}</td>
           <td className="p-2 text-right text-[10px]">{formatUSD(value)}</td>
           <td className={`p-2 text-center text-[10px] font-medium ${plClass}`}>
@@ -162,7 +162,7 @@ export default function AssetTable() {
     return (
       <tr 
         key={i} 
-        className={`${rowClass} transition-all border-b border-white/5 ${isDragging ? 'opacity-50' : ''} ${isDragOver ? 'bg-celestial-purple/20' : ''}`}
+        className={`${rowClass} transition-all border-b border-white/5 ${isDragging ? 'opacity-80' : ''} ${isDragOver ? 'bg-celestial-purple/20' : ''}`}
         draggable
         onDragStart={(e) => handleDragStart(e, i)}
         onDragOver={(e) => handleDragOver(e, i)}
@@ -185,7 +185,7 @@ export default function AssetTable() {
             </div>
             <div className="flex flex-col gap-0.5">
               <div className="flex items-center gap-1">
-                <span className="text-[10px] opacity-70 font-light">{a.qty}주</span>
+                <span className="text-[10px] opacity-90 font-light">{a.qty}주</span>
                 {warningBadge}
               </div>
               <div 
@@ -304,9 +304,9 @@ export default function AssetTable() {
                   <span className="text-[12px] font-display tracking-wider" style={{ color: typeColor }}>
                     {typeInfo.label}
                   </span>
-                  <span className="text-[9px] opacity-50 ml-2">{typeInfo.description}</span>
+                  <span className="text-[9px] opacity-80 ml-2">{typeInfo.description}</span>
                 </div>
-                <span className="text-[10px] px-2 py-0.5 rounded bg-white/10 opacity-60">
+                <span className="text-[10px] px-2 py-0.5 rounded bg-white/10 opacity-90">
                   {group.assets.length}종목
                 </span>
               </div>
@@ -317,7 +317,7 @@ export default function AssetTable() {
                     {returnPct >= 0 ? '+' : ''}{returnPct.toFixed(1)}%
                   </div>
                 </div>
-                <i className={`fas fa-chevron-${isCollapsed ? 'down' : 'up'} text-[10px] opacity-40`} />
+                <i className={`fas fa-chevron-${isCollapsed ? 'down' : 'up'} text-[10px] opacity-80`} />
               </div>
             </div>
 
@@ -329,14 +329,14 @@ export default function AssetTable() {
                     <thead className="text-[9px] font-sans uppercase tracking-widest bg-black/30">
                       <tr>
                         <th className="p-2 w-8 border-b border-white/10" />
-                        <th className="p-2 text-left border-b border-white/10 font-medium opacity-70">Ticker</th>
-                        <th className="p-2 text-center border-b border-white/10 font-medium opacity-70">Return</th>
-                        <th className="p-2 text-right border-b border-white/10 font-medium opacity-70">Avg</th>
-                        <th className="p-2 text-right border-b border-white/10 font-medium opacity-70">Price</th>
-                        <th className="p-2 text-right border-b border-white/10 font-medium opacity-70">Val($)</th>
-                        <th className="p-2 text-right border-b border-white/10 font-medium opacity-70">Val(₩)</th>
-                        <th className="p-2 text-right border-b border-white/10 font-medium opacity-70">FX Rate</th>
-                        <th className="p-2 text-right border-b border-white/10 font-medium opacity-70">FX P/L</th>
+                        <th className="p-2 text-left border-b border-white/10 font-medium opacity-90">Ticker</th>
+                        <th className="p-2 text-center border-b border-white/10 font-medium opacity-90">Return</th>
+                        <th className="p-2 text-right border-b border-white/10 font-medium opacity-90">Avg</th>
+                        <th className="p-2 text-right border-b border-white/10 font-medium opacity-90">Price</th>
+                        <th className="p-2 text-right border-b border-white/10 font-medium opacity-90">Val($)</th>
+                        <th className="p-2 text-right border-b border-white/10 font-medium opacity-90">Val(₩)</th>
+                        <th className="p-2 text-right border-b border-white/10 font-medium opacity-90">FX Rate</th>
+                        <th className="p-2 text-right border-b border-white/10 font-medium opacity-90">FX P/L</th>
                         <th className="p-2 text-center w-20 border-b border-white/10" />
                       </tr>
                     </thead>
@@ -345,11 +345,11 @@ export default function AssetTable() {
                     <thead className="text-[8px] font-sans uppercase tracking-widest bg-black/30">
                       <tr>
                         <th className="p-1.5 w-6 border-b border-white/10" />
-                        <th className="p-2 text-left border-b border-white/10 font-medium opacity-70">Ticker</th>
-                        <th className="p-2 text-right border-b border-white/10 font-medium opacity-70">Qty</th>
-                        <th className="p-2 text-right border-b border-white/10 font-medium opacity-70">Price</th>
-                        <th className="p-2 text-right border-b border-white/10 font-medium opacity-70">Value</th>
-                        <th className="p-2 text-center border-b border-white/10 font-medium opacity-70">P/L</th>
+                        <th className="p-2 text-left border-b border-white/10 font-medium opacity-90">Ticker</th>
+                        <th className="p-2 text-right border-b border-white/10 font-medium opacity-90">Qty</th>
+                        <th className="p-2 text-right border-b border-white/10 font-medium opacity-90">Price</th>
+                        <th className="p-2 text-right border-b border-white/10 font-medium opacity-90">Value</th>
+                        <th className="p-2 text-center border-b border-white/10 font-medium opacity-90">P/L</th>
                       </tr>
                     </thead>
                   )}

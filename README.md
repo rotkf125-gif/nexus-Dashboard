@@ -1,4 +1,4 @@
-# 🌟 NEXUS CELESTIAL V65.3 - Next.js Edition
+# 🌟 NEXUS CELESTIAL V65.5 - Next.js Edition
 
 개인 투자 포트폴리오 대시보드 (Celestial Glass 테마)
 
@@ -9,6 +9,41 @@
 | **Live Site** | https://nexus-dashboard-beige.vercel.app |
 | **GitHub** | https://github.com/rotkf125-gif/nexus-dashboard |
 | **Database** | Supabase (PostgreSQL) |
+
+---
+
+## ✨ V65.5 변경 사항
+
+### 👁️ 가독성 대폭 개선
+- **텍스트 크기 증가**: text-[8-9px] → text-[10-12px]
+- **Opacity 증가**: 40/50/60 → 80/90 (더 밝은 텍스트)
+- **라벨/설명 가시성 향상**: text-white/40 → text-white/80
+
+### 📊 차트 & 게이지 확대
+- **Star Core 도넛 차트**: 120x120 → 155x155 (박스의 86% 채움)
+- **Risk Analytics 게이지**: 180x110 → 200x125
+- **Sector 차트**: 60x60 → 75x75
+- **진행 바 높이**: h-1.5 → h-2
+
+### 📐 레이아웃 변경
+- **DPS Trend + Learning**: 좌우 배치 → 상하 배치 (세로 레이아웃)
+- **Risk Analytics 박스**: 모든 섹션 균등 높이 (min-h-[180px])
+- **INSIGHT 영역 확대**: 패딩 p-3 → p-4
+
+### 🎯 컴포넌트별 개선
+- **StarCore**: TOTAL VALUE 텍스트 확대 (text-xl → text-2xl)
+- **Sidebar**: Weight, Sector, Type, Rankings 박스 전체 텍스트 확대
+- **IncomeStream**: QTY, DIVIDEND, PRINCIPAL 라벨 text-[12px]
+- **RiskAnalytics**: Risk Factors, Sector Exposure 텍스트 확대
+
+---
+
+## ✨ V65.4 변경 사항
+
+### 📐 Stellar Assets 레이아웃 재구성
+- **Star Core 크기 최적화**: 320x320 → 180x180
+- **1/4 + 3/4 세로 분할**: Star Core + Sidebar (상단 1/4) / Asset Table (하단 3/4)
+- **가로 배치 최적화**: Star Core와 Sidebar가 나란히 배치
 
 ---
 
@@ -507,6 +542,8 @@ npm install
 
 | 버전 | 날짜 | 주요 변경 |
 |------|------|----------|
+| V65.5 | 2025-01-11 | 가독성 대폭 개선 (텍스트/차트 확대, opacity 증가, DPS+Learning 세로 배치) |
+| V65.4 | 2025-01-11 | Stellar Assets 레이아웃 재구성 (1/4+3/4 분할) |
 | V65.3 | 2025-01-05 | 레이아웃 최적화 (Assets/Simulation/Risk 높이 동기화) |
 | V65.2 | 2025-01-05 | Historic Performance, Risk Analytics (Risk Score + Correlation 통합), Widget API (Android) |
 | V65.1 | 2025-01-03 | 실시간 벤치마크, 섹터 분산도 기반 상관관계 |

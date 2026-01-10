@@ -158,16 +158,16 @@ export default function Sidebar({ horizontal = false }: SidebarProps) {
     return (
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 h-full">
         {/* WEIGHT BARS */}
-        <div className="inner-glass p-2.5 rounded flex flex-col">
-          <div className="flex justify-between items-center mb-1.5">
-            <span className="text-[8px] tracking-widest opacity-60">WEIGHT</span>
-            <span className="text-[8px] opacity-40">{calculations.assetCount}</span>
+        <div className="inner-glass p-3 rounded flex flex-col">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-[11px] tracking-widest text-white/90">WEIGHT</span>
+            <span className="text-[10px] text-white/80">{calculations.assetCount}</span>
           </div>
-          <div className="space-y-1 flex-1 overflow-y-auto custom-scrollbar">
+          <div className="space-y-1.5 flex-1 overflow-y-auto custom-scrollbar">
             {calculations.assetWeights.slice(0, 6).map((item, i) => (
-              <div key={item.ticker} className="flex items-center gap-1.5">
-                <span className="text-[9px] w-10 truncate">{item.ticker}</span>
-                <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
+              <div key={item.ticker} className="flex items-center gap-2">
+                <span className="text-[11px] w-12 truncate text-white/90">{item.ticker}</span>
+                <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
                   <div
                     className="h-full rounded-full"
                     style={{
@@ -176,7 +176,7 @@ export default function Sidebar({ horizontal = false }: SidebarProps) {
                     }}
                   />
                 </div>
-                <span className="text-[8px] w-8 text-right opacity-60">
+                <span className="text-[10px] w-10 text-right text-white/80">
                   {item.weight.toFixed(0)}%
                 </span>
               </div>
@@ -185,28 +185,28 @@ export default function Sidebar({ horizontal = false }: SidebarProps) {
         </div>
 
         {/* SECTOR ANALYSIS */}
-        <div className="inner-glass p-2.5 rounded flex flex-col">
-          <div className="flex justify-between items-center mb-1.5">
-            <span className="text-[8px] tracking-widest opacity-60 flex items-center gap-1">
-              <i className="fas fa-chart-pie text-celestial-purple text-[7px]" /> SECTOR
+        <div className="inner-glass p-3 rounded flex flex-col">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-[11px] tracking-widest text-white/90 flex items-center gap-1">
+              <i className="fas fa-chart-pie text-celestial-purple text-[9px]" /> SECTOR
             </span>
-            <span className="text-[8px] opacity-40">{calculations.sectorCount}</span>
+            <span className="text-[10px] text-white/80">{calculations.sectorCount}</span>
           </div>
-          <div className="flex gap-2 flex-1 items-center">
-            <div style={{ width: 60, height: 60 }} className="flex-shrink-0">
+          <div className="flex gap-3 flex-1 items-center">
+            <div style={{ width: 75, height: 75 }} className="flex-shrink-0">
               <canvas ref={sectorChartRef} />
             </div>
-            <div className="flex-1 space-y-0.5 overflow-y-auto custom-scrollbar text-[8px]">
+            <div className="flex-1 space-y-1 overflow-y-auto custom-scrollbar text-[10px]">
               {calculations.sectors.slice(0, 5).map((s, i) => (
                 <div key={s.name} className="flex items-center justify-between">
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1.5">
                     <span
-                      className="w-1.5 h-1.5 rounded-full"
+                      className="w-2 h-2 rounded-full"
                       style={{ backgroundColor: CHART_COLORS[i % CHART_COLORS.length] }}
                     />
-                    <span className="opacity-70 truncate">{s.emoji}</span>
+                    <span className="text-white/90 truncate">{s.emoji}</span>
                   </div>
-                  <span className="opacity-50">{s.weight.toFixed(0)}%</span>
+                  <span className="text-white/80">{s.weight.toFixed(0)}%</span>
                 </div>
               ))}
             </div>
@@ -214,50 +214,50 @@ export default function Sidebar({ horizontal = false }: SidebarProps) {
         </div>
 
         {/* TYPE DISTRIBUTION */}
-        <div className="inner-glass p-2.5 rounded flex flex-col">
-          <div className="text-[8px] tracking-widest opacity-60 mb-1.5">TYPE</div>
-          <div className="grid grid-cols-2 gap-1.5 flex-1">
-            <div className="inner-glass p-1.5 text-center rounded border border-white/5 flex flex-col justify-center">
-              <div className="text-[7px] opacity-40 tracking-widest">CORE</div>
-              <div className="text-xs font-display">
+        <div className="inner-glass p-3 rounded flex flex-col">
+          <div className="text-[11px] tracking-widest text-white/90 mb-2">TYPE</div>
+          <div className="grid grid-cols-2 gap-2 flex-1">
+            <div className="inner-glass p-2 text-center rounded border border-white/10 flex flex-col justify-center">
+              <div className="text-[9px] text-white/80 tracking-widest">CORE</div>
+              <div className="text-sm font-display text-white">
                 ${(calculations.coreValue / 1000).toFixed(0)}K
               </div>
-              <div className="text-[8px] opacity-50">{calculations.corePct.toFixed(0)}%</div>
+              <div className="text-[10px] text-white/80">{calculations.corePct.toFixed(0)}%</div>
             </div>
-            <div className="inner-glass p-1.5 text-center rounded border border-celestial-gold/20 flex flex-col justify-center">
-              <div className="text-[7px] text-celestial-gold/60 tracking-widest">INCOME</div>
-              <div className="text-xs font-display text-celestial-gold">
+            <div className="inner-glass p-2 text-center rounded border border-celestial-gold/30 flex flex-col justify-center">
+              <div className="text-[9px] text-celestial-gold/90 tracking-widest">INCOME</div>
+              <div className="text-sm font-display text-celestial-gold">
                 ${(calculations.incomeValue / 1000).toFixed(0)}K
               </div>
-              <div className="text-[8px] text-celestial-gold">{calculations.incomePct.toFixed(0)}%</div>
+              <div className="text-[10px] text-celestial-gold">{calculations.incomePct.toFixed(0)}%</div>
             </div>
           </div>
         </div>
 
         {/* TOP/BOTTOM 3 RANKINGS */}
-        <div className="inner-glass p-2.5 rounded flex flex-col">
-          <div className="flex gap-2 flex-1">
+        <div className="inner-glass p-3 rounded flex flex-col">
+          <div className="flex gap-3 flex-1">
             <div className="ranking-section flex-1">
-              <div className="ranking-title text-[8px] mb-1">
-                <i className="fas fa-trophy text-celestial-gold text-[7px]" /> TOP
+              <div className="ranking-title text-[10px] mb-1.5 text-white/90">
+                <i className="fas fa-trophy text-celestial-gold text-[9px]" /> TOP
               </div>
-              <div className="space-y-0.5">
+              <div className="space-y-1">
                 {calculations.top3.slice(0, 3).map((item) => (
-                  <div key={item.ticker} className="ranking-item flex justify-between text-[8px]">
-                    <span className="truncate">{item.ticker}</span>
+                  <div key={item.ticker} className="ranking-item flex justify-between text-[10px]">
+                    <span className="truncate text-white/90">{item.ticker}</span>
                     <span className="text-v64-success">+{item.returnPct.toFixed(0)}%</span>
                   </div>
                 ))}
               </div>
             </div>
             <div className="ranking-section flex-1">
-              <div className="ranking-title text-[8px] mb-1">
-                <i className="fas fa-exclamation-triangle text-v64-danger text-[7px]" /> BTM
+              <div className="ranking-title text-[10px] mb-1.5 text-white/90">
+                <i className="fas fa-exclamation-triangle text-v64-danger text-[9px]" /> BTM
               </div>
-              <div className="space-y-0.5">
+              <div className="space-y-1">
                 {calculations.bottom3.slice(0, 3).map((item) => (
-                  <div key={item.ticker} className="ranking-item flex justify-between text-[8px]">
-                    <span className="truncate">{item.ticker}</span>
+                  <div key={item.ticker} className="ranking-item flex justify-between text-[10px]">
+                    <span className="truncate text-white/90">{item.ticker}</span>
                     <span className={item.returnPct >= 0 ? 'text-v64-success' : 'text-v64-danger'}>
                       {item.returnPct >= 0 ? '+' : ''}{item.returnPct.toFixed(0)}%
                     </span>
