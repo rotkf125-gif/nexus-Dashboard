@@ -127,7 +127,7 @@ function DashboardContent() {
           )}
 
           {/* StarCore + Sidebar 가로 배치 */}
-          <div className="flex flex-col lg:flex-row gap-6">
+          <div className="flex flex-col lg:flex-row gap-6 mb-5">
             {/* Star Core */}
             <div className="flex-shrink-0 flex items-center justify-center">
               <StarCore />
@@ -136,6 +136,13 @@ function DashboardContent() {
             {/* Sidebar - 가로로 확장 */}
             <div className="flex-1">
               <Sidebar horizontal />
+            </div>
+          </div>
+
+          {/* Asset Table - Sidebar 밑에 통합 */}
+          <div className="border-t border-white/10 pt-4">
+            <div className="overflow-y-auto custom-scrollbar max-h-[350px]">
+              <AssetTable />
             </div>
           </div>
         </div>
@@ -153,22 +160,10 @@ function DashboardContent() {
         </div>
       </div>
 
-      {/* Row 2: Assets Table (풀 너비) */}
-      <div className="glass-card p-5">
-        <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
-          <h2 className="text-lg font-display tracking-widest flex items-center gap-3 text-white">
-            <i className="fas fa-table text-celestial-cyan text-xs" /> ASSET TABLE
-          </h2>
-        </div>
-        <div className="overflow-y-auto custom-scrollbar max-h-[400px]">
-          <AssetTable />
-        </div>
-      </div>
-
-      {/* Row 3: Risk Analytics (가로 배치) */}
+      {/* Row 2: Risk Analytics (가로 배치) */}
       <RiskAnalytics horizontal />
 
-      {/* Row 4: Income Stream (통합) */}
+      {/* Row 3: Income Stream (통합) */}
       <div className="glass-card p-5 border-accent-gold">
         <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
           <h2 className="text-lg font-display tracking-widest flex items-center gap-3 text-white">
@@ -193,7 +188,7 @@ function DashboardContent() {
         <IncomeStream showAnalytics />
       </div>
 
-      {/* Row 5: Performance Arena (1/4) + Historic Performance (3/4) */}
+      {/* Row 4: Performance Arena (1/4) + Historic Performance (3/4) */}
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-5">
         <div className="xl:col-span-1">
           <PerformanceArena compact />
