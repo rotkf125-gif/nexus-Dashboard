@@ -1,4 +1,4 @@
-# 🌟 NEXUS CELESTIAL V65.6 - Next.js Edition
+# 🌟 NEXUS CELESTIAL V65.7 - Next.js Edition
 
 개인 투자 포트폴리오 대시보드 (Celestial Glass 테마)
 
@@ -9,6 +9,31 @@
 | **Live Site** | https://nexus-dashboard-beige.vercel.app |
 | **GitHub** | https://github.com/rotkf125-gif/nexus-dashboard |
 | **Database** | Supabase (PostgreSQL) |
+
+---
+
+## ✨ V65.7 변경 사항
+
+### 📐 Income Stream 텍스트 크기 최적화
+- **Income 카드 (PLTY, QDTE)**
+  - 티커명: `text-lg` → `text-base` (16px)
+  - Total Return 배지: `text-xs` → `text-[11px]`, 패딩 축소
+  - 라벨(QTY, DIVIDEND 등): `text-[10px]`, 투명도 50%
+  - 값 크기 세분화: `text-[12px]~text-[13px]`
+  - 레이아웃 변경: 수직 → 수평 `flex items-baseline` (공간 효율화)
+  - Recovery 바: `h-2.5` → `h-2`
+
+- **Weekly Summary & Recent Logs**
+  - 라벨 크기: `text-[11px]` → `text-[10px]`
+  - 설명 텍스트: `text-[9px]` → `text-[8px]`
+  - 금액 표시: `text-xl` → `text-lg`
+  - Recent Logs 열 정렬: 고정 너비 적용 (`w-16`, `w-12`, `w-14`)
+
+- **Analytics 섹션**
+  - 섹션 제목: `text-[12px]` → `text-[11px]`
+  - 범례 점: `w-2 h-2` → `w-1.5 h-1.5`
+  - AVG 카드 라벨: `text-[10px]` → `text-[9px]`
+  - Learning Stats: `text-[9px]` → `text-[8px]`
 
 ---
 
@@ -565,6 +590,7 @@ npm install
 
 | 버전 | 날짜 | 주요 변경 |
 |------|------|----------|
+| V65.7 | 2026-01-11 | Income Stream 텍스트 크기 최적화, 카드 레이아웃 개선 |
 | V65.6 | 2025-01-11 | Analytics 전면 개편 (3x4 그리드), 사이드바 탭별 색상, 텍스트 확대 |
 | V65.5 | 2025-01-11 | 가독성 대폭 개선 (텍스트/차트 확대, opacity 증가, DPS+Learning 세로 배치) |
 | V65.4 | 2025-01-11 | Stellar Assets 레이아웃 재구성 (1/4+3/4 분할) |

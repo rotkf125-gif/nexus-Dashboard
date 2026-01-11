@@ -334,75 +334,75 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
         <div className={`grid ${incomeAssets.length === 1 ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'} gap-3`}>
           {incomeStats.map((stat, i) => {
             const isGold = i % 2 === 1;
-            const borderClass = isGold ? 'border-celestial-gold/20' : 'border-white/10';
+            const borderClass = isGold ? 'border-celestial-gold/30' : 'border-white/10';
             const textClass = isGold ? 'text-celestial-gold' : 'text-white';
             const barBg = isGold ? 'bg-celestial-gold/10' : 'bg-white/5';
             const barFill = isGold
               ? 'bg-gradient-to-r from-celestial-gold/50 to-celestial-gold'
-              : 'bg-gradient-to-r from-white/30 to-white/60';
+              : 'bg-gradient-to-r from-v64-success/50 to-v64-success';
 
             const totalReturnColor = stat.totalReturn >= 0 ? 'text-v64-success bg-v64-success/10 border-v64-success/30' : 'text-v64-danger bg-v64-danger/10 border-v64-danger/30';
 
             return (
               <div
                 key={stat.ticker}
-                className={`inner-glass p-4 rounded border ${borderClass}`}
+                className={`inner-glass p-4 rounded-lg border ${borderClass}`}
               >
                 {/* Header: 종목명 + Total Return */}
                 <div className="flex justify-between items-center mb-3">
                   <span className={`text-base font-display tracking-widest ${textClass}`}>
                     {stat.ticker}
                   </span>
-                  <span className={`text-[11px] font-medium px-2 py-0.5 border rounded ${totalReturnColor}`}>
+                  <span className={`text-[11px] font-semibold px-2 py-0.5 border rounded ${totalReturnColor}`}>
                     {stat.totalReturn >= 0 ? '+' : ''}${stat.totalReturn.toFixed(2)}
                   </span>
                 </div>
 
-                {/* Stats Grid */}
-                <div className="space-y-1.5 text-[12px] mb-3">
+                {/* Stats Grid - 2열 레이아웃 */}
+                <div className="space-y-1.5 mb-3">
                   {/* Row 1: QTY | DIVIDEND */}
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-white/80 tracking-wider">QTY</span>
-                      <span className="text-celestial-cyan font-medium">{stat.qty}주</span>
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-[10px] text-white/50 tracking-wider uppercase">QTY</span>
+                      <span className="text-celestial-cyan font-semibold text-[13px]">{stat.qty}주</span>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-white/80 tracking-wider">DIVIDEND</span>
-                      <span className="text-v64-success">${stat.totalDividend.toFixed(2)}</span>
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-[10px] text-white/50 tracking-wider uppercase">DIVIDEND</span>
+                      <span className="text-v64-success font-semibold text-[13px]">${stat.totalDividend.toFixed(2)}</span>
                     </div>
                   </div>
 
                   {/* Row 2: PRINCIPAL | VALUATION */}
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-white/80 tracking-wider">PRINCIPAL</span>
-                      <span className="text-white">${stat.principal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-[10px] text-white/50 tracking-wider uppercase">PRINCIPAL</span>
+                      <span className="text-white/90 font-medium text-[12px]">${stat.principal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-white/80 tracking-wider">VALUATION</span>
-                      <span className="text-white">${stat.valuation.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-[10px] text-white/50 tracking-wider uppercase">VALUATION</span>
+                      <span className="text-white/90 font-medium text-[12px]">${stat.valuation.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
                   </div>
 
                   {/* Row 3: TRADE R. */}
-                  <div className="flex justify-between items-center">
-                    <span className="text-white/80 tracking-wider">TRADE R.</span>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-[10px] text-white/50 tracking-wider uppercase">TRADE R.</span>
                     <span
-                      className={`cursor-pointer hover:opacity-80 ${stat.tradeReturn >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}
+                      className={`cursor-pointer hover:opacity-80 font-semibold text-[13px] ${stat.tradeReturn >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}
                       onClick={() => handleEditTradeReturn(stat.ticker, stat.tradeReturn)}
                       title="클릭하여 수정"
                     >
                       {stat.tradeReturn >= 0 ? '+' : ''}${stat.tradeReturn.toFixed(2)}
-                      <i className="fas fa-pen text-[8px] ml-1 text-white/60" />
+                      <i className="fas fa-pen text-[8px] ml-1 text-white/40" />
                     </span>
                   </div>
                 </div>
 
                 {/* Recovery Progress */}
-                <div className={`border-t pt-2 ${isGold ? 'border-celestial-gold/20' : 'border-white/10'}`}>
-                  <div className="flex justify-between mb-1.5 text-[11px] tracking-widest">
-                    <span className={isGold ? 'text-celestial-gold/80' : 'text-white/80'}>RECOVERY</span>
-                    <span className={stat.recoveryPct >= 100 ? 'text-v64-success' : (isGold ? 'text-celestial-gold' : 'text-white/90')}>
+                <div className={`border-t pt-2.5 ${isGold ? 'border-celestial-gold/20' : 'border-white/10'}`}>
+                  <div className="flex justify-between mb-1.5 text-[10px] tracking-widest">
+                    <span className={isGold ? 'text-celestial-gold/70' : 'text-white/50'}>RECOVERY</span>
+                    <span className={`font-semibold text-[11px] ${stat.recoveryPct >= 100 ? 'text-v64-success' : (isGold ? 'text-celestial-gold' : 'text-white')}`}>
                       {stat.recoveryPct.toFixed(1)}%
                     </span>
                   </div>
@@ -422,41 +422,41 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
         <div className="grid grid-cols-2 gap-3">
           {/* Est. Weekly */}
           <div className="inner-glass p-3 text-center rounded border border-celestial-purple/30">
-            <div className="text-[11px] text-celestial-purple tracking-[0.2em] mb-0.5 font-light">
+            <div className="text-[10px] text-celestial-purple tracking-[0.15em] mb-0.5 font-medium uppercase">
               EST. WEEKLY
             </div>
-            <div className="text-[9px] text-white/80 mb-1">(현재 수량 × 최근 6회 DPS)</div>
-            <div className="text-xl font-display font-light text-white">
+            <div className="text-[8px] text-white/60 mb-1">(현재 수량 × 최근 6회 DPS)</div>
+            <div className="text-lg font-display font-medium text-white">
               ${weeklySummary.weeklyAvg.toFixed(2)}
             </div>
-            <div className="flex justify-between mt-1.5 text-[11px] font-light text-white/90">
-              <span>MIN: <span className="text-v64-danger">${weeklySummary.weeklyMin.toFixed(2)}</span></span>
-              <span>MAX: <span className="text-v64-success">${weeklySummary.weeklyMax.toFixed(2)}</span></span>
+            <div className="flex justify-between mt-1.5 text-[10px] font-medium">
+              <span className="text-white/70">MIN: <span className="text-v64-danger">${weeklySummary.weeklyMin.toFixed(2)}</span></span>
+              <span className="text-white/70">MAX: <span className="text-v64-success">${weeklySummary.weeklyMax.toFixed(2)}</span></span>
             </div>
           </div>
 
           {/* Recent Logs */}
           <div className="inner-glass p-3 rounded flex flex-col">
-            <div className="flex justify-between items-center mb-2 text-[11px] text-white/90 tracking-widest font-light">
+            <div className="flex justify-between items-center mb-2 text-[10px] text-white/80 tracking-widest font-medium uppercase">
               <span>RECENT LOGS</span>
-              <i className="fas fa-history text-[10px]" />
+              <i className="fas fa-history text-[9px] text-white/50" />
             </div>
-            <div className="overflow-y-auto custom-scrollbar flex-grow max-h-[80px] space-y-1.5">
+            <div className="overflow-y-auto custom-scrollbar flex-grow max-h-[80px] space-y-1">
               {recentLogs.length > 0 ? recentLogs.map((d, i) => {
                 // YYYY-MM-DD → YY/MM/DD
                 const dateParts = d.date.split('-');
                 const formattedDate = `${dateParts[0].slice(2)}/${dateParts[1]}/${dateParts[2]}`;
                 return (
-                  <div key={i} className="flex justify-between text-[11px] font-light">
-                    <span className="text-white/80">{formattedDate}</span>
-                    <span className={d.ticker === incomeStats[0]?.ticker ? 'text-white' : 'text-celestial-gold'}>
+                  <div key={i} className="flex justify-between text-[10px] font-medium">
+                    <span className="text-white/60 w-16">{formattedDate}</span>
+                    <span className={`w-12 text-center ${d.ticker === incomeStats[0]?.ticker ? 'text-white' : 'text-celestial-gold'}`}>
                       {d.ticker}
                     </span>
-                    <span className="text-white">${(d.qty * d.dps * 0.85).toFixed(2)}</span>
+                    <span className="text-white w-14 text-right">${(d.qty * d.dps * 0.85).toFixed(2)}</span>
                   </div>
                 );
               }) : (
-                <div className="text-[11px] text-white/80 text-center py-2">기록 없음</div>
+                <div className="text-[10px] text-white/60 text-center py-2">기록 없음</div>
               )}
             </div>
           </div>
@@ -472,12 +472,12 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
           {/* DPS Trend - Top */}
           <div className="inner-glass p-4 rounded flex-1">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[12px] tracking-widest text-celestial-cyan">DPS TREND</span>
-              <div className="flex items-center gap-3 text-[10px] font-light">
+              <span className="text-[11px] tracking-widest text-celestial-cyan font-medium uppercase">DPS TREND</span>
+              <div className="flex items-center gap-3 text-[9px] font-medium">
                 {incomeAssets.slice(0, 3).map((asset, i) => (
-                  <span key={asset.ticker} className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: TICKER_COLORS[i] }} />
-                    <span className="text-white/80">{asset.ticker}</span>
+                  <span key={asset.ticker} className="flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: TICKER_COLORS[i] }} />
+                    <span className="text-white/70">{asset.ticker}</span>
                   </span>
                 ))}
               </div>
@@ -492,11 +492,11 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
               {avgDpsData.slice(0, 2).map((item, i) => {
                 const isGold = i % 2 === 1;
                 return (
-                  <div key={item.ticker} className={`inner-glass p-2.5 rounded text-center ${isGold ? 'border border-celestial-gold/30' : ''}`}>
-                    <div className={`text-[10px] tracking-widest mb-1 ${isGold ? 'text-celestial-gold/80' : 'text-white/80'}`}>
+                  <div key={item.ticker} className={`inner-glass p-2 rounded text-center ${isGold ? 'border border-celestial-gold/30' : ''}`}>
+                    <div className={`text-[9px] tracking-widest mb-0.5 font-medium uppercase ${isGold ? 'text-celestial-gold/70' : 'text-white/60'}`}>
                       {item.ticker} AVG
                     </div>
-                    <div className={`text-sm font-display ${isGold ? 'text-celestial-gold' : 'text-white'}`}>
+                    <div className={`text-[13px] font-display font-medium ${isGold ? 'text-celestial-gold' : 'text-white'}`}>
                       ${item.avgDps.toFixed(4)}
                     </div>
                   </div>
@@ -508,8 +508,8 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
           {/* Learning - Bottom */}
           <div className="inner-glass p-4 rounded flex-1">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[12px] tracking-widest text-celestial-purple">LEARNING</span>
-              <span className="text-[10px] text-white/80">Monthly Pattern</span>
+              <span className="text-[11px] tracking-widest text-celestial-purple font-medium uppercase">LEARNING</span>
+              <span className="text-[9px] text-white/60 font-medium">Monthly Pattern</span>
             </div>
 
             <div style={{ height: 140 }}>
@@ -518,17 +518,17 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
 
             {/* Learning Stats */}
             <div className="grid grid-cols-3 gap-2 mt-3">
-              <div className="inner-glass p-2.5 rounded text-center">
-                <div className="text-[9px] tracking-widest mb-1 text-white/80">RECORDS</div>
-                <div className="text-[12px] font-display text-white">{dividends.length}</div>
+              <div className="inner-glass p-2 rounded text-center">
+                <div className="text-[8px] tracking-widest mb-0.5 text-white/60 font-medium uppercase">RECORDS</div>
+                <div className="text-[12px] font-display font-medium text-white">{dividends.length}</div>
               </div>
-              <div className="inner-glass p-2.5 rounded text-center border border-celestial-purple/30">
-                <div className="text-[9px] tracking-widest mb-1 text-celestial-purple/80">ACCURACY</div>
-                <div className="text-[12px] font-display text-celestial-purple">{predictionAccuracy.accuracy.toFixed(0)}%</div>
+              <div className="inner-glass p-2 rounded text-center border border-celestial-purple/30">
+                <div className="text-[8px] tracking-widest mb-0.5 text-celestial-purple/70 font-medium uppercase">ACCURACY</div>
+                <div className="text-[12px] font-display font-medium text-celestial-purple">{predictionAccuracy.accuracy.toFixed(0)}%</div>
               </div>
-              <div className="inner-glass p-2.5 rounded text-center">
-                <div className="text-[9px] tracking-widest mb-1 text-white/80">AVG/MO</div>
-                <div className="text-[12px] font-display text-v64-success">
+              <div className="inner-glass p-2 rounded text-center">
+                <div className="text-[8px] tracking-widest mb-0.5 text-white/60 font-medium uppercase">AVG/MO</div>
+                <div className="text-[12px] font-display font-medium text-v64-success">
                   ${monthlyPattern.length > 0
                     ? (monthlyPattern.reduce((s, [, v]) => s + v, 0) / monthlyPattern.length).toFixed(0)
                     : '0'}
