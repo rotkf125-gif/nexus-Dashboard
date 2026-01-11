@@ -6,7 +6,7 @@ import Header from '@/components/Header';
 import StrategyBar from '@/components/StrategyBar';
 import AssetTable from '@/components/AssetTable';
 import SimulationHub from '@/components/SimulationHub';
-import RiskAnalytics from '@/components/RiskAnalytics';
+import Analytics from '@/components/Analytics';
 import AssetModal from '@/components/AssetModal';
 import DividendModal from '@/components/DividendModal';
 import SettingsModal from '@/components/SettingsModal';
@@ -92,72 +92,72 @@ function DashboardContent() {
       {/* Main Content with Left Sidebar Tabs */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* Left Sidebar Tabs */}
-        <div className="lg:col-span-2 glass-card p-3 flex flex-col h-full">
-          <div className="text-[10px] tracking-widest text-white/60 mb-3 uppercase">Navigation</div>
-          <div className="flex flex-col flex-1 gap-2">
+        <div className="lg:col-span-2 glass-card p-4 flex flex-col h-full">
+          <div className="text-xs tracking-widest text-white/60 mb-4 uppercase font-medium">Navigation</div>
+          <div className="flex flex-col flex-1 gap-3">
             <button
               onClick={() => setActiveTab('stellar')}
-              className={`flex-1 w-full text-left px-3 rounded-lg transition-all flex items-center justify-center ${
+              className={`flex-1 w-full px-4 rounded-lg transition-all flex items-center justify-center ${
                 activeTab === 'stellar'
                   ? 'bg-celestial-cyan/20 border border-celestial-cyan/50 text-white'
                   : 'text-white/70 hover:bg-white/5 hover:text-white/90'
               }`}
             >
-              <div className="flex items-center gap-2">
-                <i className="fas fa-star text-[10px]" />
-                <span className="text-[10px] font-medium">Stellar Assets</span>
+              <div className="flex items-center gap-3">
+                <i className="fas fa-star text-sm" />
+                <span className="text-sm font-medium tracking-wide">Stellar Assets</span>
               </div>
             </button>
             <button
               onClick={() => setActiveTab('income')}
-              className={`flex-1 w-full text-left px-3 rounded-lg transition-all flex items-center justify-center ${
+              className={`flex-1 w-full px-4 rounded-lg transition-all flex items-center justify-center ${
                 activeTab === 'income'
                   ? 'bg-celestial-gold/20 border border-celestial-gold/50 text-white'
                   : 'text-white/70 hover:bg-white/5 hover:text-white/90'
               }`}
             >
-              <div className="flex items-center gap-2">
-                <i className="fas fa-coins text-[10px]" />
-                <span className="text-[10px] font-medium">Income Stream</span>
+              <div className="flex items-center gap-3">
+                <i className="fas fa-coins text-sm" />
+                <span className="text-sm font-medium tracking-wide">Income Stream</span>
               </div>
             </button>
             <button
               onClick={() => setActiveTab('analytics')}
-              className={`flex-1 w-full text-left px-3 rounded-lg transition-all flex items-center justify-center ${
+              className={`flex-1 w-full px-4 rounded-lg transition-all flex items-center justify-center ${
                 activeTab === 'analytics'
                   ? 'bg-celestial-cyan/20 border border-celestial-cyan/50 text-white'
                   : 'text-white/70 hover:bg-white/5 hover:text-white/90'
               }`}
             >
-              <div className="flex items-center gap-2">
-                <i className="fas fa-shield-alt text-[10px]" />
-                <span className="text-[10px] font-medium">Analytics</span>
+              <div className="flex items-center gap-3">
+                <i className="fas fa-shield-alt text-sm" />
+                <span className="text-sm font-medium tracking-wide">Analytics</span>
               </div>
             </button>
             <button
               onClick={() => setActiveTab('performance')}
-              className={`flex-1 w-full text-left px-3 rounded-lg transition-all flex items-center justify-center ${
+              className={`flex-1 w-full px-4 rounded-lg transition-all flex items-center justify-center ${
                 activeTab === 'performance'
                   ? 'bg-v64-success/20 border border-v64-success/50 text-white'
                   : 'text-white/70 hover:bg-white/5 hover:text-white/90'
               }`}
             >
-              <div className="flex items-center gap-2">
-                <i className="fas fa-chart-line text-[10px]" />
-                <span className="text-[10px] font-medium">Performance</span>
+              <div className="flex items-center gap-3">
+                <i className="fas fa-chart-line text-sm" />
+                <span className="text-sm font-medium tracking-wide">Performance</span>
               </div>
             </button>
             <button
               onClick={() => setActiveTab('simulation')}
-              className={`flex-1 w-full text-left px-3 rounded-lg transition-all flex items-center justify-center ${
+              className={`flex-1 w-full px-4 rounded-lg transition-all flex items-center justify-center ${
                 activeTab === 'simulation'
                   ? 'bg-v64-success/20 border border-v64-success/50 text-white'
                   : 'text-white/70 hover:bg-white/5 hover:text-white/90'
               }`}
             >
-              <div className="flex items-center gap-2">
-                <i className="fas fa-flask text-[10px]" />
-                <span className="text-[10px] font-medium">Simulation</span>
+              <div className="flex items-center gap-3">
+                <i className="fas fa-flask text-sm" />
+                <span className="text-sm font-medium tracking-wide">Simulation</span>
               </div>
             </button>
           </div>
@@ -256,7 +256,7 @@ function DashboardContent() {
           {/* Analytics Tab */}
           {activeTab === 'analytics' && (
             <div className="min-h-[800px]">
-              <RiskAnalytics horizontal />
+              <Analytics horizontal />
             </div>
           )}
 

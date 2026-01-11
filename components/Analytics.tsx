@@ -127,11 +127,11 @@ function getRiskLabel(level: RiskLevel): string {
   return labels[level];
 }
 
-interface RiskAnalyticsProps {
+interface AnalyticsProps {
   horizontal?: boolean;
 }
 
-export default function RiskAnalytics({ horizontal = false }: RiskAnalyticsProps) {
+export default function Analytics({ horizontal = false }: AnalyticsProps) {
   const { state } = useNexus();
   const { assets, market, exchangeRate } = state;
   const gaugeRef = useRef<HTMLCanvasElement>(null);
