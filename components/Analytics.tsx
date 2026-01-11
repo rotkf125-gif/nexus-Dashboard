@@ -10,7 +10,6 @@ Chart.register(DoughnutController, ArcElement, Tooltip);
 
 // ETF별 섹터 분산도 데이터 (실제 ETF 구성 기반)
 const ETF_SECTOR_DATA: Record<string, Record<string, number>> = {
-  // 고배당/인컴 ETF
   'PLTY': { Technology: 0.25, Finance: 0.20, Healthcare: 0.15, Consumer: 0.15, Energy: 0.10, Industrial: 0.10, Other: 0.05 },
   'HOOY': { Technology: 0.30, Finance: 0.18, Healthcare: 0.12, Consumer: 0.12, Energy: 0.10, Industrial: 0.10, Communication: 0.08 },
   'QYLD': { Technology: 0.50, Communication: 0.15, Consumer: 0.12, Healthcare: 0.10, Finance: 0.08, Other: 0.05 },
@@ -19,22 +18,16 @@ const ETF_SECTOR_DATA: Record<string, Record<string, number>> = {
   'SCHD': { Finance: 0.20, Healthcare: 0.18, Industrial: 0.15, Consumer: 0.15, Technology: 0.12, Energy: 0.10, Other: 0.10 },
   'VIG': { Technology: 0.22, Finance: 0.18, Healthcare: 0.16, Industrial: 0.14, Consumer: 0.14, Communication: 0.06, Materials: 0.05, Other: 0.05 },
   'VYM': { Finance: 0.22, Healthcare: 0.15, Consumer: 0.13, Industrial: 0.12, Energy: 0.10, Technology: 0.10, Utilities: 0.08, Communication: 0.05, Other: 0.05 },
-
-  // 지수 ETF
   'SPY': { Technology: 0.30, Healthcare: 0.13, Finance: 0.13, Consumer: 0.12, Communication: 0.09, Industrial: 0.08, Energy: 0.05, Other: 0.10 },
   'SSO': { Technology: 0.30, Healthcare: 0.13, Finance: 0.13, Consumer: 0.12, Communication: 0.09, Industrial: 0.08, Energy: 0.05, Other: 0.10 },
   'SPYM': { Technology: 0.30, Healthcare: 0.13, Finance: 0.13, Consumer: 0.12, Communication: 0.09, Industrial: 0.08, Energy: 0.05, Other: 0.10 },
   'QQQ': { Technology: 0.50, Communication: 0.16, Consumer: 0.14, Healthcare: 0.07, Industrial: 0.05, Finance: 0.03, Other: 0.05 },
   'DIA': { Finance: 0.22, Healthcare: 0.18, Technology: 0.18, Industrial: 0.15, Consumer: 0.12, Energy: 0.08, Other: 0.07 },
   'IWM': { Healthcare: 0.16, Finance: 0.15, Industrial: 0.15, Technology: 0.14, Consumer: 0.12, RealEstate: 0.08, Energy: 0.08, Other: 0.12 },
-
-  // 섹터 ETF
   'XLK': { Technology: 0.95, Communication: 0.03, Other: 0.02 },
   'XLF': { Finance: 0.95, RealEstate: 0.03, Other: 0.02 },
   'XLE': { Energy: 0.95, Industrial: 0.03, Other: 0.02 },
   'XLV': { Healthcare: 0.95, Consumer: 0.03, Other: 0.02 },
-
-  // 개별주 (섹터 100%)
   'AAPL': { Technology: 1.0 },
   'MSFT': { Technology: 1.0 },
   'GOOGL': { Communication: 1.0 },
@@ -47,7 +40,6 @@ const ETF_SECTOR_DATA: Record<string, Record<string, number>> = {
   'XOM': { Energy: 1.0 },
 };
 
-// 섹터간 상관관계 매트릭스
 const SECTOR_CORRELATIONS: Record<string, Record<string, number>> = {
   Technology: { Technology: 1.0, Communication: 0.85, Consumer: 0.70, Healthcare: 0.55, Finance: 0.60, Industrial: 0.65, Energy: 0.30, RealEstate: 0.40, Utilities: 0.25, Materials: 0.50 },
   Communication: { Technology: 0.85, Communication: 1.0, Consumer: 0.75, Healthcare: 0.50, Finance: 0.55, Industrial: 0.60, Energy: 0.25, RealEstate: 0.35, Utilities: 0.20, Materials: 0.45 },
@@ -64,30 +56,21 @@ const SECTOR_CORRELATIONS: Record<string, Record<string, number>> = {
   Other: { Technology: 0.50, Communication: 0.50, Consumer: 0.50, Healthcare: 0.50, Finance: 0.50, Industrial: 0.50, Energy: 0.40, RealEstate: 0.45, Utilities: 0.40, Materials: 0.50 },
 };
 
-// Risk Score 계산 함수
 function calculateRiskMetrics(
   diversificationScore: number,
   topSectorWeight: number,
   vix: number,
   maxAssetWeight: number
 ): RiskMetrics {
-  // VIX 기반 변동성 점수 (VIX 12 = 100점, VIX 40+ = 0점)
   const volatilityScore = Math.max(0, Math.min(100, 100 - (vix - 12) * 3.5));
-
-  // 섹터 집중도 점수 (50% 이상 집중 = 낮은 점수)
   const sectorConcentration = Math.max(0, Math.min(100, 100 - (topSectorWeight * 100)));
-
-  // 단일 종목 집중도 점수 (30% 이상 집중 = 낮은 점수)
   const concentrationRisk = Math.max(0, Math.min(100, 100 - (maxAssetWeight * 100 * 1.5)));
-
-  // 가중 평균 종합 점수
   const overallScore = Math.round(
     diversificationScore * 0.25 +
     sectorConcentration * 0.20 +
     volatilityScore * 0.25 +
     concentrationRisk * 0.30
   );
-
   return {
     overallScore,
     diversificationScore: Math.round(diversificationScore),
@@ -97,7 +80,6 @@ function calculateRiskMetrics(
   };
 }
 
-// Risk Level 결정
 function getRiskLevel(score: number): RiskLevel {
   if (score >= 70) return 'LOW';
   if (score >= 50) return 'MODERATE';
@@ -105,7 +87,6 @@ function getRiskLevel(score: number): RiskLevel {
   return 'EXTREME';
 }
 
-// Risk Level 색상
 function getRiskColor(level: RiskLevel): string {
   const colors: Record<RiskLevel, string> = {
     LOW: '#81C784',
@@ -116,13 +97,12 @@ function getRiskColor(level: RiskLevel): string {
   return colors[level];
 }
 
-// Risk Level 라벨
 function getRiskLabel(level: RiskLevel): string {
   const labels: Record<RiskLevel, string> = {
-    LOW: '안정',
-    MODERATE: '보통',
-    HIGH: '주의',
-    EXTREME: '위험',
+    LOW: 'LOW RISK',
+    MODERATE: 'MODERATE RISK',
+    HIGH: 'HIGH RISK',
+    EXTREME: 'EXTREME RISK',
   };
   return labels[level];
 }
@@ -133,24 +113,23 @@ interface AnalyticsProps {
 
 export default function Analytics({ horizontal = false }: AnalyticsProps) {
   const { state } = useNexus();
-  const { assets, market, exchangeRate } = state;
+  const { assets, market } = state;
   const gaugeRef = useRef<HTMLCanvasElement>(null);
+  const totalValueChartRef = useRef<HTMLCanvasElement>(null);
+  const totalValueChartInstance = useRef<Chart | null>(null);
   const sectorChartRef = useRef<HTMLCanvasElement>(null);
   const sectorChartInstance = useRef<Chart | null>(null);
-  const starCoreChartRef = useRef<HTMLCanvasElement>(null);
-  const starCoreChartInstance = useRef<Chart | null>(null);
+  const typeChartRef = useRef<HTMLCanvasElement>(null);
+  const typeChartInstance = useRef<Chart | null>(null);
 
   // 포트폴리오 섹터 분산도 계산
   const portfolioSectorWeights = useMemo(() => {
     const totalValue = assets.reduce((sum, a) => sum + a.qty * a.price, 0);
     if (totalValue === 0) return {};
-
     const sectorWeights: Record<string, number> = {};
-
     assets.forEach(asset => {
       const assetWeight = (asset.qty * asset.price) / totalValue;
       const etfSectors = ETF_SECTOR_DATA[asset.ticker];
-
       if (etfSectors) {
         Object.entries(etfSectors).forEach(([sector, weight]) => {
           sectorWeights[sector] = (sectorWeights[sector] || 0) + assetWeight * weight;
@@ -160,75 +139,58 @@ export default function Analytics({ horizontal = false }: AnalyticsProps) {
         sectorWeights[sector] = (sectorWeights[sector] || 0) + assetWeight;
       }
     });
-
     return sectorWeights;
   }, [assets]);
 
-  // 상위 섹터 추출
   const topSectors = useMemo(() => {
     return Object.entries(portfolioSectorWeights)
       .sort(([, a], [, b]) => b - a)
       .slice(0, 5);
   }, [portfolioSectorWeights]);
 
-  // 분산도 점수 계산 (HHI 기반)
   const diversificationScore = useMemo(() => {
     const weights = Object.values(portfolioSectorWeights);
     if (weights.length === 0) return 0;
-
     const hhi = weights.reduce((sum, w) => sum + w * w, 0);
     const minHHI = 1 / Math.max(weights.length, 1);
-    const score = Math.max(0, 100 - ((hhi - minHHI) / (1 - minHHI)) * 100);
-    return score;
+    return Math.max(0, 100 - ((hhi - minHHI) / (1 - minHHI)) * 100);
   }, [portfolioSectorWeights]);
 
-  // 시장 지수와의 상관관계 계산
   const marketCorrelations = useMemo(() => {
     const spySectors = ETF_SECTOR_DATA['SPY'] || {};
     const qqqSectors = ETF_SECTOR_DATA['QQQ'] || {};
-
     let spyCorr = 0;
     let qqqCorr = 0;
-
     Object.entries(portfolioSectorWeights).forEach(([sector, weight]) => {
       const spyWeight = spySectors[sector] || 0;
       const qqqWeight = qqqSectors[sector] || 0;
-
       spyCorr += weight * spyWeight * (SECTOR_CORRELATIONS[sector]?.[sector] || 0.5);
       qqqCorr += weight * qqqWeight * (SECTOR_CORRELATIONS[sector]?.[sector] || 0.5);
     });
-
     spyCorr = Math.min(0.95, Math.max(0.3, spyCorr * 2 + 0.4));
     qqqCorr = Math.min(0.95, Math.max(0.3, qqqCorr * 2 + 0.3));
-
     return { spy: spyCorr, qqq: qqqCorr };
   }, [portfolioSectorWeights]);
 
-  // 리스크 지표 계산
   const riskProfile = useMemo(() => {
     const techExposure = (portfolioSectorWeights['Technology'] || 0) + (portfolioSectorWeights['Communication'] || 0);
     const defensiveExposure = (portfolioSectorWeights['Healthcare'] || 0) + (portfolioSectorWeights['Utilities'] || 0) + (portfolioSectorWeights['Consumer'] || 0);
     const cyclicalExposure = (portfolioSectorWeights['Finance'] || 0) + (portfolioSectorWeights['Industrial'] || 0) + (portfolioSectorWeights['Energy'] || 0) + (portfolioSectorWeights['Materials'] || 0);
-
     return { techExposure, defensiveExposure, cyclicalExposure };
   }, [portfolioSectorWeights]);
 
-  // 최대 자산 비중 계산
   const maxAssetWeight = useMemo(() => {
     const totalValue = assets.reduce((sum, a) => sum + a.qty * a.price, 0);
     if (totalValue === 0) return 0;
-
     const weights = assets.map(a => (a.qty * a.price) / totalValue);
     return Math.max(...weights, 0);
   }, [assets]);
 
-  // 최대 섹터 비중
   const topSectorWeight = useMemo(() => {
     const weights = Object.values(portfolioSectorWeights);
     return Math.max(...weights, 0);
   }, [portfolioSectorWeights]);
 
-  // Risk Score 계산
   const riskMetrics = useMemo(() => {
     return calculateRiskMetrics(
       diversificationScore,
@@ -241,11 +203,8 @@ export default function Analytics({ horizontal = false }: AnalyticsProps) {
   const riskLevel = getRiskLevel(riskMetrics.overallScore);
   const riskColor = getRiskColor(riskLevel);
 
-  // Sidebar 기능 통합: Portfolio Weight, Type Distribution, Top/BTM
   const portfolioStats = useMemo(() => {
     const totalValue = assets.reduce((sum, a) => sum + (a.qty * a.price), 0);
-    
-    // Weight별 정렬
     const assetWeights = assets
       .map(a => ({
         ticker: a.ticker,
@@ -254,11 +213,9 @@ export default function Analytics({ horizontal = false }: AnalyticsProps) {
       }))
       .sort((a, b) => b.weight - a.weight);
 
-    // Type 분포 (CORE vs INCOME)
     const coreValue = assets.filter(a => a.type !== 'INCOME').reduce((s, a) => s + a.qty * a.price, 0);
     const incomeValue = assets.filter(a => a.type === 'INCOME').reduce((s, a) => s + a.qty * a.price, 0);
 
-    // Top 3 / Bottom 3
     const sorted = assets
       .map(a => {
         const value = a.qty * a.price;
@@ -283,107 +240,14 @@ export default function Analytics({ horizontal = false }: AnalyticsProps) {
     };
   }, [assets]);
 
-  // Sector Chart 데이터 (Sidebar에서 사용하는 형식)
-  const sectorChartData = useMemo(() => {
-    const sectorData: { [key: string]: { value: number } } = {};
-    assets.forEach(a => {
-      const sector = a.sector || 'Other';
-      const value = a.qty * a.price;
-      if (!sectorData[sector]) {
-        sectorData[sector] = { value: 0 };
-      }
-      sectorData[sector].value += value;
-    });
-
-    const sectors = Object.entries(sectorData)
-      .map(([name, data]) => ({
-        name,
-        value: data.value,
-        weight: portfolioStats.totalValue > 0 ? (data.value / portfolioStats.totalValue) * 100 : 0,
-        emoji: SECTORS[name]?.emoji || '📦',
-      }))
-      .sort((a, b) => b.weight - a.weight);
-
-    return {
-      labels: sectors.map(s => s.name),
-      values: sectors.map(s => s.value),
-      total: portfolioStats.totalValue,
-    };
-  }, [assets, portfolioStats.totalValue]);
-
-  // Sector Chart 초기화 및 업데이트
+  // Total Value 도넛 차트
   useEffect(() => {
-    if (!sectorChartRef.current) return;
-
-    if (!sectorChartInstance.current) {
-      sectorChartInstance.current = new Chart(sectorChartRef.current, {
-        type: 'doughnut',
-        data: {
-          labels: sectorChartData.labels,
-          datasets: [{
-            data: sectorChartData.values,
-            backgroundColor: CHART_COLORS.slice(0, sectorChartData.labels.length),
-            borderWidth: 0,
-          }],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          cutout: '65%',
-          animation: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              backgroundColor: 'rgba(10, 15, 41, 0.9)',
-              callbacks: {
-                label: (ctx) => {
-                  const total = sectorChartData.total || 1;
-                  return `${ctx.label}: ${ctx.parsed.toFixed(0)} (${((ctx.parsed / total) * 100).toFixed(1)}%)`;
-                },
-              },
-            },
-          },
-        },
-      });
-    } else {
-      sectorChartInstance.current.data.labels = sectorChartData.labels;
-      sectorChartInstance.current.data.datasets[0].data = sectorChartData.values;
-      sectorChartInstance.current.data.datasets[0].backgroundColor = CHART_COLORS.slice(0, sectorChartData.labels.length);
-      sectorChartInstance.current.update('none');
-    }
-
-    return () => {
-      if (sectorChartInstance.current) {
-        sectorChartInstance.current.destroy();
-        sectorChartInstance.current = null;
-      }
-    };
-  }, [sectorChartData]);
-
-  // StarCore 도넛 차트 데이터 및 계산
-  const starCoreStats = useMemo(() => {
-    let totalValue = 0;
-    let totalCost = 0;
-    assets.forEach(a => {
-      totalValue += a.qty * a.price;
-      totalCost += a.qty * a.avg;
-    });
-    const returnValue = totalValue - totalCost;
-    const returnPct = totalCost > 0 ? ((returnValue / totalCost) * 100) : 0;
-    return { totalValue, returnValue, returnPct };
-  }, [assets]);
-
-  // StarCore 도넛 차트 초기화
-  useEffect(() => {
-    if (!starCoreChartRef.current) return;
-
+    if (!totalValueChartRef.current) return;
     const data = assets.filter(a => a.qty * a.price > 0);
-
-    if (starCoreChartInstance.current) {
-      starCoreChartInstance.current.destroy();
+    if (totalValueChartInstance.current) {
+      totalValueChartInstance.current.destroy();
     }
-
-    starCoreChartInstance.current = new Chart(starCoreChartRef.current, {
+    totalValueChartInstance.current = new Chart(totalValueChartRef.current, {
       type: 'doughnut',
       data: {
         labels: data.map(a => a.ticker),
@@ -396,7 +260,7 @@ export default function Analytics({ horizontal = false }: AnalyticsProps) {
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        cutout: '72%',
+        cutout: '75%',
         plugins: {
           legend: { display: false },
           tooltip: { enabled: false },
@@ -404,294 +268,321 @@ export default function Analytics({ horizontal = false }: AnalyticsProps) {
         animation: { animateRotate: false },
       },
     });
-
     return () => {
-      if (starCoreChartInstance.current) {
-        starCoreChartInstance.current.destroy();
-        starCoreChartInstance.current = null;
+      if (totalValueChartInstance.current) {
+        totalValueChartInstance.current.destroy();
+        totalValueChartInstance.current = null;
       }
     };
   }, [assets]);
+
+  // Sector 도넛 차트
+  useEffect(() => {
+    if (!sectorChartRef.current) return;
+    if (sectorChartInstance.current) {
+      sectorChartInstance.current.destroy();
+    }
+    sectorChartInstance.current = new Chart(sectorChartRef.current, {
+      type: 'doughnut',
+      data: {
+        labels: topSectors.map(([s]) => s),
+        datasets: [{
+          data: topSectors.map(([, w]) => w * 100),
+          backgroundColor: CHART_COLORS.slice(0, topSectors.length),
+          borderWidth: 0,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '65%',
+        plugins: {
+          legend: { display: false },
+          tooltip: { enabled: false },
+        },
+        animation: { animateRotate: false },
+      },
+    });
+    return () => {
+      if (sectorChartInstance.current) {
+        sectorChartInstance.current.destroy();
+        sectorChartInstance.current = null;
+      }
+    };
+  }, [topSectors]);
+
+  // Type 도넛 차트
+  useEffect(() => {
+    if (!typeChartRef.current) return;
+    if (typeChartInstance.current) {
+      typeChartInstance.current.destroy();
+    }
+    typeChartInstance.current = new Chart(typeChartRef.current, {
+      type: 'doughnut',
+      data: {
+        labels: ['CORE', 'INCOME'],
+        datasets: [{
+          data: [portfolioStats.corePct, portfolioStats.incomePct],
+          backgroundColor: ['#64B5F6', '#FFD700'],
+          borderWidth: 0,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '65%',
+        plugins: {
+          legend: { display: false },
+          tooltip: { enabled: false },
+        },
+        animation: { animateRotate: false },
+      },
+    });
+    return () => {
+      if (typeChartInstance.current) {
+        typeChartInstance.current.destroy();
+        typeChartInstance.current = null;
+      }
+    };
+  }, [portfolioStats.corePct, portfolioStats.incomePct]);
 
   // 반원 게이지 그리기
   useEffect(() => {
     const canvas = gaugeRef.current;
     if (!canvas) return;
-
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     const width = canvas.width;
     const height = canvas.height;
     const centerX = width / 2;
-    const centerY = height - 15;
-    const radius = Math.min(width, height) - 40;
+    const centerY = height - 20;
+    const radius = Math.min(width / 2, height) - 30;
 
-    // Clear canvas
     ctx.clearRect(0, 0, width, height);
 
-    // 배경 아크 그리기
+    // 배경 아크
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius, Math.PI, 2 * Math.PI);
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-    ctx.lineWidth = 20;
+    ctx.lineWidth = 16;
     ctx.lineCap = 'round';
     ctx.stroke();
 
-    // 점수 아크 그리기
-    const scoreAngle = Math.PI + (riskMetrics.overallScore / 100) * Math.PI;
-
-    // 그라데이션 생성
+    // 그라데이션 아크
     const gradient = ctx.createLinearGradient(0, centerY, width, centerY);
     gradient.addColorStop(0, '#E57373');
-    gradient.addColorStop(0.3, '#FFB74D');
+    gradient.addColorStop(0.35, '#FFB74D');
     gradient.addColorStop(0.5, '#FFD700');
     gradient.addColorStop(1, '#81C784');
 
+    const scoreAngle = Math.PI + (riskMetrics.overallScore / 100) * Math.PI;
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius, Math.PI, scoreAngle);
     ctx.strokeStyle = gradient;
-    ctx.lineWidth = 20;
+    ctx.lineWidth = 16;
     ctx.lineCap = 'round';
     ctx.stroke();
 
-    // 점수 텍스트
-    ctx.font = 'bold 36px "Cinzel", serif';
-    ctx.fillStyle = riskColor;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(riskMetrics.overallScore.toString(), centerX, centerY - 30);
-
-    // 레벨 텍스트
-    ctx.font = '13px "Montserrat", sans-serif';
-    ctx.fillStyle = riskColor;
-    ctx.fillText(getRiskLabel(riskLevel), centerX, centerY + 8);
-
-  }, [riskMetrics.overallScore, riskColor, riskLevel]);
-
-  const getSectorIcon = (sector: string) => {
-    const icons: Record<string, string> = {
-      Technology: '💻', Communication: '📡', Consumer: '🛒', Healthcare: '🏥',
-      Finance: '🏦', Industrial: '🏭', Energy: '⚡', RealEstate: '🏠',
-      Utilities: '💡', Materials: '🧱', ETF: '📊', Crypto: '₿', Other: '📦'
-    };
-    return icons[sector] || '📦';
-  };
+  }, [riskMetrics.overallScore]);
 
   if (assets.length === 0) {
     return (
-      <div className="glass-card p-5">
-        <div className="flex items-center gap-2 mb-4 border-b border-white/10 pb-3">
-          <i className="fas fa-shield-alt text-celestial-cyan" />
-          <h3 className="font-display text-sm tracking-widest text-white/90">ANALYTICS</h3>
-        </div>
-        <div className="text-center py-8 opacity-50">
-          <i className="fas fa-chart-pie text-2xl mb-3 opacity-30" />
-          <div className="text-[10px]">자산을 추가하세요</div>
+      <div className="glass-card p-6">
+        <div className="text-center py-12 opacity-50">
+          <i className="fas fa-chart-pie text-4xl mb-4 opacity-30" />
+          <div className="text-sm">자산을 추가하세요</div>
         </div>
       </div>
     );
   }
 
-  // 가로 레이아웃
+  // 가로 레이아웃 (3행 x 4열 그리드)
   if (horizontal) {
     return (
       <div className="glass-card p-5">
-        <div className="flex items-center gap-2 mb-4 border-b border-white/10 pb-3">
-          <i className="fas fa-shield-alt text-celestial-cyan" />
-          <h3 className="font-display text-lg tracking-widest text-white">ANALYTICS</h3>
+        {/* Row 1: Total Value, Weight, Sector, Type */}
+        <div className="grid grid-cols-4 gap-4 mb-4">
+          {/* Total Value */}
+          <div className="inner-glass p-4 rounded-xl">
+            <div className="text-xs tracking-widest text-white/60 mb-3 flex items-center gap-2">
+              TOTAL VALUE <i className="fas fa-info-circle text-white/30" />
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="relative" style={{ width: 100, height: 100 }}>
+                <canvas ref={totalValueChartRef} />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-lg font-display text-white">
+                    ${(portfolioStats.totalValue / 1000).toFixed(0)}K
+                  </span>
+                </div>
+              </div>
+              <div className="flex-1 space-y-1.5">
+                {portfolioStats.assetWeights.slice(0, 5).map((item, i) => (
+                  <div key={item.ticker} className="flex items-center gap-2 text-xs">
+                    <span
+                      className="w-2 h-2 rounded-full"
+                      style={{ backgroundColor: CHART_COLORS[i % CHART_COLORS.length] }}
+                    />
+                    <span className="text-white/80 w-16">{item.ticker}</span>
+                    <span className="text-white/60">{item.weight.toFixed(2)}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Weight */}
+          <div className="inner-glass p-4 rounded-xl">
+            <div className="text-xs tracking-widest text-white/60 mb-3">WEIGHT</div>
+            <div className="space-y-2">
+              {portfolioStats.assetWeights.slice(0, 5).map((item, i) => (
+                <div key={item.ticker} className="flex items-center gap-2">
+                  <span
+                    className="w-2 h-2 rounded-full"
+                    style={{ backgroundColor: CHART_COLORS[i % CHART_COLORS.length] }}
+                  />
+                  <span className="text-xs text-white/80 w-20">{item.ticker}</span>
+                  <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full"
+                      style={{
+                        width: `${item.weight}%`,
+                        backgroundColor: CHART_COLORS[i % CHART_COLORS.length],
+                      }}
+                    />
+                  </div>
+                  <span className="text-xs text-white/60 w-14 text-right">{item.weight.toFixed(2)}%</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Sector */}
+          <div className="inner-glass p-4 rounded-xl">
+            <div className="text-xs tracking-widest text-white/60 mb-3">SECTOR</div>
+            <div className="flex items-center gap-4">
+              <div className="relative" style={{ width: 80, height: 80 }}>
+                <canvas ref={sectorChartRef} />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-[10px] text-white/60">topSectors</span>
+                </div>
+              </div>
+              <div className="flex-1 space-y-1">
+                {topSectors.map(([sector, weight], i) => (
+                  <div key={sector} className="flex items-center gap-2 text-xs">
+                    <span
+                      className="w-2 h-2 rounded-full"
+                      style={{ backgroundColor: CHART_COLORS[i % CHART_COLORS.length] }}
+                    />
+                    <span className="text-white/80">{sector}</span>
+                    <span className="text-white/60 ml-auto">{(weight * 100).toFixed(0)}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Type */}
+          <div className="inner-glass p-4 rounded-xl">
+            <div className="text-xs tracking-widest text-white/60 mb-3">TYPE</div>
+            <div className="flex items-center gap-4">
+              <div className="relative" style={{ width: 80, height: 80 }}>
+                <canvas ref={typeChartRef} />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-[10px] text-white/60">Assets</span>
+                </div>
+              </div>
+              <div className="flex-1 space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-blue-400" />
+                  <span className="text-xs text-white/80">CORE</span>
+                  <span className="text-xs text-blue-400 ml-auto">{portfolioStats.corePct.toFixed(0)}%</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-celestial-gold" />
+                  <span className="text-xs text-white/80">INCOME</span>
+                  <span className="text-xs text-celestial-gold ml-auto">{portfolioStats.incomePct.toFixed(0)}%</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
-          {/* Column 1: TOTAL VALUE + INSIGHT */}
-          <div className="flex flex-col gap-3">
-            <div className="inner-glass p-4 rounded-lg flex flex-col items-center justify-center relative min-h-[200px]">
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
-                <div style={{ width: 130, height: 130 }}>
-                  <canvas ref={starCoreChartRef} />
+        {/* Row 2: Risk Score, Risk Factors, Performance */}
+        <div className="grid grid-cols-4 gap-4 mb-4">
+          {/* Risk Score */}
+          <div className="inner-glass p-4 rounded-xl">
+            <div className="text-xs tracking-widest text-white/60 mb-2">RISK SCORE</div>
+            <div className="flex flex-col items-center">
+              <canvas ref={gaugeRef} width={180} height={100} />
+              <div className="text-center -mt-2">
+                <div className="text-3xl font-display" style={{ color: riskColor }}>
+                  {riskMetrics.overallScore}
                 </div>
-              </div>
-              <div className="relative z-10 text-center">
-                <div className="text-[9px] tracking-widest text-white/80 mb-1.5">TOTAL VALUE</div>
-                <div className="text-xl font-display font-light text-white">
-                  ${(starCoreStats.totalValue / 1000).toFixed(0)}K
+                <div className="text-xs tracking-wider" style={{ color: riskColor }}>
+                  {getRiskLabel(riskLevel)}
                 </div>
-                <div className={`text-xs font-light mt-1 ${
-                  starCoreStats.returnPct >= 0 ? 'text-v64-success' : 'text-v64-danger'
-                }`}>
-                  {starCoreStats.returnPct >= 0 ? '+' : ''}{starCoreStats.returnPct.toFixed(1)}%
-                </div>
-              </div>
-            </div>
-            <div className="inner-glass p-3 rounded-lg border border-celestial-purple/30 flex flex-col min-h-[200px]">
-              <div className="text-[10px] text-celestial-purple tracking-widest mb-2">
-                <i className="fas fa-lightbulb mr-1" />
-                INSIGHT
-              </div>
-              <div className="text-[10px] text-white/90 leading-relaxed flex-1">
-                {riskMetrics.overallScore >= 70 ? (
-                  <>포트폴리오가 <span className="text-v64-success">안정적</span>으로 분산되어 있습니다. 현재 전략을 유지하세요.</>
-                ) : riskMetrics.overallScore >= 50 ? (
-                  <>전반적으로 <span className="text-celestial-gold">양호</span>하지만, 일부 섹터 집중도를 점검하세요.</>
-                ) : riskMetrics.overallScore >= 30 ? (
-                  <>리스크가 <span className="text-v64-warning">높은 편</span>입니다. 분산 투자를 고려하세요.</>
-                ) : (
-                  <>리스크가 <span className="text-v64-danger">매우 높습니다</span>. 포트폴리오 재조정을 권장합니다.</>
-                )}
-                {market.vix > 25 && (
-                  <> 현재 VIX({market.vix?.toFixed(1)})가 높아 시장 변동성에 주의가 필요합니다.</>
-                )}
               </div>
             </div>
           </div>
 
-          {/* Column 2: RISK SCORE + RISK FACTORS */}
-          <div className="flex flex-col gap-3">
-            <div className="inner-glass p-3 rounded-lg flex flex-col items-center justify-center min-h-[200px]">
-              <div className="text-[10px] tracking-widest text-white/80 mb-2">RISK SCORE</div>
-              <canvas
-                ref={gaugeRef}
-                width={180}
-                height={120}
-                className="max-w-full"
-              />
-            </div>
-            <div className="inner-glass p-3 rounded-lg flex flex-col min-h-[200px]">
-              <div className="text-[10px] tracking-widest text-white/90 mb-3">RISK FACTORS</div>
-              <div className="space-y-2 flex-1">
-                {[
-                  { label: '분산도', score: riskMetrics.diversificationScore, icon: 'chart-pie' },
-                  { label: '섹터 집중', score: riskMetrics.sectorConcentration, icon: 'layer-group' },
-                  { label: '변동성', score: riskMetrics.volatilityScore, icon: 'chart-line' },
-                  { label: '종목 집중', score: riskMetrics.concentrationRisk, icon: 'bullseye' },
-                ].map(factor => (
-                  <div key={factor.label} className="inner-glass p-2 rounded">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-[9px] text-white/80">
-                        <i className={`fas fa-${factor.icon} mr-1`} />
-                        {factor.label}
-                      </span>
-                      <span className={`text-[10px] font-mono ${
-                        factor.score >= 70 ? 'text-v64-success' :
-                        factor.score >= 40 ? 'text-celestial-gold' : 'text-v64-danger'
-                      }`}>
-                        {factor.score}
-                      </span>
+          {/* Risk Factors */}
+          <div className="inner-glass p-4 rounded-xl col-span-2">
+            <div className="text-xs tracking-widest text-white/60 mb-3">RISK FACTORS</div>
+            <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+              {[
+                { label: '분산도', eng: 'Diversification', score: riskMetrics.diversificationScore },
+                { label: '섹터 집중', eng: 'Sector Concentration', score: riskMetrics.sectorConcentration },
+                { label: '변동성', eng: 'Volatility', score: riskMetrics.volatilityScore },
+                { label: '종목 집중', eng: 'Stock Concentration', score: riskMetrics.concentrationRisk },
+              ].map(factor => (
+                <div key={factor.label}>
+                  <div className="flex items-center gap-3 mb-1">
+                    <div className="flex gap-0.5">
+                      {[...Array(5)].map((_, i) => (
+                        <div
+                          key={i}
+                          className={`w-2 h-4 rounded-sm ${
+                            i < Math.ceil(factor.score / 20)
+                              ? factor.score >= 70 ? 'bg-v64-success' : factor.score >= 40 ? 'bg-celestial-gold' : 'bg-v64-danger'
+                              : 'bg-white/10'
+                          }`}
+                        />
+                      ))}
                     </div>
-                    <div className="h-1 bg-white/10 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full rounded-full transition-all ${
-                          factor.score >= 70 ? 'bg-v64-success' :
-                          factor.score >= 40 ? 'bg-celestial-gold' : 'bg-v64-danger'
-                        }`}
-                        style={{ width: `${factor.score}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Column 3: WEIGHT + SECTOR */}
-          <div className="flex flex-col gap-3">
-            <div className="inner-glass p-3 rounded-lg flex flex-col min-h-[200px]">
-              <div className="text-[10px] tracking-widest text-white/90 mb-2 flex items-center justify-between">
-                <span>WEIGHT</span>
-                <span className="text-[9px] text-white/60">{portfolioStats.assetWeights.length}</span>
-              </div>
-              <div className="space-y-1.5 flex-1 overflow-y-auto custom-scrollbar">
-                {portfolioStats.assetWeights.slice(0, 6).map((item, i) => (
-                  <div key={item.ticker} className="flex items-center gap-1.5">
-                    <span className="text-[10px] w-10 truncate text-white/90">{item.ticker}</span>
-                    <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full"
-                        style={{
-                          width: `${item.weight}%`,
-                          backgroundColor: CHART_COLORS[i % CHART_COLORS.length],
-                        }}
-                      />
-                    </div>
-                    <span className="text-[9px] w-8 text-right text-white/80">
-                      {item.weight.toFixed(0)}%
+                    <span className={`text-sm font-mono ${
+                      factor.score >= 70 ? 'text-v64-success' : factor.score >= 40 ? 'text-celestial-gold' : 'text-v64-danger'
+                    }`}>
+                      {factor.score}
                     </span>
                   </div>
-                ))}
-              </div>
-            </div>
-            <div className="inner-glass p-3 rounded-lg flex flex-col min-h-[200px]">
-              <div className="text-[10px] text-white/90 tracking-widest mb-2 flex items-center gap-1">
-                <i className="fas fa-chart-pie text-celestial-purple text-[9px]" /> SECTOR
-              </div>
-              <div className="flex gap-2 flex-1 items-center">
-                <div style={{ width: 70, height: 70 }} className="flex-shrink-0">
-                  <canvas ref={sectorChartRef} />
+                  <div className="text-xs text-white/60">
+                    {factor.label} <span className="text-white/40">({factor.eng})</span>
+                  </div>
                 </div>
-                <div className="flex-1 space-y-1 overflow-y-auto custom-scrollbar text-[9px]">
-                  {topSectors.slice(0, 5).map(([sector, weight], i) => (
-                    <div key={sector} className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5">
-                        <span
-                          className="w-1.5 h-1.5 rounded-full"
-                          style={{ backgroundColor: CHART_COLORS[i % CHART_COLORS.length] }}
-                        />
-                        <span className="text-white/90 truncate">{getSectorIcon(sector)}</span>
-                      </div>
-                      <span className="text-white/80">{(weight * 100).toFixed(0)}%</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              ))}
             </div>
           </div>
 
-          {/* Column 4: TYPE + TOP */}
-          <div className="flex flex-col gap-3">
-            <div className="inner-glass p-3 rounded-lg flex flex-col min-h-[200px]">
-              <div className="text-[10px] tracking-widest text-white/90 mb-2">TYPE</div>
-              <div className="grid grid-cols-2 gap-2 flex-1">
-                <div className="inner-glass p-2 text-center rounded border border-white/10 flex flex-col justify-center">
-                  <div className="text-[8px] text-white/80 tracking-widest">CORE</div>
-                  <div className="text-sm font-display text-white">
-                    ${(portfolioStats.coreValue / 1000).toFixed(0)}K
-                  </div>
-                  <div className="text-[9px] text-white/80">{portfolioStats.corePct.toFixed(0)}%</div>
-                </div>
-                <div className="inner-glass p-2 text-center rounded border border-celestial-gold/30 flex flex-col justify-center">
-                  <div className="text-[8px] text-celestial-gold/90 tracking-widest">INCOME</div>
-                  <div className="text-sm font-display text-celestial-gold">
-                    ${(portfolioStats.incomeValue / 1000).toFixed(0)}K
-                  </div>
-                  <div className="text-[9px] text-celestial-gold">{portfolioStats.incomePct.toFixed(0)}%</div>
-                </div>
-              </div>
-            </div>
-            <div className="inner-glass p-3 rounded-lg flex flex-col min-h-[200px]">
-              <div className="ranking-title text-[10px] mb-2 text-white/90">
-                <i className="fas fa-trophy text-celestial-gold text-[9px]" /> TOP
-              </div>
-              <div className="space-y-1.5 flex-1">
-                {portfolioStats.top3.slice(0, 3).map((item) => (
-                  <div key={item.ticker} className="ranking-item flex justify-between text-[10px]">
-                    <span className="truncate text-white/90">{item.ticker}</span>
-                    <span className="text-v64-success">{item.returnPct >= 0 ? '+' : ''}{item.returnPct.toFixed(0)}%</span>
+          {/* Performance */}
+          <div className="inner-glass p-4 rounded-xl">
+            <div className="text-xs tracking-widest text-white/60 mb-3">PERFORMANCE</div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <div className="text-xs text-white/60 mb-2">TOP</div>
+                {portfolioStats.top3.map(item => (
+                  <div key={item.ticker} className="flex justify-between text-xs mb-1">
+                    <span className="text-white/80">{item.ticker}</span>
+                    <span className="text-v64-success">+{item.returnPct.toFixed(0)}%</span>
                   </div>
                 ))}
               </div>
-            </div>
-          </div>
-
-          {/* Column 5: BTM + VS S&P 500 + VS NASDAQ + RISK PROFILE */}
-          <div className="flex flex-col gap-3">
-            <div className="inner-glass p-3 rounded-lg flex flex-col min-h-[200px]">
-              <div className="ranking-title text-[10px] mb-2 text-white/90">
-                <i className="fas fa-exclamation-triangle text-v64-danger text-[9px]" /> BTM
-              </div>
-              <div className="space-y-1.5 flex-1">
-                {portfolioStats.bottom3.slice(0, 3).map((item) => (
-                  <div key={item.ticker} className="ranking-item flex justify-between text-[10px]">
-                    <span className="truncate text-white/90">{item.ticker}</span>
+              <div>
+                <div className="text-xs text-white/60 mb-2">BTM</div>
+                {portfolioStats.bottom3.map(item => (
+                  <div key={item.ticker} className="flex justify-between text-xs mb-1">
+                    <span className="text-white/80">{item.ticker}</span>
                     <span className={item.returnPct >= 0 ? 'text-v64-success' : 'text-v64-danger'}>
                       {item.returnPct >= 0 ? '+' : ''}{item.returnPct.toFixed(0)}%
                     </span>
@@ -699,188 +590,114 @@ export default function Analytics({ horizontal = false }: AnalyticsProps) {
                 ))}
               </div>
             </div>
-            <div className="inner-glass p-3 rounded-lg flex flex-col justify-center min-h-[200px]">
-              <div className="text-[10px] text-white/80 tracking-widest mb-2 flex items-center gap-1">
-                <i className="fas fa-chart-line text-v64-danger text-[9px]" /> VS S&P 500
+          </div>
+        </div>
+
+        {/* Row 3: Market Correlation, Risk Profile, Insight */}
+        <div className="grid grid-cols-4 gap-4">
+          {/* Market Correlation */}
+          <div className="inner-glass p-4 rounded-xl">
+            <div className="text-xs tracking-widest text-white/60 mb-3">MARKET CORRELATION</div>
+            <div className="grid grid-cols-2 gap-4 text-center">
+              <div>
+                <div className="text-xs text-white/50 mb-1">VS S&P 500</div>
+                <div className="text-2xl font-display text-white/90">({marketCorrelations.spy.toFixed(2)})</div>
               </div>
-              <div className={`text-2xl font-display mb-2 ${
-                marketCorrelations.spy >= 0.7 ? 'text-v64-success' : 'text-celestial-gold'
-              }`}>
-                {marketCorrelations.spy.toFixed(2)}
+              <div>
+                <div className="text-xs text-white/50 mb-1">VS NASDAQ</div>
+                <div className="text-2xl font-display text-white/90">({marketCorrelations.qqq.toFixed(2)})</div>
               </div>
-              {portfolioStats.bottom3.length > 0 && (
-                <div className="text-[9px] text-v64-danger mt-1">
-                  {portfolioStats.bottom3[0]?.ticker} {portfolioStats.bottom3[0]?.returnPct < 0 ? '' : '+'}{portfolioStats.bottom3[0]?.returnPct.toFixed(0)}%
-                </div>
+            </div>
+          </div>
+
+          {/* Risk Profile */}
+          <div className="inner-glass p-4 rounded-xl">
+            <div className="text-xs tracking-widest text-white/60 mb-3">RISK PROFILE</div>
+            <div className="text-xs text-white/60 mb-3">Based on the data with eoature analytics:</div>
+            <div className="flex flex-wrap gap-2">
+              <span className="px-3 py-1.5 rounded-full bg-blue-500/20 border border-blue-500/50 text-blue-400 text-xs">
+                Tech (기술주)
+              </span>
+              <span className="px-3 py-1.5 rounded-full bg-green-500/20 border border-green-500/50 text-green-400 text-xs">
+                방어 (Defensive)
+              </span>
+              <span className="px-3 py-1.5 rounded-full bg-yellow-500/20 border border-yellow-500/50 text-yellow-400 text-xs">
+                경기 (Cyclical)
+              </span>
+            </div>
+          </div>
+
+          {/* Insight */}
+          <div className="inner-glass p-4 rounded-xl col-span-2">
+            <div className="text-xs tracking-widest text-white/60 mb-3">INSIGHT</div>
+            <ul className="text-xs text-white/80 space-y-2 list-disc list-inside">
+              {riskProfile.defensiveExposure < 0.2 && (
+                <li>Consider increasing defensive assets to lower volatility.</li>
               )}
-            </div>
-            <div className="inner-glass p-3 rounded-lg flex flex-col justify-center min-h-[200px]">
-              <div className="text-[10px] text-white/80 tracking-widest mb-2">VS NASDAQ</div>
-              <div className={`text-2xl font-display ${
-                marketCorrelations.qqq >= 0.7 ? 'text-v64-success' : 'text-celestial-gold'
-              }`}>
-                {marketCorrelations.qqq.toFixed(2)}
-              </div>
-            </div>
-            <div className="inner-glass p-3 rounded-lg flex flex-col justify-center min-h-[200px]">
-              <div className="text-[10px] text-white/80 tracking-widest mb-3">RISK PROFILE</div>
-              <div className="grid grid-cols-3 gap-2 text-center">
-                <div>
-                  <div className="text-[12px] text-blue-400 font-mono mb-0.5">{(riskProfile.techExposure * 100).toFixed(0)}%</div>
-                  <div className="text-[9px] text-white/80">Tech</div>
-                </div>
-                <div>
-                  <div className="text-[12px] text-v64-success font-mono mb-0.5">{(riskProfile.defensiveExposure * 100).toFixed(0)}%</div>
-                  <div className="text-[9px] text-white/80">방어</div>
-                </div>
-                <div>
-                  <div className="text-[12px] text-celestial-gold font-mono mb-0.5">{(riskProfile.cyclicalExposure * 100).toFixed(0)}%</div>
-                  <div className="text-[9px] text-white/80">경기</div>
-                </div>
-              </div>
-            </div>
+              {riskProfile.techExposure > 0.4 && (
+                <li>Tech sector exposure is high; review diversificationScore.</li>
+              )}
+              {maxAssetWeight > 0.2 && portfolioStats.top3[0] && (
+                <li>Monitor top concentrationRisk in {portfolioStats.top3[0].ticker}.</li>
+              )}
+              {riskMetrics.overallScore >= 70 && (
+                <li>Portfolio is well-diversified. Maintain current strategy.</li>
+              )}
+              {market.vix > 25 && (
+                <li>VIX is elevated ({market.vix?.toFixed(1)}). Monitor market volatility.</li>
+              )}
+            </ul>
           </div>
         </div>
       </div>
     );
   }
 
-  // 세로 레이아웃 (기존)
+  // 세로 레이아웃 (기존 유지)
   return (
     <div className="glass-card p-5 h-full flex flex-col">
-      {/* Header */}
-      <div className="flex items-center gap-2 mb-4 border-b border-white/10 pb-3 flex-shrink-0">
+      <div className="flex items-center gap-2 mb-4 border-b border-white/10 pb-3">
         <i className="fas fa-shield-alt text-celestial-cyan" />
-        <h3 className="font-display text-sm tracking-widest text-white/90">RISK ANALYTICS</h3>
+        <h3 className="font-display text-sm tracking-widest text-white/90">ANALYTICS</h3>
       </div>
-
-      {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto custom-scrollbar min-h-0">
-        {/* Risk Score Gauge */}
         <div className="flex justify-center mb-4">
-          <canvas
-            ref={gaugeRef}
-            width={200}
-            height={120}
-            className="max-w-full"
-          />
+          <canvas ref={gaugeRef} width={200} height={120} />
         </div>
-
-        {/* Risk Factors */}
+        <div className="text-center mb-4">
+          <div className="text-2xl font-display" style={{ color: riskColor }}>
+            {riskMetrics.overallScore}
+          </div>
+          <div className="text-xs" style={{ color: riskColor }}>
+            {getRiskLabel(riskLevel)}
+          </div>
+        </div>
         <div className="grid grid-cols-2 gap-2 mb-4">
           {[
-            { label: '분산도', score: riskMetrics.diversificationScore, icon: 'chart-pie' },
-            { label: '섹터 집중', score: riskMetrics.sectorConcentration, icon: 'layer-group' },
-            { label: '변동성', score: riskMetrics.volatilityScore, icon: 'chart-line' },
-            { label: '종목 집중', score: riskMetrics.concentrationRisk, icon: 'bullseye' },
+            { label: '분산도', score: riskMetrics.diversificationScore },
+            { label: '섹터 집중', score: riskMetrics.sectorConcentration },
+            { label: '변동성', score: riskMetrics.volatilityScore },
+            { label: '종목 집중', score: riskMetrics.concentrationRisk },
           ].map(factor => (
             <div key={factor.label} className="inner-glass p-2 rounded-lg">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-[8px] opacity-50">
-                  <i className={`fas fa-${factor.icon} mr-1`} />
-                  {factor.label}
-                </span>
-                <span className={`text-[10px] font-mono ${
-                  factor.score >= 70 ? 'text-v64-success' :
-                  factor.score >= 40 ? 'text-celestial-gold' : 'text-v64-danger'
+                <span className="text-[9px] text-white/60">{factor.label}</span>
+                <span className={`text-xs font-mono ${
+                  factor.score >= 70 ? 'text-v64-success' : factor.score >= 40 ? 'text-celestial-gold' : 'text-v64-danger'
                 }`}>
                   {factor.score}
                 </span>
               </div>
               <div className="h-1 bg-white/10 rounded-full overflow-hidden">
                 <div
-                  className={`h-full rounded-full transition-all ${
-                    factor.score >= 70 ? 'bg-v64-success' :
-                    factor.score >= 40 ? 'bg-celestial-gold' : 'bg-v64-danger'
+                  className={`h-full rounded-full ${
+                    factor.score >= 70 ? 'bg-v64-success' : factor.score >= 40 ? 'bg-celestial-gold' : 'bg-v64-danger'
                   }`}
                   style={{ width: `${factor.score}%` }}
                 />
               </div>
             </div>
           ))}
-        </div>
-
-        {/* Sector Exposure */}
-        <div className="inner-glass p-3 rounded-lg mb-3">
-          <div className="text-[9px] opacity-40 tracking-widest mb-2">SECTOR EXPOSURE</div>
-          <div className="space-y-2">
-            {topSectors.map(([sector, weight]) => (
-              <div key={sector} className="flex items-center gap-2">
-                <span className="text-[11px] w-5">{getSectorIcon(sector)}</span>
-                <span className="text-[9px] opacity-70 w-20 truncate">{sector}</span>
-                <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-celestial-cyan/50 to-celestial-cyan rounded-full"
-                    style={{ width: `${weight * 100}%` }}
-                  />
-                </div>
-                <span className="text-[9px] font-mono w-10 text-right">{(weight * 100).toFixed(1)}%</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Market Correlation */}
-        <div className="grid grid-cols-2 gap-2 mb-3">
-          <div className="inner-glass p-3 rounded-lg text-center">
-            <div className="text-[8px] opacity-40 tracking-widest mb-1">VS S&P 500</div>
-            <div className={`text-base font-display ${
-              marketCorrelations.spy >= 0.7 ? 'text-v64-success' : 'text-celestial-gold'
-            }`}>
-              {marketCorrelations.spy.toFixed(2)}
-            </div>
-            <div className="text-[7px] opacity-40">상관계수</div>
-          </div>
-          <div className="inner-glass p-3 rounded-lg text-center">
-            <div className="text-[8px] opacity-40 tracking-widest mb-1">VS NASDAQ</div>
-            <div className={`text-base font-display ${
-              marketCorrelations.qqq >= 0.7 ? 'text-v64-success' : 'text-celestial-gold'
-            }`}>
-              {marketCorrelations.qqq.toFixed(2)}
-            </div>
-            <div className="text-[7px] opacity-40">상관계수</div>
-          </div>
-        </div>
-
-        {/* Risk Profile */}
-        <div className="inner-glass p-3 rounded-lg mb-3">
-          <div className="text-[9px] opacity-40 tracking-widest mb-2">RISK PROFILE</div>
-          <div className="grid grid-cols-3 gap-2 text-center">
-            <div>
-              <div className="text-[10px] text-blue-400 font-mono">{(riskProfile.techExposure * 100).toFixed(0)}%</div>
-              <div className="text-[7px] opacity-40">Tech/성장</div>
-            </div>
-            <div>
-              <div className="text-[10px] text-v64-success font-mono">{(riskProfile.defensiveExposure * 100).toFixed(0)}%</div>
-              <div className="text-[7px] opacity-40">방어주</div>
-            </div>
-            <div>
-              <div className="text-[10px] text-celestial-gold font-mono">{(riskProfile.cyclicalExposure * 100).toFixed(0)}%</div>
-              <div className="text-[7px] opacity-40">경기민감</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Insight */}
-        <div className="inner-glass p-3 rounded-lg border border-celestial-purple/20">
-          <div className="text-[9px] text-celestial-purple tracking-widest mb-1">
-            <i className="fas fa-lightbulb mr-1" />
-            INSIGHT
-          </div>
-          <div className="text-[9px] text-white/70 leading-relaxed">
-            {riskMetrics.overallScore >= 70 ? (
-              <>포트폴리오가 <span className="text-v64-success">안정적</span>으로 분산되어 있습니다. 현재 전략을 유지하세요.</>
-            ) : riskMetrics.overallScore >= 50 ? (
-              <>전반적으로 <span className="text-celestial-gold">양호</span>하지만, 일부 섹터 집중도를 점검하세요.</>
-            ) : riskMetrics.overallScore >= 30 ? (
-              <>리스크가 <span className="text-v64-warning">높은 편</span>입니다. 분산 투자를 고려하세요.</>
-            ) : (
-              <>리스크가 <span className="text-v64-danger">매우 높습니다</span>. 포트폴리오 재조정을 권장합니다.</>
-            )}
-            {market.vix > 25 && (
-              <> 현재 VIX({market.vix?.toFixed(1)})가 높아 시장 변동성에 주의가 필요합니다.</>
-            )}
-          </div>
         </div>
       </div>
     </div>

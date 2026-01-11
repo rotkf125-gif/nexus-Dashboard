@@ -1,4 +1,4 @@
-# 🌟 NEXUS CELESTIAL V65.5 - Next.js Edition
+# 🌟 NEXUS CELESTIAL V65.6 - Next.js Edition
 
 개인 투자 포트폴리오 대시보드 (Celestial Glass 테마)
 
@@ -9,6 +9,29 @@
 | **Live Site** | https://nexus-dashboard-beige.vercel.app |
 | **GitHub** | https://github.com/rotkf125-gif/nexus-dashboard |
 | **Database** | Supabase (PostgreSQL) |
+
+---
+
+## ✨ V65.6 변경 사항
+
+### 🎨 Analytics 컴포넌트 전면 개편
+- **3행 x 4열 그리드 레이아웃**으로 재구성
+- **Row 1**: Total Value (도넛 차트), Weight (바 그래프), Sector (도넛 차트), Type (CORE/INCOME 차트)
+- **Row 2**: Risk Score (반원 게이지), Risk Factors (4지표 막대 시각화), Performance (TOP/BTM 순위)
+- **Row 3**: Market Correlation (S&P/NASDAQ 상관계수), Risk Profile (태그 버튼), Insight (분석 리스트)
+
+### 🎯 사이드바 네비게이션 개선
+- **텍스트 크기 확대**: text-[10px] → text-sm (14px)
+- **아이콘 크기 확대**: text-[10px] → text-sm
+- **탭별 고유 색상** hover 효과:
+  - Stellar Assets: Cyan (핵심 자산)
+  - Income Stream: Gold (배당/수익)
+  - Analytics: Purple (분석/리스크)
+  - Performance: Green (성과/수익률)
+  - Simulation: Orange (시뮬레이션/실험)
+
+### 🔧 파일 리네이밍
+- `RiskAnalytics.tsx` → `Analytics.tsx`
 
 ---
 
@@ -241,7 +264,7 @@ nexus-next/
 │   ├── SimulationHub.tsx     # 시뮬레이션 탭 (What-If, Rebalance)
 │   ├── WhatIfSimulator.tsx   # What-If
 │   ├── RebalanceSimulator.tsx# 리밸런싱
-│   ├── RiskAnalytics.tsx     # Risk Score + 상관관계 분석
+│   ├── Analytics.tsx         # Analytics (Risk Score + 상관관계 분석)
 │   ├── PerformanceArena.tsx  # 벤치마크 비교
 │   ├── HistoricPerformance.tsx # 히스토릭 퍼포먼스 차트
 │   ├── SettingsModal.tsx     # 설정 (Export/Import)
@@ -542,6 +565,7 @@ npm install
 
 | 버전 | 날짜 | 주요 변경 |
 |------|------|----------|
+| V65.6 | 2025-01-11 | Analytics 전면 개편 (3x4 그리드), 사이드바 탭별 색상, 텍스트 확대 |
 | V65.5 | 2025-01-11 | 가독성 대폭 개선 (텍스트/차트 확대, opacity 증가, DPS+Learning 세로 배치) |
 | V65.4 | 2025-01-11 | Stellar Assets 레이아웃 재구성 (1/4+3/4 분할) |
 | V65.3 | 2025-01-05 | 레이아웃 최적화 (Assets/Simulation/Risk 높이 동기화) |

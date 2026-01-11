@@ -95,12 +95,13 @@ function DashboardContent() {
         <div className="lg:col-span-2 glass-card p-4 flex flex-col h-full">
           <div className="text-xs tracking-widest text-white/60 mb-4 uppercase font-medium">Navigation</div>
           <div className="flex flex-col flex-1 gap-3">
+            {/* Stellar Assets - Cyan (핵심 자산) */}
             <button
               onClick={() => setActiveTab('stellar')}
               className={`flex-1 w-full px-4 rounded-lg transition-all flex items-center justify-center ${
                 activeTab === 'stellar'
-                  ? 'bg-celestial-cyan/20 border border-celestial-cyan/50 text-white'
-                  : 'text-white/70 hover:bg-white/5 hover:text-white/90'
+                  ? 'bg-celestial-cyan/20 border border-celestial-cyan/50 text-celestial-cyan'
+                  : 'text-white/70 hover:bg-celestial-cyan/10 hover:text-celestial-cyan hover:border-celestial-cyan/30 border border-transparent'
               }`}
             >
               <div className="flex items-center gap-3">
@@ -108,12 +109,13 @@ function DashboardContent() {
                 <span className="text-sm font-medium tracking-wide">Stellar Assets</span>
               </div>
             </button>
+            {/* Income Stream - Gold (배당/수익) */}
             <button
               onClick={() => setActiveTab('income')}
               className={`flex-1 w-full px-4 rounded-lg transition-all flex items-center justify-center ${
                 activeTab === 'income'
-                  ? 'bg-celestial-gold/20 border border-celestial-gold/50 text-white'
-                  : 'text-white/70 hover:bg-white/5 hover:text-white/90'
+                  ? 'bg-celestial-gold/20 border border-celestial-gold/50 text-celestial-gold'
+                  : 'text-white/70 hover:bg-celestial-gold/10 hover:text-celestial-gold hover:border-celestial-gold/30 border border-transparent'
               }`}
             >
               <div className="flex items-center gap-3">
@@ -121,12 +123,13 @@ function DashboardContent() {
                 <span className="text-sm font-medium tracking-wide">Income Stream</span>
               </div>
             </button>
+            {/* Analytics - Purple (분석/리스크) */}
             <button
               onClick={() => setActiveTab('analytics')}
               className={`flex-1 w-full px-4 rounded-lg transition-all flex items-center justify-center ${
                 activeTab === 'analytics'
-                  ? 'bg-celestial-cyan/20 border border-celestial-cyan/50 text-white'
-                  : 'text-white/70 hover:bg-white/5 hover:text-white/90'
+                  ? 'bg-celestial-purple/20 border border-celestial-purple/50 text-celestial-purple'
+                  : 'text-white/70 hover:bg-celestial-purple/10 hover:text-celestial-purple hover:border-celestial-purple/30 border border-transparent'
               }`}
             >
               <div className="flex items-center gap-3">
@@ -134,12 +137,13 @@ function DashboardContent() {
                 <span className="text-sm font-medium tracking-wide">Analytics</span>
               </div>
             </button>
+            {/* Performance - Green (성과/수익률) */}
             <button
               onClick={() => setActiveTab('performance')}
               className={`flex-1 w-full px-4 rounded-lg transition-all flex items-center justify-center ${
                 activeTab === 'performance'
-                  ? 'bg-v64-success/20 border border-v64-success/50 text-white'
-                  : 'text-white/70 hover:bg-white/5 hover:text-white/90'
+                  ? 'bg-v64-success/20 border border-v64-success/50 text-v64-success'
+                  : 'text-white/70 hover:bg-v64-success/10 hover:text-v64-success hover:border-v64-success/30 border border-transparent'
               }`}
             >
               <div className="flex items-center gap-3">
@@ -147,12 +151,13 @@ function DashboardContent() {
                 <span className="text-sm font-medium tracking-wide">Performance</span>
               </div>
             </button>
+            {/* Simulation - Orange (시뮬레이션/실험) */}
             <button
               onClick={() => setActiveTab('simulation')}
               className={`flex-1 w-full px-4 rounded-lg transition-all flex items-center justify-center ${
                 activeTab === 'simulation'
-                  ? 'bg-v64-success/20 border border-v64-success/50 text-white'
-                  : 'text-white/70 hover:bg-white/5 hover:text-white/90'
+                  ? 'bg-orange-500/20 border border-orange-500/50 text-orange-400'
+                  : 'text-white/70 hover:bg-orange-500/10 hover:text-orange-400 hover:border-orange-500/30 border border-transparent'
               }`}
             >
               <div className="flex items-center gap-3">
