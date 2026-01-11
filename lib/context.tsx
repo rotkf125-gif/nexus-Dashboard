@@ -131,8 +131,12 @@ export function NexusProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!isLoaded) return;
 
-    // localStorage에 즉시 저장 (로컬 백업)
-    saveState(state);
+    // localStorage에 즉시 저장 (로컬 백업) - 동기적이므로 빠름
+    try {
+      saveState(state);
+    } catch (error) {
+      console.error('Failed to save to localStorage:', error);
+    }
 
     // Supabase 저장은 debounce (1초 후)
     if (saveTimerRef.current) {
@@ -140,9 +144,14 @@ export function NexusProvider({ children }: { children: ReactNode }) {
     }
 
     saveTimerRef.current = setTimeout(async () => {
-      setIsSyncing(true);
-      await saveStateToSupabase(state);
-      setIsSyncing(false);
+      try {
+        setIsSyncing(true);
+        await saveStateToSupabase(state);
+      } catch (error) {
+        console.error('Failed to save to Supabase:', error);
+      } finally {
+        setIsSyncing(false);
+      }
     }, 1000);
 
     return () => {

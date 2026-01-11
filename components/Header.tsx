@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNexus } from '@/lib/context';
 import { supabase } from '@/lib/supabase';
 import { getMarketStateInfo, isDST, MarketState } from '@/lib/utils';
@@ -114,58 +114,85 @@ export default function Header({ onOpenSettings, onOpenAuth, onOpenFreedom }: He
     };
   }, []);
 
-  // Calculate totals
-  let totalCost = 0, totalValue = 0, totalCostKrw = 0, totalValueKrw = 0;
-  state.assets.forEach(a => {
-    const cost = a.qty * a.avg;
-    const value = a.qty * a.price;
-    const buyRate = a.buyRate || state.exchangeRate;
-    totalCost += cost;
-    totalValue += value;
-    totalCostKrw += Math.round(cost * buyRate);
-    totalValueKrw += Math.round(value * state.exchangeRate);
-  });
+  // Calculate totals - 메모이제이션
+  const portfolioStats = useMemo(() => {
+    let totalCost = 0, totalValue = 0, totalCostKrw = 0, totalValueKrw = 0;
+    state.assets.forEach(a => {
+      const cost = a.qty * a.avg;
+      const value = a.qty * a.price;
+      const buyRate = a.buyRate || state.exchangeRate;
+      totalCost += cost;
+      totalValue += value;
+      totalCostKrw += Math.round(cost * buyRate);
+      totalValueKrw += Math.round(value * state.exchangeRate);
+    });
 
-  const returnVal = totalValue - totalCost;
-  const returnKrw = totalValueKrw - totalCostKrw;
-  const sign = returnVal >= 0 ? '+' : '';
-  const signKrw = returnKrw >= 0 ? '+' : '';
-  const colorClass = returnVal >= 0 ? 'text-v64-success glow-success' : 'text-v64-danger glow-danger';
-  const colorClassKrw = returnKrw >= 0 ? 'text-v64-success glow-success' : 'text-v64-danger glow-danger';
+    const returnVal = totalValue - totalCost;
+    const returnKrw = totalValueKrw - totalCostKrw;
+    const sign = returnVal >= 0 ? '+' : '';
+    const signKrw = returnKrw >= 0 ? '+' : '';
+    const colorClass = returnVal >= 0 ? 'text-v64-success glow-success' : 'text-v64-danger glow-danger';
+    const colorClassKrw = returnKrw >= 0 ? 'text-v64-success glow-success' : 'text-v64-danger glow-danger';
 
-  // VIX Level
-  const vix = state.market.vix || 15;
-  let vixLevel = 'LOW';
-  let vixAction = '평상 운용';
-  let vixBarWidth = 20;
-  let vixBarColor = 'bg-v64-success';
-  
-  if (vix <= 15) {
-    vixLevel = 'LOW';
-    vixAction = '평상 운용';
-    vixBarWidth = 20;
-    vixBarColor = 'bg-v64-success';
-  } else if (vix <= 25) {
-    vixLevel = 'NORMAL';
-    vixAction = '주의 관찰';
-    vixBarWidth = 40;
-    vixBarColor = 'bg-v64-success';
-  } else if (vix <= 35) {
-    vixLevel = 'ELEVATED';
-    vixAction = '현금 확보';
-    vixBarWidth = 60;
-    vixBarColor = 'bg-v64-warning';
-  } else if (vix <= 50) {
-    vixLevel = 'HIGH';
-    vixAction = '방어 모드';
-    vixBarWidth = 80;
-    vixBarColor = 'bg-v64-danger';
-  } else {
-    vixLevel = 'EXTREME';
-    vixAction = '시장 혼란';
-    vixBarWidth = 100;
-    vixBarColor = 'bg-v64-danger';
-  }
+    return {
+      totalCost,
+      totalValue,
+      totalCostKrw,
+      totalValueKrw,
+      returnVal,
+      returnKrw,
+      sign,
+      signKrw,
+      colorClass,
+      colorClassKrw,
+    };
+  }, [state.assets, state.exchangeRate]);
+
+  // VIX Level 계산 - 메모이제이션
+  const vixStats = useMemo(() => {
+    const vix = state.market.vix || 15;
+    let vixLevel = 'LOW';
+    let vixAction = '평상 운용';
+    let vixBarWidth = 20;
+    let vixBarColor = 'bg-v64-success';
+    
+    if (vix <= 15) {
+      vixLevel = 'LOW';
+      vixAction = '평상 운용';
+      vixBarWidth = 20;
+      vixBarColor = 'bg-v64-success';
+    } else if (vix <= 25) {
+      vixLevel = 'NORMAL';
+      vixAction = '주의 관찰';
+      vixBarWidth = 40;
+      vixBarColor = 'bg-v64-success';
+    } else if (vix <= 35) {
+      vixLevel = 'ELEVATED';
+      vixAction = '현금 확보';
+      vixBarWidth = 60;
+      vixBarColor = 'bg-v64-warning';
+    } else if (vix <= 50) {
+      vixLevel = 'HIGH';
+      vixAction = '방어 모드';
+      vixBarWidth = 80;
+      vixBarColor = 'bg-v64-danger';
+    } else {
+      vixLevel = 'EXTREME';
+      vixAction = '시장 혼란';
+      vixBarWidth = 100;
+      vixBarColor = 'bg-v64-danger';
+    }
+
+    return { vix, vixLevel, vixAction, vixBarWidth, vixBarColor };
+  }, [state.market.vix]);
+
+  // Market state 정보 - 메모이제이션
+  const marketInfo = useMemo(() => {
+    const marketState = (state.market.marketState || 'CLOSED') as MarketState;
+    return getMarketStateInfo(marketState);
+  }, [state.market.marketState]);
+
+  const dstActive = useMemo(() => isDST(), []);
 
   // ═══════════════════════════════════════════════════════════════
   // EXPORT FUNCTION (Refactored with FreedomModal Logic)
@@ -183,7 +210,7 @@ export default function Header({ onOpenSettings, onOpenAuth, onOpenFreedom }: He
       });
       return Object.entries(groups).map(([name, data]) => ({
         name,
-        weight: totalValue > 0 ? (data.value / totalValue * 100).toFixed(1) + '%' : '0%',
+        weight: portfolioStats.totalValue > 0 ? (data.value / portfolioStats.totalValue * 100).toFixed(1) + '%' : '0%',
         returnPct: data.cost > 0 ? ((data.value - data.cost) / data.cost * 100).toFixed(2) + '%' : '0%',
         valueUsd: Math.round(data.value),
         assetCount: data.count
@@ -203,7 +230,7 @@ export default function Header({ onOpenSettings, onOpenAuth, onOpenFreedom }: He
     // 4. 자산 상세 데이터
     const assetsData = state.assets.map(a => {
       const value = a.qty * a.price;
-      const weight = totalValue > 0 ? (value / totalValue * 100).toFixed(2) + '%' : '0%';
+      const weight = portfolioStats.totalValue > 0 ? (value / portfolioStats.totalValue * 100).toFixed(2) + '%' : '0%';
       return {
         ticker: a.ticker,
         type: a.type,
@@ -235,10 +262,10 @@ export default function Header({ onOpenSettings, onOpenAuth, onOpenFreedom }: He
         userStrategy: state.strategy || 'Unspecified',
       },
       summary: {
-        totalValue: Number(totalValue.toFixed(2)),
-        totalCost: Number(totalCost.toFixed(2)),
+        totalValue: Number(portfolioStats.totalValue.toFixed(2)),
+        totalCost: Number(portfolioStats.totalCost.toFixed(2)),
         totalRealizedPL: Number(totalRealizedPL.toFixed(2)),
-        unrealizedReturnPct: totalCost > 0 ? Number(((totalValue - totalCost) / totalCost * 100).toFixed(2)) + '%' : '0%',
+        unrealizedReturnPct: portfolioStats.totalCost > 0 ? Number(((portfolioStats.totalValue - portfolioStats.totalCost) / portfolioStats.totalCost * 100).toFixed(2)) + '%' : '0%',
         exchangeRate: state.exchangeRate,
         cashHoldings: 0,
       },
@@ -282,16 +309,16 @@ export default function Header({ onOpenSettings, onOpenAuth, onOpenFreedom }: He
           {/* USD */}
           <div className="text-center">
             <div className="text-[8px] uppercase tracking-widest mb-1 opacity-80">평가금($)</div>
-            <div className="text-2xl font-light tracking-tight text-gradient-cyan">{formatUSD(totalValue)}</div>
-            <div className={`text-[10px] mt-0.5 ${colorClass}`}>({sign}{formatUSD(Math.abs(returnVal))})</div>
-            <div className="text-[9px] mt-1 opacity-80">원금: {formatUSD(totalCost)}</div>
+            <div className="text-2xl font-light tracking-tight text-gradient-cyan">{formatUSD(portfolioStats.totalValue)}</div>
+            <div className={`text-[10px] mt-0.5 ${portfolioStats.colorClass}`}>({portfolioStats.sign}{formatUSD(Math.abs(portfolioStats.returnVal))})</div>
+            <div className="text-[9px] mt-1 opacity-80">원금: {formatUSD(portfolioStats.totalCost)}</div>
           </div>
           {/* KRW */}
           <div className="text-center">
             <div className="text-[8px] uppercase tracking-widest mb-1 opacity-80">평가금(₩)</div>
-            <div className="text-2xl font-light tracking-tight text-gradient-gold">₩{totalValueKrw.toLocaleString()}</div>
-            <div className={`text-[10px] mt-0.5 ${colorClassKrw}`}>({signKrw}₩{Math.abs(returnKrw).toLocaleString()})</div>
-            <div className="text-[9px] mt-1 opacity-80">원금: ₩{totalCostKrw.toLocaleString()}</div>
+            <div className="text-2xl font-light tracking-tight text-gradient-gold">₩{portfolioStats.totalValueKrw.toLocaleString()}</div>
+            <div className={`text-[10px] mt-0.5 ${portfolioStats.colorClassKrw}`}>({portfolioStats.signKrw}₩{Math.abs(portfolioStats.returnKrw).toLocaleString()})</div>
+            <div className="text-[9px] mt-1 opacity-80">원금: ₩{portfolioStats.totalCostKrw.toLocaleString()}</div>
           </div>
         </div>
 
@@ -300,9 +327,6 @@ export default function Header({ onOpenSettings, onOpenAuth, onOpenFreedom }: He
           {/* Market State Badge */}
           <div className="flex flex-col justify-center items-center min-w-[85px]">
             {(() => {
-              const marketState = (state.market.marketState || 'CLOSED') as MarketState;
-              const marketInfo = getMarketStateInfo(marketState);
-              const dstActive = isDST();
 
               const stateColors = {
                 green: 'bg-v64-success/20 text-v64-success border border-v64-success/30',
@@ -361,20 +385,20 @@ export default function Header({ onOpenSettings, onOpenAuth, onOpenFreedom }: He
             <div className="flex items-center justify-between gap-2 mb-1">
               <span className="text-[9px] tracking-widest text-v64-danger/80">VIX</span>
               <span className="text-base font-display text-v64-danger font-medium">
-                {vix.toFixed(2)}
+                {vixStats.vix.toFixed(2)}
               </span>
             </div>
             <div className="flex items-center gap-2 mb-1">
               <div className="flex-1 h-[3px] bg-white/10 rounded-full overflow-hidden">
                 <div 
-                  className={`h-full transition-all duration-500 ${vixBarColor}`}
-                  style={{ width: `${vixBarWidth}%` }}
+                  className={`h-full transition-all duration-500 ${vixStats.vixBarColor}`}
+                  style={{ width: `${vixStats.vixBarWidth}%` }}
                 />
               </div>
-              <span className="text-[8px] opacity-90">{vixLevel}</span>
+              <span className="text-[8px] opacity-90">{vixStats.vixLevel}</span>
             </div>
             <span className="text-[8px] text-celestial-gold/80 font-light block text-right">
-              {vixAction}
+              {vixStats.vixAction}
             </span>
           </div>
         </div>
