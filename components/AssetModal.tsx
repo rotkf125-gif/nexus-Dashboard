@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Asset } from '@/lib/types';
 import { SECTORS } from '@/lib/config';
 
@@ -40,8 +40,45 @@ export default function AssetModal({
   const [buyRate, setBuyRate] = useState(exchangeRate);
   const [type, setType] = useState<Asset['type']>('CORE');
   const [sector, setSector] = useState('Technology');
+  const [isFetchingSector, setIsFetchingSector] = useState(false);
+  const [assetName, setAssetName] = useState('');
 
   const isEditMode = editingAsset !== null && editingAsset !== undefined;
+
+  // 티커로 섹터 정보 자동 조회
+  const fetchSectorInfo = useCallback(async (tickerSymbol: string) => {
+    if (!tickerSymbol || tickerSymbol.length < 1) return;
+
+    setIsFetchingSector(true);
+    try {
+      const res = await fetch(`/api/info/${tickerSymbol}`);
+      const data = await res.json();
+
+      if (data.sector && data.sector !== 'Other') {
+        // 유효한 섹터만 적용 (SECTORS에 있는지 확인)
+        if (SECTORS[data.sector]) {
+          setSector(data.sector);
+        }
+      }
+
+      if (data.name) {
+        setAssetName(data.name);
+      }
+
+      // ETF인 경우 INCOME 타입 제안
+      if (data.isETF && !isEditMode) {
+        // ETF는 기본적으로 CORE, 배당 ETF면 INCOME
+        const incomeETFs = ['PLTY', 'HOOY', 'QYLD', 'JEPI', 'JEPQ', 'SCHD', 'VIG', 'VYM', 'SPYD', 'HDV'];
+        if (incomeETFs.includes(tickerSymbol.toUpperCase())) {
+          setType('INCOME');
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch sector info:', error);
+    } finally {
+      setIsFetchingSector(false);
+    }
+  }, [isEditMode]);
 
   // 모달 열릴 때 초기화
   useEffect(() => {
@@ -54,6 +91,7 @@ export default function AssetModal({
         setBuyRate(editingAsset.buyRate || exchangeRate);
         setType(editingAsset.type);
         setSector(editingAsset.sector);
+        setAssetName('');
       } else {
         // 추가 모드 - 초기화
         setTicker('');
@@ -62,9 +100,17 @@ export default function AssetModal({
         setBuyRate(exchangeRate);
         setType('CORE');
         setSector('Technology');
+        setAssetName('');
       }
     }
   }, [isOpen, editingAsset, exchangeRate]);
+
+  // 티커 입력 완료 시 (blur) 섹터 자동 조회
+  const handleTickerBlur = () => {
+    if (!isEditMode && ticker.trim().length >= 1) {
+      fetchSectorInfo(ticker.trim());
+    }
+  };
 
   const handleSave = () => {
     if (!ticker.trim()) {
@@ -118,17 +164,29 @@ export default function AssetModal({
           <div>
             <label className="text-[10px] text-white/50 block mb-1 tracking-widest font-medium">
               TICKER
+              {isFetchingSector && (
+                <span className="ml-2 text-celestial-cyan animate-pulse">
+                  <i className="fas fa-spinner fa-spin mr-1" />
+                  조회 중...
+                </span>
+              )}
             </label>
             <input
               type="text"
               value={ticker}
               onChange={(e) => setTicker(e.target.value.toUpperCase())}
+              onBlur={handleTickerBlur}
               disabled={isEditMode}
               className={`glass-input py-2.5 w-full uppercase font-semibold rounded-lg ${
                 isEditMode ? 'opacity-50 cursor-not-allowed' : ''
               }`}
               placeholder="e.g. AAPL"
             />
+            {assetName && !isEditMode && (
+              <div className="text-[10px] text-celestial-cyan/80 mt-1 truncate">
+                {assetName}
+              </div>
+            )}
           </div>
 
           {/* Qty, Avg, BuyRate */}
