@@ -1,4 +1,4 @@
-# 🌟 NEXUS CELESTIAL V65.9 - Next.js Edition
+# 🌟 NEXUS CELESTIAL V65.10 - Next.js Edition
 
 개인 투자 포트폴리오 대시보드 (Celestial Glass 테마)
 
@@ -9,6 +9,21 @@
 | **Live Site** | https://nexus-dashboard-beige.vercel.app |
 | **GitHub** | https://github.com/rotkf125-gif/nexus-dashboard |
 | **Database** | Supabase (PostgreSQL) |
+
+---
+
+## ✨ V65.10 변경 사항
+
+### 🎨 사이드바-대시보드 Seamless 연결
+- **통합 glass-card 컨테이너**: 사이드바와 메인 콘텐츠를 하나의 glass-card로 통합
+- **탭 연결 디자인**: 활성 탭이 메인 콘텐츠 영역과 선 구분 없이 연결
+  - 활성 탭: 왼쪽 테두리만 유지 (`border-l-2`), 오른쪽 테두리 제거
+  - 탭 배경색이 콘텐츠와 자연스럽게 연결 (`-mr-px z-10`)
+- **사이드바 스타일 개선**:
+  - 탭 간격 축소 (`gap-3` → `gap-1`)
+  - 사이드바 배경 어둡게 (`bg-black/20`)
+  - 사이드바-콘텐츠 경계선 (`border-r border-white/10`)
+- **콘텐츠 영역 간소화**: 각 탭 내부 중복 glass-card 제거
 
 ---
 

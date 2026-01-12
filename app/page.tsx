@@ -89,20 +89,21 @@ function DashboardContent() {
       {/* Strategy Bar */}
       <StrategyBar />
 
-      {/* Main Content with Left Sidebar Tabs */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+      {/* Main Content with Left Sidebar Tabs - Seamless Connection */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 glass-card overflow-hidden">
         {/* Left Sidebar Tabs */}
-        <div className="lg:col-span-2 glass-card p-4 flex flex-col h-full">
+        <div className="lg:col-span-2 p-4 flex flex-col h-full border-r border-white/10 bg-black/20">
           <div className="text-xs tracking-widest text-white/60 mb-4 uppercase font-medium">Navigation</div>
-          <div className="flex flex-col flex-1 gap-3">
+          <div className="flex flex-col flex-1 gap-1">
             {/* Stellar Assets - Cyan (핵심 자산) */}
             <button
               onClick={() => setActiveTab('stellar')}
-              className={`flex-1 w-full px-4 rounded-lg transition-all flex items-center justify-center ${
+              className={`flex-1 w-full px-4 transition-all flex items-center justify-center relative ${
                 activeTab === 'stellar'
-                  ? 'bg-celestial-cyan/20 border border-celestial-cyan/50 text-celestial-cyan'
-                  : 'text-white/70 hover:bg-celestial-cyan/10 hover:text-celestial-cyan hover:border-celestial-cyan/30 border border-transparent'
+                  ? 'bg-celestial-cyan/10 text-celestial-cyan rounded-l-lg border-l-2 border-y border-celestial-cyan/50 border-r-0 -mr-px z-10'
+                  : 'text-white/70 hover:bg-celestial-cyan/10 hover:text-celestial-cyan rounded-lg'
               }`}
+              style={activeTab === 'stellar' ? { marginRight: '-1px', borderRight: 'none' } : {}}
             >
               <div className="flex items-center gap-3">
                 <i className="fas fa-star text-sm" />
@@ -112,11 +113,12 @@ function DashboardContent() {
             {/* Income Stream - Gold (배당/수익) */}
             <button
               onClick={() => setActiveTab('income')}
-              className={`flex-1 w-full px-4 rounded-lg transition-all flex items-center justify-center ${
+              className={`flex-1 w-full px-4 transition-all flex items-center justify-center relative ${
                 activeTab === 'income'
-                  ? 'bg-celestial-gold/20 border border-celestial-gold/50 text-celestial-gold'
-                  : 'text-white/70 hover:bg-celestial-gold/10 hover:text-celestial-gold hover:border-celestial-gold/30 border border-transparent'
+                  ? 'bg-celestial-gold/10 text-celestial-gold rounded-l-lg border-l-2 border-y border-celestial-gold/50 border-r-0 -mr-px z-10'
+                  : 'text-white/70 hover:bg-celestial-gold/10 hover:text-celestial-gold rounded-lg'
               }`}
+              style={activeTab === 'income' ? { marginRight: '-1px', borderRight: 'none' } : {}}
             >
               <div className="flex items-center gap-3">
                 <i className="fas fa-coins text-sm" />
@@ -126,11 +128,12 @@ function DashboardContent() {
             {/* Analytics - Purple (분석/리스크) */}
             <button
               onClick={() => setActiveTab('analytics')}
-              className={`flex-1 w-full px-4 rounded-lg transition-all flex items-center justify-center ${
+              className={`flex-1 w-full px-4 transition-all flex items-center justify-center relative ${
                 activeTab === 'analytics'
-                  ? 'bg-celestial-purple/20 border border-celestial-purple/50 text-celestial-purple'
-                  : 'text-white/70 hover:bg-celestial-purple/10 hover:text-celestial-purple hover:border-celestial-purple/30 border border-transparent'
+                  ? 'bg-celestial-purple/10 text-celestial-purple rounded-l-lg border-l-2 border-y border-celestial-purple/50 border-r-0 -mr-px z-10'
+                  : 'text-white/70 hover:bg-celestial-purple/10 hover:text-celestial-purple rounded-lg'
               }`}
+              style={activeTab === 'analytics' ? { marginRight: '-1px', borderRight: 'none' } : {}}
             >
               <div className="flex items-center gap-3">
                 <i className="fas fa-shield-alt text-sm" />
@@ -140,11 +143,12 @@ function DashboardContent() {
             {/* Performance - Green (성과/수익률) */}
             <button
               onClick={() => setActiveTab('performance')}
-              className={`flex-1 w-full px-4 rounded-lg transition-all flex items-center justify-center ${
+              className={`flex-1 w-full px-4 transition-all flex items-center justify-center relative ${
                 activeTab === 'performance'
-                  ? 'bg-v64-success/20 border border-v64-success/50 text-v64-success'
-                  : 'text-white/70 hover:bg-v64-success/10 hover:text-v64-success hover:border-v64-success/30 border border-transparent'
+                  ? 'bg-v64-success/10 text-v64-success rounded-l-lg border-l-2 border-y border-v64-success/50 border-r-0 -mr-px z-10'
+                  : 'text-white/70 hover:bg-v64-success/10 hover:text-v64-success rounded-lg'
               }`}
+              style={activeTab === 'performance' ? { marginRight: '-1px', borderRight: 'none' } : {}}
             >
               <div className="flex items-center gap-3">
                 <i className="fas fa-chart-line text-sm" />
@@ -154,11 +158,12 @@ function DashboardContent() {
             {/* Simulation - Orange (시뮬레이션/실험) */}
             <button
               onClick={() => setActiveTab('simulation')}
-              className={`flex-1 w-full px-4 rounded-lg transition-all flex items-center justify-center ${
+              className={`flex-1 w-full px-4 transition-all flex items-center justify-center relative ${
                 activeTab === 'simulation'
-                  ? 'bg-orange-500/20 border border-orange-500/50 text-orange-400'
-                  : 'text-white/70 hover:bg-orange-500/10 hover:text-orange-400 hover:border-orange-500/30 border border-transparent'
+                  ? 'bg-orange-500/10 text-orange-400 rounded-l-lg border-l-2 border-y border-orange-500/50 border-r-0 -mr-px z-10'
+                  : 'text-white/70 hover:bg-orange-500/10 hover:text-orange-400 rounded-lg'
               }`}
+              style={activeTab === 'simulation' ? { marginRight: '-1px', borderRight: 'none' } : {}}
             >
               <div className="flex items-center gap-3">
                 <i className="fas fa-flask text-sm" />
@@ -169,10 +174,10 @@ function DashboardContent() {
         </div>
 
         {/* Main Content Area */}
-        <div className="lg:col-span-10 min-h-[800px]">
+        <div className="lg:col-span-10 min-h-[800px] p-5">
           {/* Stellar Assets Tab */}
           {activeTab === 'stellar' && (
-            <div className="glass-card glass-card-primary p-6 h-full min-h-[800px]">
+            <div className="h-full min-h-[800px]">
               <div className="flex justify-between items-end mb-4 pb-2 border-b border-white/10">
                 <h2 className="text-lg font-display tracking-widest flex items-center gap-3 text-white">
                   <i className="fas fa-star text-celestial-gold text-xs" /> STELLAR ASSETS
@@ -233,7 +238,7 @@ function DashboardContent() {
 
           {/* Income Stream Tab */}
           {activeTab === 'income' && (
-            <div className="glass-card p-5 border-accent-gold min-h-[800px]">
+            <div className="min-h-[800px]">
               <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
                 <h2 className="text-lg font-display tracking-widest flex items-center gap-3 text-white">
                   <i className="fas fa-coins text-celestial-gold text-xs" /> INCOME STREAM
@@ -279,7 +284,7 @@ function DashboardContent() {
 
           {/* Simulation Tab */}
           {activeTab === 'simulation' && (
-            <div className="glass-card p-5 border-accent-success flex flex-col min-h-[800px]">
+            <div className="flex flex-col min-h-[800px]">
               <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3 flex-shrink-0">
                 <h2 className="text-base font-semibold text-white font-display tracking-widest flex items-center gap-2">
                   <i className="fas fa-flask text-v64-success" /> SIMULATION
@@ -295,7 +300,7 @@ function DashboardContent() {
 
       {/* Footer */}
       <footer className="text-center text-[10px] opacity-30 py-4 tracking-[0.3em]">
-        CELESTIAL NEXUS V65.3 // NEXT.JS EDITION
+        CELESTIAL NEXUS V65.10 // NEXT.JS EDITION
       </footer>
     </div>
   );
