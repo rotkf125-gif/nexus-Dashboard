@@ -300,7 +300,7 @@ export default function Header({ onOpenSettings, onOpenAuth, onOpenFreedom }: He
           </div>
           <div>
             <h1 className="text-2xl font-bold tracking-[0.2em] font-display text-white text-glow">CELESTIAL</h1>
-            <div className="text-[10px] tracking-[0.3em] opacity-90 mt-1">NEXUS INTELLIGENCE V65.0</div>
+            <div className="text-[10px] tracking-[0.3em] opacity-90 mt-1">NEXUS INTELLIGENCE V1.0</div>
           </div>
         </div>
 

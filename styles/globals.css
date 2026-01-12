@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /* ═══════════════════════════════════════════════════════════════
-   NEXUS CELESTIAL V64.2 - Global Styles
+   NEXUS CELESTIAL V1.0 - Global Styles
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
@@ -65,32 +65,52 @@ body {
 
 /* ─── GLASS CARDS ─── */
 .glass-card {
-  background: rgba(255, 255, 255, 0.02);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2), inset 0 0 20px rgba(255, 255, 255, 0.01);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 
+    0 8px 40px rgba(0, 0, 0, 0.3),
+    inset 0 0 30px rgba(255, 255, 255, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   transition: all 0.4s ease;
 }
 
 .glass-card:hover {
-  border-color: rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 
+    0 12px 50px rgba(0, 0, 0, 0.4),
+    inset 0 0 40px rgba(255, 255, 255, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .inner-glass {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.2),
+    inset 0 0 15px rgba(255, 255, 255, 0.02);
   border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.inner-glass:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.18);
 }
 
 /* ─── BUTTONS ─── */
 .celestial-btn {
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   color: #fff;
   padding: 0.5rem 1rem;
   font-family: 'Cinzel', serif;
@@ -100,11 +120,13 @@ body {
   letter-spacing: 0.1em;
   cursor: pointer;
   border-radius: 2px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2), inset 0 0 10px rgba(255, 255, 255, 0.05);
 }
 
 .celestial-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 4px 25px rgba(255, 255, 255, 0.15), inset 0 0 15px rgba(255, 255, 255, 0.08);
   transform: translateY(-1px);
 }
 
@@ -127,36 +149,49 @@ body {
 
 /* ─── INPUTS ─── */
 .glass-input {
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   color: #fff;
   text-align: center;
   font-family: 'Montserrat';
   font-size: 0.8rem;
   border-radius: 2px;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
 }
 
 .glass-input:focus {
-  border-color: rgba(255, 255, 255, 0.4);
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(0, 0, 0, 0.4);
+  box-shadow: 
+    inset 0 2px 8px rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(255, 255, 255, 0.1);
   outline: none;
 }
 
 /* ─── TABLE ─── */
 .asset-row {
   transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .asset-row:hover {
-  background: rgba(255, 255, 255, 0.06) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  box-shadow: 0 2px 15px rgba(255, 255, 255, 0.08);
   transform: scale(1.002);
 }
 
 .asset-row-profit {
-  background: linear-gradient(90deg, rgba(74, 222, 128, 0.04) 0%, transparent 100%);
+  background: linear-gradient(90deg, rgba(74, 222, 128, 0.08) 0%, rgba(74, 222, 128, 0.02) 50%, transparent 100%);
 }
 
 .asset-row-loss {
-  background: linear-gradient(90deg, rgba(248, 113, 113, 0.04) 0%, transparent 100%);
+  background: linear-gradient(90deg, rgba(248, 113, 113, 0.08) 0%, rgba(248, 113, 113, 0.02) 50%, transparent 100%);
 }
 
 /* ─── STATUS DOT ─── */
@@ -165,21 +200,32 @@ body {
   height: 6px;
   border-radius: 50%;
   background: #546E7A;
+  box-shadow: 0 0 8px rgba(84, 110, 122, 0.5);
+  transition: all 0.3s ease;
 }
 
 .status-dot.connected,
 .status-dot.online {
   background: #E0F7FA;
-  box-shadow: 0 0 10px #E0F7FA;
+  box-shadow: 
+    0 0 12px #E0F7FA,
+    0 0 24px rgba(224, 247, 250, 0.5),
+    inset 0 0 6px rgba(255, 255, 255, 0.8);
 }
 
 .status-dot.loading {
   background: #FFD700;
+  box-shadow: 
+    0 0 12px #FFD700,
+    0 0 24px rgba(255, 215, 0, 0.5);
   animation: blink 0.5s infinite;
 }
 
 @keyframes blink {
-  50% { opacity: 0.3; }
+  50% { 
+    opacity: 0.3;
+    box-shadow: 0 0 6px #FFD700;
+  }
 }
 
 /* ─── SCROLLBAR ─── */
@@ -264,17 +310,22 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 4px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.7);
   font-size: 10px;
   cursor: pointer;
   transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .quick-action-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.35);
   color: #fff;
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
 }
 
 /* ─── SECTOR BADGE ─── */
@@ -286,8 +337,17 @@ body {
   border-radius: 2px;
   font-size: 9px;
   font-weight: 500;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.sector-badge:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 /* ─── WARNING BADGES ─── */
@@ -300,17 +360,20 @@ body {
   border-radius: 50%;
   font-size: 10px;
   margin-left: 4px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .warning-badge-yellow {
-  background: rgba(251, 191, 36, 0.2);
-  border: 1px solid rgba(251, 191, 36, 0.5);
+  background: rgba(251, 191, 36, 0.25);
+  border: 1px solid rgba(251, 191, 36, 0.6);
   color: var(--warning);
 }
 
 .warning-badge-red {
-  background: rgba(248, 113, 113, 0.2);
-  border: 1px solid rgba(248, 113, 113, 0.5);
+  background: rgba(248, 113, 113, 0.25);
+  border: 1px solid rgba(248, 113, 113, 0.6);
   color: var(--danger);
 }
 
@@ -345,8 +408,8 @@ body {
   position: absolute;
   inset: 25px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(224,247,250,0.1) 60%, transparent 70%);
-  filter: blur(18px);
+  background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(224,247,250,0.2) 60%, transparent 70%);
+  filter: blur(24px);
   animation: starPulse 5s ease-in-out infinite alternate;
 }
 
@@ -355,14 +418,17 @@ body {
   width: 140px;
   height: 140px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.01);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(5px);
-  box-shadow: inset 0 0 30px rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  box-shadow: 
+    inset 0 0 40px rgba(255, 255, 255, 0.08),
+    0 0 30px rgba(255, 255, 255, 0.1);
   z-index: 20;
 }
 
@@ -388,10 +454,13 @@ body {
   gap: 10px;
   padding: 12px 16px;
   border-radius: 8px;
-  background: rgba(10, 15, 41, 0.95);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  background: rgba(10, 15, 41, 0.85);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   font-size: 12px;
   animation: toastSlideIn 0.3s ease;
 }
@@ -407,9 +476,12 @@ body {
   flex-direction: column;
   gap: 6px;
   padding: 8px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 4px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), inset 0 0 10px rgba(255, 255, 255, 0.02);
 }
 
 .ranking-title {
@@ -528,10 +600,13 @@ body {
   align-items: center;
   gap: 12px;
   padding: 8px 12px;
-  background: rgba(255, 215, 0, 0.05);
-  border: 1px solid rgba(255, 215, 0, 0.2);
+  background: rgba(255, 215, 0, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 215, 0, 0.3);
   border-radius: 4px;
   font-size: 10px;
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.1), inset 0 0 10px rgba(255, 215, 0, 0.05);
 }
 
 .dividend-countdown-item {
@@ -539,8 +614,12 @@ body {
   align-items: center;
   gap: 6px;
   padding: 4px 8px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .dividend-countdown-ticker {
