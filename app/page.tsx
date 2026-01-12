@@ -92,125 +92,95 @@ function DashboardContent() {
       {/* Main Content with Left Sidebar Tabs - Seamless Connection */}
       <div className="grid grid-cols-1 lg:grid-cols-12 glass-card overflow-hidden relative">
         {/* Left Sidebar Tabs */}
-        <div className="lg:col-span-2 p-4 flex flex-col h-full bg-black/30 relative z-10">
-          <div className="text-xs tracking-widest text-white/60 mb-4 uppercase font-medium">Navigation</div>
-          <div className="flex flex-col flex-1 gap-1">
+        <div className="lg:col-span-2 p-4 flex flex-col h-full relative z-10">
+          <div className="text-[10px] tracking-[0.15em] text-white/50 mb-3 uppercase font-medium text-center">Navigation</div>
+          <div className="flex flex-col flex-1 gap-0 relative">
             {/* Stellar Assets - Cyan (핵심 자산) */}
             <button
               onClick={() => setActiveTab('stellar')}
-              className={`flex-1 w-full px-4 transition-all flex items-center justify-center relative ${
+              className={`flex-1 w-full px-3 py-2 transition-all duration-300 flex items-center justify-center relative ${
                 activeTab === 'stellar'
-                  ? 'text-celestial-cyan rounded-l-lg border-l-2 border-celestial-cyan/60'
-                  : 'text-white/70 hover:bg-celestial-cyan/10 hover:text-celestial-cyan rounded-lg'
+                  ? 'text-celestial-cyan border-l-[3px] border-celestial-cyan bg-celestial-cyan/10'
+                  : 'text-white/70 hover:bg-celestial-cyan/10 hover:text-celestial-cyan'
               }`}
-              style={activeTab === 'stellar' ? {
-                background: 'linear-gradient(90deg, rgba(34,211,238,0.15) 0%, rgba(34,211,238,0.12) 100%)',
-                borderTop: 'none',
-                borderBottom: 'none',
-                borderRight: 'none'
-              } : {}}
             >
-              <div className="flex items-center gap-3">
-                <i className="fas fa-star text-sm" />
-                <span className="text-sm font-medium tracking-wide">Stellar Assets</span>
+              <div className="flex items-center gap-2.5">
+                <i className="fas fa-star text-xs" />
+                <span className="text-[13px] font-medium tracking-wide">Stellar Assets</span>
               </div>
             </button>
             {/* Income Stream - Gold (배당/수익) */}
             <button
               onClick={() => setActiveTab('income')}
-              className={`flex-1 w-full px-4 transition-all flex items-center justify-center relative ${
+              className={`flex-1 w-full px-3 py-2 transition-all duration-300 flex items-center justify-center relative ${
                 activeTab === 'income'
-                  ? 'text-celestial-gold rounded-l-lg border-l-2 border-celestial-gold/60'
-                  : 'text-white/70 hover:bg-celestial-gold/10 hover:text-celestial-gold rounded-lg'
+                  ? 'text-celestial-gold border-l-[3px] border-celestial-gold bg-celestial-gold/10'
+                  : 'text-white/70 hover:bg-celestial-gold/10 hover:text-celestial-gold'
               }`}
-              style={activeTab === 'income' ? {
-                background: 'linear-gradient(90deg, rgba(251,191,36,0.15) 0%, rgba(251,191,36,0.12) 100%)',
-                borderTop: 'none',
-                borderBottom: 'none',
-                borderRight: 'none'
-              } : {}}
             >
-              <div className="flex items-center gap-3">
-                <i className="fas fa-coins text-sm" />
-                <span className="text-sm font-medium tracking-wide">Income Stream</span>
+              <div className="flex items-center gap-2.5">
+                <i className="fas fa-coins text-xs" />
+                <span className="text-[13px] font-medium tracking-wide">Income Stream</span>
               </div>
             </button>
             {/* Analytics - Purple (분석/리스크) */}
             <button
               onClick={() => setActiveTab('analytics')}
-              className={`flex-1 w-full px-4 transition-all flex items-center justify-center relative ${
+              className={`flex-1 w-full px-3 py-2 transition-all duration-300 flex items-center justify-center relative ${
                 activeTab === 'analytics'
-                  ? 'text-celestial-purple rounded-l-lg border-l-2 border-celestial-purple/60'
-                  : 'text-white/70 hover:bg-celestial-purple/10 hover:text-celestial-purple rounded-lg'
+                  ? 'text-celestial-purple border-l-[3px] border-celestial-purple bg-celestial-purple/10'
+                  : 'text-white/70 hover:bg-celestial-purple/10 hover:text-celestial-purple'
               }`}
-              style={activeTab === 'analytics' ? {
-                background: 'linear-gradient(90deg, rgba(168,85,247,0.15) 0%, rgba(168,85,247,0.12) 100%)',
-                borderTop: 'none',
-                borderBottom: 'none',
-                borderRight: 'none'
-              } : {}}
             >
-              <div className="flex items-center gap-3">
-                <i className="fas fa-shield-alt text-sm" />
-                <span className="text-sm font-medium tracking-wide">Analytics</span>
+              <div className="flex items-center gap-2.5">
+                <i className="fas fa-shield-alt text-xs" />
+                <span className="text-[13px] font-medium tracking-wide">Analytics</span>
               </div>
             </button>
             {/* Performance - Green (성과/수익률) */}
             <button
               onClick={() => setActiveTab('performance')}
-              className={`flex-1 w-full px-4 transition-all flex items-center justify-center relative ${
+              className={`flex-1 w-full px-3 py-2 transition-all duration-300 flex items-center justify-center relative ${
                 activeTab === 'performance'
-                  ? 'text-v64-success rounded-l-lg border-l-2 border-v64-success/60'
-                  : 'text-white/70 hover:bg-v64-success/10 hover:text-v64-success rounded-lg'
+                  ? 'text-v64-success border-l-[3px] border-v64-success bg-v64-success/10'
+                  : 'text-white/70 hover:bg-v64-success/10 hover:text-v64-success'
               }`}
-              style={activeTab === 'performance' ? {
-                background: 'linear-gradient(90deg, rgba(105,240,174,0.15) 0%, rgba(105,240,174,0.12) 100%)',
-                borderTop: 'none',
-                borderBottom: 'none',
-                borderRight: 'none'
-              } : {}}
             >
-              <div className="flex items-center gap-3">
-                <i className="fas fa-chart-line text-sm" />
-                <span className="text-sm font-medium tracking-wide">Performance</span>
+              <div className="flex items-center gap-2.5">
+                <i className="fas fa-chart-line text-xs" />
+                <span className="text-[13px] font-medium tracking-wide">Performance</span>
               </div>
             </button>
             {/* Simulation - Orange (시뮬레이션/실험) */}
             <button
               onClick={() => setActiveTab('simulation')}
-              className={`flex-1 w-full px-4 transition-all flex items-center justify-center relative ${
+              className={`flex-1 w-full px-3 py-2 transition-all duration-300 flex items-center justify-center relative ${
                 activeTab === 'simulation'
-                  ? 'text-orange-400 rounded-l-lg border-l-2 border-orange-500/60'
-                  : 'text-white/70 hover:bg-orange-500/10 hover:text-orange-400 rounded-lg'
+                  ? 'text-orange-400 border-l-[3px] border-orange-500 bg-orange-500/10'
+                  : 'text-white/70 hover:bg-orange-500/10 hover:text-orange-400'
               }`}
-              style={activeTab === 'simulation' ? {
-                background: 'linear-gradient(90deg, rgba(249,115,22,0.15) 0%, rgba(249,115,22,0.12) 100%)',
-                borderTop: 'none',
-                borderBottom: 'none',
-                borderRight: 'none'
-              } : {}}
             >
-              <div className="flex items-center gap-3">
-                <i className="fas fa-flask text-sm" />
-                <span className="text-sm font-medium tracking-wide">Simulation</span>
+              <div className="flex items-center gap-2.5">
+                <i className="fas fa-flask text-xs" />
+                <span className="text-[13px] font-medium tracking-wide">Simulation</span>
               </div>
             </button>
           </div>
         </div>
 
-        {/* Main Content Area with Gradient Connection */}
+        {/* Main Content Area with Subtle Tab Color Connection */}
         <div
-          className="lg:col-span-10 min-h-[800px] p-5 relative"
+          className="lg:col-span-10 min-h-[800px] p-5 relative transition-colors duration-300"
           style={{
-            background: activeTab === 'stellar'
-              ? 'linear-gradient(90deg, rgba(34,211,238,0.12) 0%, rgba(34,211,238,0.04) 10%, transparent 25%)'
+            borderLeft: activeTab === 'stellar'
+              ? '1px solid rgba(34,211,238,0.2)'
               : activeTab === 'income'
-              ? 'linear-gradient(90deg, rgba(251,191,36,0.12) 0%, rgba(251,191,36,0.04) 10%, transparent 25%)'
+              ? '1px solid rgba(251,191,36,0.2)'
               : activeTab === 'analytics'
-              ? 'linear-gradient(90deg, rgba(168,85,247,0.12) 0%, rgba(168,85,247,0.04) 10%, transparent 25%)'
+              ? '1px solid rgba(168,85,247,0.2)'
               : activeTab === 'performance'
-              ? 'linear-gradient(90deg, rgba(105,240,174,0.12) 0%, rgba(105,240,174,0.04) 10%, transparent 25%)'
-              : 'linear-gradient(90deg, rgba(249,115,22,0.12) 0%, rgba(249,115,22,0.04) 10%, transparent 25%)'
+              ? '1px solid rgba(105,240,174,0.2)'
+              : '1px solid rgba(249,115,22,0.2)'
           }}
         >
           {/* Stellar Assets Tab */}
@@ -338,7 +308,7 @@ function DashboardContent() {
 
       {/* Footer */}
       <footer className="text-center text-[10px] opacity-30 py-4 tracking-[0.3em]">
-        CELESTIAL NEXUS V65.10 // NEXT.JS EDITION
+        NEXUS DASHBOARD v1.0 // NEXT.JS EDITION
       </footer>
     </div>
   );

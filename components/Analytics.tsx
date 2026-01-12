@@ -489,7 +489,7 @@ export default function Analytics({ horizontal = false }: AnalyticsProps) {
           {/* Total Value */}
           <div className="inner-glass p-4 rounded-xl">
             <div className="text-xs tracking-widest text-white/60 mb-3 flex items-center gap-2">
-              TOTAL VALUE <i className="fas fa-info-circle text-white/30" />
+              총 평가액 <i className="fas fa-info-circle text-white/30" />
             </div>
             <div className="flex items-center gap-4">
               <div className="relative" style={{ width: 100, height: 100 }}>
@@ -517,7 +517,7 @@ export default function Analytics({ horizontal = false }: AnalyticsProps) {
 
           {/* Weight */}
           <div className="inner-glass p-4 rounded-xl">
-            <div className="text-xs tracking-widest text-white/60 mb-3">WEIGHT</div>
+            <div className="text-xs tracking-widest text-white/60 mb-3">비중</div>
             <div className="space-y-2">
               {portfolioStats.assetWeights.slice(0, 5).map((item, i) => (
                 <div key={item.ticker} className="flex items-center gap-2">
@@ -543,7 +543,7 @@ export default function Analytics({ horizontal = false }: AnalyticsProps) {
 
           {/* Sector */}
           <div className="inner-glass p-4 rounded-xl">
-            <div className="text-xs tracking-widest text-white/60 mb-3">SECTOR</div>
+            <div className="text-xs tracking-widest text-white/60 mb-3">섹터</div>
             <div className="flex items-center gap-4">
               <div className="relative" style={{ width: 80, height: 80 }}>
                 <canvas ref={sectorChartRef} />
@@ -568,7 +568,7 @@ export default function Analytics({ horizontal = false }: AnalyticsProps) {
 
           {/* Type */}
           <div className="inner-glass p-4 rounded-xl">
-            <div className="text-xs tracking-widest text-white/60 mb-3">TYPE</div>
+            <div className="text-xs tracking-widest text-white/60 mb-3">유형</div>
             <div className="flex items-center gap-4">
               <div className="relative" style={{ width: 80, height: 80 }}>
                 <canvas ref={typeChartRef} />
@@ -596,7 +596,7 @@ export default function Analytics({ horizontal = false }: AnalyticsProps) {
         <div className="grid grid-cols-4 gap-4 mb-4">
           {/* Risk Score */}
           <div className="inner-glass p-4 rounded-xl">
-            <div className="text-xs tracking-widest text-white/60 mb-2">RISK SCORE</div>
+            <div className="text-xs tracking-widest text-white/60 mb-2">리스크 점수</div>
             <div className="flex flex-col items-center">
               <canvas ref={gaugeRef} width={180} height={100} />
               <div className="text-center -mt-2">
@@ -612,7 +612,7 @@ export default function Analytics({ horizontal = false }: AnalyticsProps) {
 
           {/* Risk Factors */}
           <div className="inner-glass p-4 rounded-xl col-span-2">
-            <div className="text-xs tracking-widest text-white/60 mb-3">RISK FACTORS</div>
+            <div className="text-xs tracking-widest text-white/60 mb-3">리스크 요인</div>
             <div className="grid grid-cols-2 gap-x-6 gap-y-3">
               {[
                 { label: '분산도', eng: 'Diversification', score: riskMetrics.diversificationScore },
@@ -650,10 +650,10 @@ export default function Analytics({ horizontal = false }: AnalyticsProps) {
 
           {/* Performance */}
           <div className="inner-glass p-4 rounded-xl">
-            <div className="text-xs tracking-widest text-white/60 mb-3">PERFORMANCE</div>
+            <div className="text-xs tracking-widest text-white/60 mb-3">수익률</div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <div className="text-xs text-white/60 mb-2">TOP</div>
+                <div className="text-xs text-white/60 mb-2">상위</div>
                 {portfolioStats.top3.map(item => (
                   <div key={item.ticker} className="flex justify-between text-xs mb-1">
                     <span className="text-white/80">{item.ticker}</span>
@@ -662,7 +662,7 @@ export default function Analytics({ horizontal = false }: AnalyticsProps) {
                 ))}
               </div>
               <div>
-                <div className="text-xs text-white/60 mb-2">BTM</div>
+                <div className="text-xs text-white/60 mb-2">하위</div>
                 {portfolioStats.bottom3.map(item => (
                   <div key={item.ticker} className="flex justify-between text-xs mb-1">
                     <span className="text-white/80">{item.ticker}</span>
@@ -680,7 +680,7 @@ export default function Analytics({ horizontal = false }: AnalyticsProps) {
         <div className="grid grid-cols-4 gap-4">
           {/* Market Correlation */}
           <div className="inner-glass p-4 rounded-xl">
-            <div className="text-xs tracking-widest text-white/60 mb-3">MARKET CORRELATION</div>
+            <div className="text-xs tracking-widest text-white/60 mb-3">시장 상관관계</div>
             <div className="grid grid-cols-2 gap-4 text-center">
               <div>
                 <div className="text-xs text-white/50 mb-1">VS S&P 500</div>
@@ -695,8 +695,8 @@ export default function Analytics({ horizontal = false }: AnalyticsProps) {
 
           {/* Risk Profile */}
           <div className="inner-glass p-4 rounded-xl">
-            <div className="text-xs tracking-widest text-white/60 mb-3">RISK PROFILE</div>
-            <div className="text-xs text-white/60 mb-3">Based on the data with eoature analytics:</div>
+            <div className="text-xs tracking-widest text-white/60 mb-3">리스크 프로필</div>
+            <div className="text-xs text-white/60 mb-3">포트폴리오 구성 분석 기반:</div>
             <div className="flex flex-wrap gap-2">
               <span className="px-3 py-1.5 rounded-full bg-blue-500/20 border border-blue-500/50 text-blue-400 text-xs">
                 Tech (기술주)
@@ -712,22 +712,22 @@ export default function Analytics({ horizontal = false }: AnalyticsProps) {
 
           {/* Insight */}
           <div className="inner-glass p-4 rounded-xl col-span-2">
-            <div className="text-xs tracking-widest text-white/60 mb-3">INSIGHT</div>
+            <div className="text-xs tracking-widest text-white/60 mb-3">인사이트</div>
             <ul className="text-xs text-white/80 space-y-2 list-disc list-inside">
               {riskProfile.defensiveExposure < 0.2 && (
-                <li>Consider increasing defensive assets to lower volatility.</li>
+                <li>변동성을 낮추기 위해 방어 자산 비중을 늘리는 것을 고려하세요.</li>
               )}
               {riskProfile.techExposure > 0.4 && (
-                <li>Tech sector exposure is high; review diversificationScore.</li>
+                <li>기술주 섹터 비중이 높습니다. 분산도를 재검토하세요.</li>
               )}
               {maxAssetWeight > 0.2 && portfolioStats.top3[0] && (
-                <li>Monitor top concentrationRisk in {portfolioStats.top3[0].ticker}.</li>
+                <li>{portfolioStats.top3[0].ticker}의 집중도를 모니터링하세요.</li>
               )}
               {riskMetrics.overallScore >= 70 && (
-                <li>Portfolio is well-diversified. Maintain current strategy.</li>
+                <li>포트폴리오가 잘 분산되어 있습니다. 현재 전략을 유지하세요.</li>
               )}
               {market.vix > 25 && (
-                <li>VIX is elevated ({market.vix?.toFixed(1)}). Monitor market volatility.</li>
+                <li>VIX가 상승({market.vix?.toFixed(1)})했습니다. 시장 변동성을 주시하세요.</li>
               )}
             </ul>
           </div>

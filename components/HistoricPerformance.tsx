@@ -271,9 +271,9 @@ export default function HistoricPerformance({ defaultPeriod = '24h' }: Props) {
   }, [state.assets]);
 
   return (
-    <div className="glass-card p-5">
+    <div className="glass-card p-5 flex flex-col" style={{ height: '420px' }}>
       {/* Header */}
-      <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-3">
+      <div className="flex items-center justify-between mb-3 border-b border-white/10 pb-2 flex-shrink-0">
         <div className="flex items-center gap-2">
           <i className="fas fa-chart-area text-celestial-cyan" />
           <h3 className="font-display text-sm tracking-widest text-white/90">HISTORIC PERFORMANCE</h3>
@@ -298,32 +298,32 @@ export default function HistoricPerformance({ defaultPeriod = '24h' }: Props) {
       </div>
 
       {/* Stats Summary */}
-      <div className="grid grid-cols-4 gap-3 mb-4">
-        <div className="inner-glass p-3 rounded-lg text-center">
-          <div className="text-[8px] opacity-40 tracking-widest mb-1">CURRENT VALUE</div>
-          <div className="text-base font-display text-celestial-cyan">
+      <div className="grid grid-cols-4 gap-3 mb-3 flex-shrink-0">
+        <div className="inner-glass p-2.5 rounded-lg text-center">
+          <div className="text-[8px] opacity-40 tracking-widest mb-0.5">CURRENT VALUE</div>
+          <div className="text-sm font-display text-celestial-cyan">
             ${currentStats.totalValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </div>
         </div>
-        <div className="inner-glass p-3 rounded-lg text-center">
-          <div className="text-[8px] opacity-40 tracking-widest mb-1">CURRENT RETURN</div>
-          <div className={`text-base font-display ${
+        <div className="inner-glass p-2.5 rounded-lg text-center">
+          <div className="text-[8px] opacity-40 tracking-widest mb-0.5">CURRENT RETURN</div>
+          <div className={`text-sm font-display ${
             currentStats.returnPct >= 0 ? 'text-v64-success' : 'text-v64-danger'
           }`}>
             {currentStats.returnPct >= 0 ? '+' : ''}{currentStats.returnPct.toFixed(2)}%
           </div>
         </div>
-        <div className="inner-glass p-3 rounded-lg text-center">
-          <div className="text-[8px] opacity-40 tracking-widest mb-1">{period.toUpperCase()} CHANGE</div>
-          <div className={`text-base font-display ${
+        <div className="inner-glass p-2.5 rounded-lg text-center">
+          <div className="text-[8px] opacity-40 tracking-widest mb-0.5">{period.toUpperCase()} CHANGE</div>
+          <div className={`text-sm font-display ${
             performanceStats.valueChange >= 0 ? 'text-v64-success' : 'text-v64-danger'
           }`}>
             {performanceStats.valueChange >= 0 ? '+' : ''}${Math.abs(performanceStats.valueChange).toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </div>
         </div>
-        <div className="inner-glass p-3 rounded-lg text-center">
-          <div className="text-[8px] opacity-40 tracking-widest mb-1">{period.toUpperCase()} %</div>
-          <div className={`text-base font-display ${
+        <div className="inner-glass p-2.5 rounded-lg text-center">
+          <div className="text-[8px] opacity-40 tracking-widest mb-0.5">{period.toUpperCase()} %</div>
+          <div className={`text-sm font-display ${
             performanceStats.valueChangePct >= 0 ? 'text-v64-success' : 'text-v64-danger'
           }`}>
             {performanceStats.valueChangePct >= 0 ? '+' : ''}{performanceStats.valueChangePct.toFixed(2)}%
@@ -332,7 +332,7 @@ export default function HistoricPerformance({ defaultPeriod = '24h' }: Props) {
       </div>
 
       {/* Chart */}
-      <div className="relative" style={{ height: 250 }}>
+      <div className="relative flex-1 min-h-0 mb-3">
         {isLoading ? (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-white/40 text-sm">
@@ -354,14 +354,14 @@ export default function HistoricPerformance({ defaultPeriod = '24h' }: Props) {
       </div>
 
       {/* Legend */}
-      <div className="flex justify-center gap-6 mt-3 pt-3 border-t border-white/10">
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-0.5 bg-blue-400 rounded" />
-          <span className="text-[9px] text-white/50">Total Value (USD)</span>
+      <div className="flex justify-center gap-6 pt-2 border-t border-white/10 flex-shrink-0">
+        <div className="flex items-center gap-1.5">
+          <div className="w-2.5 h-0.5 bg-blue-400 rounded" />
+          <span className="text-[8px] text-white/50">Total Value (USD)</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-0.5 bg-celestial-gold rounded border-dashed" style={{ borderStyle: 'dashed' }} />
-          <span className="text-[9px] text-white/50">Return %</span>
+        <div className="flex items-center gap-1.5">
+          <div className="w-2.5 h-0.5 bg-celestial-gold rounded border-dashed" style={{ borderStyle: 'dashed' }} />
+          <span className="text-[8px] text-white/50">Return %</span>
         </div>
       </div>
     </div>

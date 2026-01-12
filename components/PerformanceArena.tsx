@@ -77,9 +77,9 @@ export default function PerformanceArena({ compact = false }: PerformanceArenaPr
   // 컴팩트 모드 (세로 레이아웃, 1/4 너비용)
   if (compact) {
     return (
-      <div className="glass-card p-5 border-accent-purple h-full flex flex-col">
+      <div className="glass-card p-5 border-accent-purple flex flex-col" style={{ height: '420px' }}>
         {/* Header */}
-        <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
+        <div className="flex justify-between items-center mb-3 border-b border-white/10 pb-2 flex-shrink-0">
           <h2 className="text-sm font-display tracking-widest flex items-center gap-2 text-white">
             <i className="fas fa-trophy text-celestial-gold text-xs" />
             PERFORMANCE
@@ -88,7 +88,7 @@ export default function PerformanceArena({ compact = false }: PerformanceArenaPr
         </div>
 
         {/* Quick Stats */}
-        <div className="space-y-3 flex-1">
+        <div className="space-y-2.5 flex-1 overflow-y-auto custom-scrollbar">
           {/* YTD Return */}
           <div className="inner-glass p-3 rounded-lg">
             <div className="text-[8px] opacity-40 tracking-widest mb-1">YTD RETURN</div>
@@ -99,13 +99,13 @@ export default function PerformanceArena({ compact = false }: PerformanceArenaPr
 
           {/* Alpha Cards */}
           <div className="grid grid-cols-2 gap-2">
-            <div className="inner-glass p-2 rounded-lg text-center">
+            <div className="inner-glass p-2.5 rounded-lg text-center">
               <div className="text-[7px] opacity-40 tracking-widest mb-0.5">VS S&P</div>
               <div className={`text-sm font-display ${alphaVsSP500 >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}>
                 {alphaVsSP500 >= 0 ? '+' : ''}{alphaVsSP500.toFixed(1)}%p
               </div>
             </div>
-            <div className="inner-glass p-2 rounded-lg text-center">
+            <div className="inner-glass p-2.5 rounded-lg text-center">
               <div className="text-[7px] opacity-40 tracking-widest mb-0.5">VS QQQ</div>
               <div className={`text-sm font-display ${alphaVsNasdaq >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}>
                 {alphaVsNasdaq >= 0 ? '+' : ''}{alphaVsNasdaq.toFixed(1)}%p
@@ -129,7 +129,7 @@ export default function PerformanceArena({ compact = false }: PerformanceArenaPr
           </div>
 
           {/* Benchmarks Mini */}
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <div className="text-[8px] opacity-40 tracking-widest">BENCHMARKS</div>
             {benchmarks.slice(0, 4).map((b) => (
               <div key={b.ticker} className="flex items-center justify-between text-[10px]">
@@ -145,7 +145,7 @@ export default function PerformanceArena({ compact = false }: PerformanceArenaPr
         {/* Refresh Button */}
         <button
           onClick={fetchBenchmarks}
-          className="mt-3 text-[9px] opacity-50 hover:opacity-80 flex items-center justify-center gap-1"
+          className="mt-2.5 text-[9px] opacity-50 hover:opacity-80 flex items-center justify-center gap-1 flex-shrink-0"
         >
           <i className="fas fa-sync-alt" /> 새로고침
         </button>
