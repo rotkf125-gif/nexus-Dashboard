@@ -90,9 +90,9 @@ function DashboardContent() {
       <StrategyBar />
 
       {/* Main Content with Left Sidebar Tabs - Seamless Connection */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 glass-card overflow-hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-12 glass-card overflow-hidden relative">
         {/* Left Sidebar Tabs */}
-        <div className="lg:col-span-2 p-4 flex flex-col h-full border-r border-white/10 bg-black/20">
+        <div className="lg:col-span-2 p-4 flex flex-col h-full border-r border-white/5 bg-black/30 relative z-10">
           <div className="text-xs tracking-widest text-white/60 mb-4 uppercase font-medium">Navigation</div>
           <div className="flex flex-col flex-1 gap-1">
             {/* Stellar Assets - Cyan (핵심 자산) */}
@@ -173,8 +173,21 @@ function DashboardContent() {
           </div>
         </div>
 
-        {/* Main Content Area */}
-        <div className="lg:col-span-10 min-h-[800px] p-5">
+        {/* Main Content Area with Gradient Connection */}
+        <div
+          className="lg:col-span-10 min-h-[800px] p-5 relative"
+          style={{
+            background: activeTab === 'stellar'
+              ? 'linear-gradient(90deg, rgba(34,211,238,0.08) 0%, transparent 15%)'
+              : activeTab === 'income'
+              ? 'linear-gradient(90deg, rgba(251,191,36,0.08) 0%, transparent 15%)'
+              : activeTab === 'analytics'
+              ? 'linear-gradient(90deg, rgba(168,85,247,0.08) 0%, transparent 15%)'
+              : activeTab === 'performance'
+              ? 'linear-gradient(90deg, rgba(105,240,174,0.08) 0%, transparent 15%)'
+              : 'linear-gradient(90deg, rgba(249,115,22,0.08) 0%, transparent 15%)'
+          }}
+        >
           {/* Stellar Assets Tab */}
           {activeTab === 'stellar' && (
             <div className="h-full min-h-[800px]">
