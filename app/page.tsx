@@ -100,7 +100,7 @@ function DashboardContent() {
               onClick={() => setActiveTab('stellar')}
               className={`flex-1 w-full px-4 transition-all flex items-center justify-center relative ${
                 activeTab === 'stellar'
-                  ? 'bg-celestial-cyan/10 text-celestial-cyan rounded-l-lg border-l-2 border-y border-celestial-cyan/50 border-r-0 -mr-px z-10'
+                  ? 'bg-celestial-cyan/15 text-celestial-cyan rounded-l-lg border-l-2 border-y border-celestial-cyan/40 border-r-0 -mr-px z-10'
                   : 'text-white/70 hover:bg-celestial-cyan/10 hover:text-celestial-cyan rounded-lg'
               }`}
               style={activeTab === 'stellar' ? { marginRight: '-1px', borderRight: 'none' } : {}}
@@ -115,7 +115,7 @@ function DashboardContent() {
               onClick={() => setActiveTab('income')}
               className={`flex-1 w-full px-4 transition-all flex items-center justify-center relative ${
                 activeTab === 'income'
-                  ? 'bg-celestial-gold/10 text-celestial-gold rounded-l-lg border-l-2 border-y border-celestial-gold/50 border-r-0 -mr-px z-10'
+                  ? 'bg-celestial-gold/15 text-celestial-gold rounded-l-lg border-l-2 border-y border-celestial-gold/40 border-r-0 -mr-px z-10'
                   : 'text-white/70 hover:bg-celestial-gold/10 hover:text-celestial-gold rounded-lg'
               }`}
               style={activeTab === 'income' ? { marginRight: '-1px', borderRight: 'none' } : {}}
@@ -130,7 +130,7 @@ function DashboardContent() {
               onClick={() => setActiveTab('analytics')}
               className={`flex-1 w-full px-4 transition-all flex items-center justify-center relative ${
                 activeTab === 'analytics'
-                  ? 'bg-celestial-purple/10 text-celestial-purple rounded-l-lg border-l-2 border-y border-celestial-purple/50 border-r-0 -mr-px z-10'
+                  ? 'bg-celestial-purple/15 text-celestial-purple rounded-l-lg border-l-2 border-y border-celestial-purple/40 border-r-0 -mr-px z-10'
                   : 'text-white/70 hover:bg-celestial-purple/10 hover:text-celestial-purple rounded-lg'
               }`}
               style={activeTab === 'analytics' ? { marginRight: '-1px', borderRight: 'none' } : {}}
@@ -145,7 +145,7 @@ function DashboardContent() {
               onClick={() => setActiveTab('performance')}
               className={`flex-1 w-full px-4 transition-all flex items-center justify-center relative ${
                 activeTab === 'performance'
-                  ? 'bg-v64-success/10 text-v64-success rounded-l-lg border-l-2 border-y border-v64-success/50 border-r-0 -mr-px z-10'
+                  ? 'bg-v64-success/15 text-v64-success rounded-l-lg border-l-2 border-y border-v64-success/40 border-r-0 -mr-px z-10'
                   : 'text-white/70 hover:bg-v64-success/10 hover:text-v64-success rounded-lg'
               }`}
               style={activeTab === 'performance' ? { marginRight: '-1px', borderRight: 'none' } : {}}
@@ -160,7 +160,7 @@ function DashboardContent() {
               onClick={() => setActiveTab('simulation')}
               className={`flex-1 w-full px-4 transition-all flex items-center justify-center relative ${
                 activeTab === 'simulation'
-                  ? 'bg-orange-500/10 text-orange-400 rounded-l-lg border-l-2 border-y border-orange-500/50 border-r-0 -mr-px z-10'
+                  ? 'bg-orange-500/15 text-orange-400 rounded-l-lg border-l-2 border-y border-orange-500/40 border-r-0 -mr-px z-10'
                   : 'text-white/70 hover:bg-orange-500/10 hover:text-orange-400 rounded-lg'
               }`}
               style={activeTab === 'simulation' ? { marginRight: '-1px', borderRight: 'none' } : {}}
@@ -178,14 +178,14 @@ function DashboardContent() {
           className="lg:col-span-10 min-h-[800px] p-5 relative"
           style={{
             background: activeTab === 'stellar'
-              ? 'linear-gradient(90deg, rgba(34,211,238,0.08) 0%, transparent 15%)'
+              ? 'linear-gradient(90deg, rgba(34,211,238,0.12) 0%, rgba(34,211,238,0.04) 10%, transparent 25%)'
               : activeTab === 'income'
-              ? 'linear-gradient(90deg, rgba(251,191,36,0.08) 0%, transparent 15%)'
+              ? 'linear-gradient(90deg, rgba(251,191,36,0.12) 0%, rgba(251,191,36,0.04) 10%, transparent 25%)'
               : activeTab === 'analytics'
-              ? 'linear-gradient(90deg, rgba(168,85,247,0.08) 0%, transparent 15%)'
+              ? 'linear-gradient(90deg, rgba(168,85,247,0.12) 0%, rgba(168,85,247,0.04) 10%, transparent 25%)'
               : activeTab === 'performance'
-              ? 'linear-gradient(90deg, rgba(105,240,174,0.08) 0%, transparent 15%)'
-              : 'linear-gradient(90deg, rgba(249,115,22,0.08) 0%, transparent 15%)'
+              ? 'linear-gradient(90deg, rgba(105,240,174,0.12) 0%, rgba(105,240,174,0.04) 10%, transparent 25%)'
+              : 'linear-gradient(90deg, rgba(249,115,22,0.12) 0%, rgba(249,115,22,0.04) 10%, transparent 25%)'
           }}
         >
           {/* Stellar Assets Tab */}
