@@ -92,7 +92,7 @@ function DashboardContent() {
       {/* Main Content with Left Sidebar Tabs - Seamless Connection */}
       <div className="grid grid-cols-1 lg:grid-cols-12 glass-card overflow-hidden relative">
         {/* Left Sidebar Tabs */}
-        <div className="lg:col-span-2 p-4 flex flex-col h-full border-r border-white/5 bg-black/30 relative z-10">
+        <div className="lg:col-span-2 p-4 flex flex-col h-full bg-black/30 relative z-10">
           <div className="text-xs tracking-widest text-white/60 mb-4 uppercase font-medium">Navigation</div>
           <div className="flex flex-col flex-1 gap-1">
             {/* Stellar Assets - Cyan (핵심 자산) */}
@@ -100,10 +100,15 @@ function DashboardContent() {
               onClick={() => setActiveTab('stellar')}
               className={`flex-1 w-full px-4 transition-all flex items-center justify-center relative ${
                 activeTab === 'stellar'
-                  ? 'bg-celestial-cyan/15 text-celestial-cyan rounded-l-lg border-l-2 border-y border-celestial-cyan/40 border-r-0 -mr-px z-10'
+                  ? 'text-celestial-cyan rounded-l-lg border-l-2 border-celestial-cyan/60'
                   : 'text-white/70 hover:bg-celestial-cyan/10 hover:text-celestial-cyan rounded-lg'
               }`}
-              style={activeTab === 'stellar' ? { marginRight: '-1px', borderRight: 'none' } : {}}
+              style={activeTab === 'stellar' ? {
+                background: 'linear-gradient(90deg, rgba(34,211,238,0.15) 0%, rgba(34,211,238,0.12) 100%)',
+                borderTop: 'none',
+                borderBottom: 'none',
+                borderRight: 'none'
+              } : {}}
             >
               <div className="flex items-center gap-3">
                 <i className="fas fa-star text-sm" />
@@ -115,10 +120,15 @@ function DashboardContent() {
               onClick={() => setActiveTab('income')}
               className={`flex-1 w-full px-4 transition-all flex items-center justify-center relative ${
                 activeTab === 'income'
-                  ? 'bg-celestial-gold/15 text-celestial-gold rounded-l-lg border-l-2 border-y border-celestial-gold/40 border-r-0 -mr-px z-10'
+                  ? 'text-celestial-gold rounded-l-lg border-l-2 border-celestial-gold/60'
                   : 'text-white/70 hover:bg-celestial-gold/10 hover:text-celestial-gold rounded-lg'
               }`}
-              style={activeTab === 'income' ? { marginRight: '-1px', borderRight: 'none' } : {}}
+              style={activeTab === 'income' ? {
+                background: 'linear-gradient(90deg, rgba(251,191,36,0.15) 0%, rgba(251,191,36,0.12) 100%)',
+                borderTop: 'none',
+                borderBottom: 'none',
+                borderRight: 'none'
+              } : {}}
             >
               <div className="flex items-center gap-3">
                 <i className="fas fa-coins text-sm" />
@@ -130,10 +140,15 @@ function DashboardContent() {
               onClick={() => setActiveTab('analytics')}
               className={`flex-1 w-full px-4 transition-all flex items-center justify-center relative ${
                 activeTab === 'analytics'
-                  ? 'bg-celestial-purple/15 text-celestial-purple rounded-l-lg border-l-2 border-y border-celestial-purple/40 border-r-0 -mr-px z-10'
+                  ? 'text-celestial-purple rounded-l-lg border-l-2 border-celestial-purple/60'
                   : 'text-white/70 hover:bg-celestial-purple/10 hover:text-celestial-purple rounded-lg'
               }`}
-              style={activeTab === 'analytics' ? { marginRight: '-1px', borderRight: 'none' } : {}}
+              style={activeTab === 'analytics' ? {
+                background: 'linear-gradient(90deg, rgba(168,85,247,0.15) 0%, rgba(168,85,247,0.12) 100%)',
+                borderTop: 'none',
+                borderBottom: 'none',
+                borderRight: 'none'
+              } : {}}
             >
               <div className="flex items-center gap-3">
                 <i className="fas fa-shield-alt text-sm" />
@@ -145,10 +160,15 @@ function DashboardContent() {
               onClick={() => setActiveTab('performance')}
               className={`flex-1 w-full px-4 transition-all flex items-center justify-center relative ${
                 activeTab === 'performance'
-                  ? 'bg-v64-success/15 text-v64-success rounded-l-lg border-l-2 border-y border-v64-success/40 border-r-0 -mr-px z-10'
+                  ? 'text-v64-success rounded-l-lg border-l-2 border-v64-success/60'
                   : 'text-white/70 hover:bg-v64-success/10 hover:text-v64-success rounded-lg'
               }`}
-              style={activeTab === 'performance' ? { marginRight: '-1px', borderRight: 'none' } : {}}
+              style={activeTab === 'performance' ? {
+                background: 'linear-gradient(90deg, rgba(105,240,174,0.15) 0%, rgba(105,240,174,0.12) 100%)',
+                borderTop: 'none',
+                borderBottom: 'none',
+                borderRight: 'none'
+              } : {}}
             >
               <div className="flex items-center gap-3">
                 <i className="fas fa-chart-line text-sm" />
@@ -160,10 +180,15 @@ function DashboardContent() {
               onClick={() => setActiveTab('simulation')}
               className={`flex-1 w-full px-4 transition-all flex items-center justify-center relative ${
                 activeTab === 'simulation'
-                  ? 'bg-orange-500/15 text-orange-400 rounded-l-lg border-l-2 border-y border-orange-500/40 border-r-0 -mr-px z-10'
+                  ? 'text-orange-400 rounded-l-lg border-l-2 border-orange-500/60'
                   : 'text-white/70 hover:bg-orange-500/10 hover:text-orange-400 rounded-lg'
               }`}
-              style={activeTab === 'simulation' ? { marginRight: '-1px', borderRight: 'none' } : {}}
+              style={activeTab === 'simulation' ? {
+                background: 'linear-gradient(90deg, rgba(249,115,22,0.15) 0%, rgba(249,115,22,0.12) 100%)',
+                borderTop: 'none',
+                borderBottom: 'none',
+                borderRight: 'none'
+              } : {}}
             >
               <div className="flex items-center gap-3">
                 <i className="fas fa-flask text-sm" />
