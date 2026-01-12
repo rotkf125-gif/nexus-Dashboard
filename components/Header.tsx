@@ -291,39 +291,39 @@ export default function Header({ onOpenSettings, onOpenAuth, onOpenFreedom }: He
   const formatUSD = (n: number) => '$' + n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   return (
-    <header className="glass-card p-5">
-      <div className="flex flex-wrap justify-between items-center gap-4">
+    <header className="glass-card p-3 md:p-4 lg:p-5">
+      <div className="flex flex-wrap justify-between items-center gap-3 md:gap-4">
         {/* Logo */}
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 border border-white/20 rounded-full flex items-center justify-center bg-white/5 backdrop-blur-md shadow-[0_0_30px_rgba(255,255,255,0.1)]">
-            <i className="fas fa-infinity text-xl text-white" />
+        <div className="flex items-center gap-2 md:gap-4">
+          <div className="w-10 h-10 md:w-12 md:h-12 border border-white/20 rounded-full flex items-center justify-center bg-white/5 backdrop-blur-md shadow-[0_0_30px_rgba(255,255,255,0.1)]">
+            <i className="fas fa-infinity text-lg md:text-xl text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-[0.2em] font-display text-white text-glow">CELESTIAL</h1>
-            <div className="text-[10px] tracking-[0.3em] opacity-90 mt-1">NEXUS INTELLIGENCE V1.0</div>
+            <h1 className="text-lg md:text-xl lg:text-2xl font-bold tracking-[0.2em] font-display text-white text-glow">CELESTIAL</h1>
+            <div className="text-[8px] md:text-[10px] tracking-[0.3em] opacity-90 mt-0.5 md:mt-1">NEXUS INTELLIGENCE V1.0</div>
           </div>
         </div>
 
         {/* Total Assets - 평가금(수익금), 원금 순 */}
-        <div className="flex items-center gap-6 px-6 border-l border-white/10">
+        <div className="hidden lg:flex items-center gap-6 px-6 border-l border-white/10">
           {/* USD */}
           <div className="text-center">
             <div className="text-[8px] uppercase tracking-widest mb-1 opacity-80">평가금($)</div>
-            <div className="text-2xl font-light tracking-tight text-gradient-cyan">{formatUSD(portfolioStats.totalValue)}</div>
+            <div className="text-xl lg:text-2xl font-light tracking-tight text-gradient-cyan">{formatUSD(portfolioStats.totalValue)}</div>
             <div className={`text-[10px] mt-0.5 ${portfolioStats.colorClass}`}>({portfolioStats.sign}{formatUSD(Math.abs(portfolioStats.returnVal))})</div>
             <div className="text-[9px] mt-1 opacity-80">원금: {formatUSD(portfolioStats.totalCost)}</div>
           </div>
           {/* KRW */}
           <div className="text-center">
             <div className="text-[8px] uppercase tracking-widest mb-1 opacity-80">평가금(₩)</div>
-            <div className="text-2xl font-light tracking-tight text-gradient-gold">₩{portfolioStats.totalValueKrw.toLocaleString()}</div>
+            <div className="text-xl lg:text-2xl font-light tracking-tight text-gradient-gold">₩{portfolioStats.totalValueKrw.toLocaleString()}</div>
             <div className={`text-[10px] mt-0.5 ${portfolioStats.colorClassKrw}`}>({portfolioStats.signKrw}₩{Math.abs(portfolioStats.returnKrw).toLocaleString()})</div>
             <div className="text-[9px] mt-1 opacity-80">원금: ₩{portfolioStats.totalCostKrw.toLocaleString()}</div>
           </div>
         </div>
 
         {/* Market Indices - 2x2 그리드 + VIX + Market State */}
-        <div className="flex gap-3 px-6 border-l border-r border-white/15">
+        <div className="hidden md:flex gap-3 px-4 lg:px-6 border-l border-r border-white/15">
           {/* Market State Badge */}
           <div className="flex flex-col justify-center items-center min-w-[85px]">
             {(() => {

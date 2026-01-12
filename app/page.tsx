@@ -64,7 +64,7 @@ function DashboardContent() {
   const handleCloseFreedom = useCallback(() => setFreedomOpen(false), []);
 
   return (
-    <div className="max-w-[1900px] mx-auto p-4 md:p-6 space-y-5">
+    <div className="max-w-[1900px] mx-auto p-2 md:p-4 lg:p-6 space-y-3 md:space-y-5">
       {/* Modals */}
       <AssetModal
         isOpen={assetModalOpen}
@@ -91,78 +91,78 @@ function DashboardContent() {
 
       {/* Main Content with Left Sidebar Tabs - Seamless Connection */}
       <div className="grid grid-cols-1 lg:grid-cols-12 glass-card overflow-hidden relative">
-        {/* Left Sidebar Tabs */}
-        <div className="lg:col-span-2 p-4 flex flex-col h-full relative z-10">
-          <div className="text-[10px] tracking-[0.15em] text-white/50 mb-3 uppercase font-medium text-center">Navigation</div>
-          <div className="flex flex-col flex-1 gap-0 relative">
+        {/* Left Sidebar Tabs - 모바일: 가로 스크롤, 데스크톱: 세로 */}
+        <div className="lg:col-span-2 p-2 md:p-4 flex flex-col h-full relative z-10">
+          <div className="hidden lg:block text-[10px] tracking-[0.15em] text-white/50 mb-3 uppercase font-medium text-center">Navigation</div>
+          <div className="flex lg:flex-col flex-1 gap-0 relative overflow-x-auto lg:overflow-x-visible custom-scrollbar">
             {/* Stellar Assets - Cyan (핵심 자산) */}
             <button
               onClick={() => setActiveTab('stellar')}
-              className={`flex-1 w-full px-3 py-2 transition-all duration-300 flex items-center justify-center relative ${
+              className={`flex-1 lg:w-full whitespace-nowrap px-3 md:px-4 py-2 md:py-3 transition-all duration-300 flex items-center justify-center relative ${
                 activeTab === 'stellar'
-                  ? 'text-celestial-cyan border-l-[3px] border-celestial-cyan bg-celestial-cyan/10'
+                  ? 'text-celestial-cyan border-b-[3px] lg:border-b-0 lg:border-l-[3px] border-celestial-cyan bg-celestial-cyan/10'
                   : 'text-white/70 hover:bg-celestial-cyan/10 hover:text-celestial-cyan'
               }`}
             >
-              <div className="flex items-center gap-2.5">
-                <i className="fas fa-star text-xs" />
-                <span className="text-[13px] font-medium tracking-wide">Stellar Assets</span>
+              <div className="flex items-center gap-1.5 md:gap-2.5">
+                <i className="fas fa-star text-[10px] md:text-xs" />
+                <span className="text-[11px] md:text-[13px] font-medium tracking-wide">Stellar</span>
               </div>
             </button>
             {/* Income Stream - Gold (배당/수익) */}
             <button
               onClick={() => setActiveTab('income')}
-              className={`flex-1 w-full px-3 py-2 transition-all duration-300 flex items-center justify-center relative ${
+              className={`flex-1 lg:w-full whitespace-nowrap px-3 md:px-4 py-2 md:py-3 transition-all duration-300 flex items-center justify-center relative ${
                 activeTab === 'income'
-                  ? 'text-celestial-gold border-l-[3px] border-celestial-gold bg-celestial-gold/10'
+                  ? 'text-celestial-gold border-b-[3px] lg:border-b-0 lg:border-l-[3px] border-celestial-gold bg-celestial-gold/10'
                   : 'text-white/70 hover:bg-celestial-gold/10 hover:text-celestial-gold'
               }`}
             >
-              <div className="flex items-center gap-2.5">
-                <i className="fas fa-coins text-xs" />
-                <span className="text-[13px] font-medium tracking-wide">Income Stream</span>
+              <div className="flex items-center gap-1.5 md:gap-2.5">
+                <i className="fas fa-coins text-[10px] md:text-xs" />
+                <span className="text-[11px] md:text-[13px] font-medium tracking-wide">Income</span>
               </div>
             </button>
             {/* Analytics - Purple (분석/리스크) */}
             <button
               onClick={() => setActiveTab('analytics')}
-              className={`flex-1 w-full px-3 py-2 transition-all duration-300 flex items-center justify-center relative ${
+              className={`flex-1 lg:w-full whitespace-nowrap px-3 md:px-4 py-2 md:py-3 transition-all duration-300 flex items-center justify-center relative ${
                 activeTab === 'analytics'
-                  ? 'text-celestial-purple border-l-[3px] border-celestial-purple bg-celestial-purple/10'
+                  ? 'text-celestial-purple border-b-[3px] lg:border-b-0 lg:border-l-[3px] border-celestial-purple bg-celestial-purple/10'
                   : 'text-white/70 hover:bg-celestial-purple/10 hover:text-celestial-purple'
               }`}
             >
-              <div className="flex items-center gap-2.5">
-                <i className="fas fa-shield-alt text-xs" />
-                <span className="text-[13px] font-medium tracking-wide">Analytics</span>
+              <div className="flex items-center gap-1.5 md:gap-2.5">
+                <i className="fas fa-shield-alt text-[10px] md:text-xs" />
+                <span className="text-[11px] md:text-[13px] font-medium tracking-wide">Analytics</span>
               </div>
             </button>
             {/* Performance - Green (성과/수익률) */}
             <button
               onClick={() => setActiveTab('performance')}
-              className={`flex-1 w-full px-3 py-2 transition-all duration-300 flex items-center justify-center relative ${
+              className={`flex-1 lg:w-full whitespace-nowrap px-3 md:px-4 py-2 md:py-3 transition-all duration-300 flex items-center justify-center relative ${
                 activeTab === 'performance'
-                  ? 'text-v64-success border-l-[3px] border-v64-success bg-v64-success/10'
+                  ? 'text-v64-success border-b-[3px] lg:border-b-0 lg:border-l-[3px] border-v64-success bg-v64-success/10'
                   : 'text-white/70 hover:bg-v64-success/10 hover:text-v64-success'
               }`}
             >
-              <div className="flex items-center gap-2.5">
-                <i className="fas fa-chart-line text-xs" />
-                <span className="text-[13px] font-medium tracking-wide">Performance</span>
+              <div className="flex items-center gap-1.5 md:gap-2.5">
+                <i className="fas fa-chart-line text-[10px] md:text-xs" />
+                <span className="text-[11px] md:text-[13px] font-medium tracking-wide">Performance</span>
               </div>
             </button>
             {/* Simulation - Orange (시뮬레이션/실험) */}
             <button
               onClick={() => setActiveTab('simulation')}
-              className={`flex-1 w-full px-3 py-2 transition-all duration-300 flex items-center justify-center relative ${
+              className={`flex-1 lg:w-full whitespace-nowrap px-3 md:px-4 py-2 md:py-3 transition-all duration-300 flex items-center justify-center relative ${
                 activeTab === 'simulation'
-                  ? 'text-orange-400 border-l-[3px] border-orange-500 bg-orange-500/10'
+                  ? 'text-orange-400 border-b-[3px] lg:border-b-0 lg:border-l-[3px] border-orange-500 bg-orange-500/10'
                   : 'text-white/70 hover:bg-orange-500/10 hover:text-orange-400'
               }`}
             >
-              <div className="flex items-center gap-2.5">
-                <i className="fas fa-flask text-xs" />
-                <span className="text-[13px] font-medium tracking-wide">Simulation</span>
+              <div className="flex items-center gap-1.5 md:gap-2.5">
+                <i className="fas fa-flask text-[10px] md:text-xs" />
+                <span className="text-[11px] md:text-[13px] font-medium tracking-wide">Simulation</span>
               </div>
             </button>
           </div>
@@ -170,7 +170,7 @@ function DashboardContent() {
 
         {/* Main Content Area with Subtle Tab Color Connection */}
         <div
-          className="lg:col-span-10 min-h-[800px] p-5 relative transition-colors duration-300"
+          className="lg:col-span-10 min-h-[500px] md:min-h-[800px] p-3 md:p-4 lg:p-5 relative transition-colors duration-300"
           style={{
             borderLeft: activeTab === 'stellar'
               ? '1px solid rgba(34,211,238,0.2)'
@@ -185,7 +185,7 @@ function DashboardContent() {
         >
           {/* Stellar Assets Tab */}
           {activeTab === 'stellar' && (
-            <div className="h-full min-h-[800px]">
+            <div className="h-full min-h-[500px] md:min-h-[800px]">
               <div className="flex justify-between items-end mb-4 pb-2 border-b border-white/10">
                 <h2 className="text-lg font-display tracking-widest flex items-center gap-3 text-white">
                   <i className="fas fa-star text-celestial-gold text-xs" /> STELLAR ASSETS

@@ -327,11 +327,11 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
   }
 
   return (
-    <div className={showAnalytics ? "space-y-4" : "space-y-3"}>
+    <div className={showAnalytics ? "space-y-3 md:space-y-4" : "space-y-3"}>
       {showAnalytics ? (
         <>
           {/* Row 1: PLTY | HOOY | EST. WEEKLY | RECENT LOGS */}
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
             {incomeStats.map((stat, i) => {
               const isGold = i % 2 === 1;
               const borderClass = isGold ? 'border-celestial-gold/30' : 'border-white/10';
@@ -463,7 +463,7 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
           </div>
 
           {/* Row 2: DPS Trend | Learning */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4">
             {/* DPS Trend */}
             <div className="inner-glass p-4 rounded" style={{ minHeight: '280px' }}>
               <div className="flex items-center justify-between mb-3">

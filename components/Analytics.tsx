@@ -483,9 +483,9 @@ export default function Analytics({ horizontal = false }: AnalyticsProps) {
   // 가로 레이아웃 (3행 x 4열 그리드)
   if (horizontal) {
     return (
-      <div className="glass-card p-5">
+      <div className="glass-card p-3 md:p-4 lg:p-5">
         {/* Row 1: Total Value, Weight, Sector, Type */}
-        <div className="grid grid-cols-4 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-3 md:mb-4">
           {/* Total Value */}
           <div className="inner-glass p-4 rounded-xl">
             <div className="text-xs tracking-widest text-white/60 mb-3 flex items-center gap-2">
@@ -593,7 +593,7 @@ export default function Analytics({ horizontal = false }: AnalyticsProps) {
         </div>
 
         {/* Row 2: Risk Score, Risk Factors, Performance */}
-        <div className="grid grid-cols-4 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-3 md:mb-4">
           {/* Risk Score */}
           <div className="inner-glass p-4 rounded-xl">
             <div className="text-xs tracking-widest text-white/60 mb-2">리스크 점수</div>
@@ -677,7 +677,7 @@ export default function Analytics({ horizontal = false }: AnalyticsProps) {
         </div>
 
         {/* Row 3: Market Correlation, Risk Profile, Insight */}
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           {/* Market Correlation */}
           <div className="inner-glass p-4 rounded-xl">
             <div className="text-xs tracking-widest text-white/60 mb-3">시장 상관관계</div>
@@ -711,7 +711,7 @@ export default function Analytics({ horizontal = false }: AnalyticsProps) {
           </div>
 
           {/* Insight */}
-          <div className="inner-glass p-4 rounded-xl col-span-2">
+          <div className="inner-glass p-4 rounded-xl md:col-span-2">
             <div className="text-xs tracking-widest text-white/60 mb-3">인사이트</div>
             <ul className="text-xs text-white/80 space-y-2 list-disc list-inside">
               {riskProfile.defensiveExposure < 0.2 && (
