@@ -8,7 +8,7 @@ import { formatUSD, getReturnColorClass, getPriceChangeIndicator, groupAssetsByT
 
 export default function AssetTable() {
   const { state, removeAsset, openEditAssetModal, updateAssets } = useNexus();
-  const { assets, exchangeRate, previousPrices, compactMode } = state;
+  const { assets, exchangeRate } = state;
   
   // 드래그 정렬 상태
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
@@ -25,19 +25,6 @@ export default function AssetTable() {
     }));
     return groupAssetsByType(assetsWithIndex);
   }, [assets]);
-
-  const getDeltaHtml = (current: number, previous: number) => {
-    if (!previous || previous === 0 || current === previous) return null;
-    const diff = current - previous;
-    const pct = ((diff / previous) * 100).toFixed(1);
-    const isUp = diff > 0;
-    return (
-      <span className={`delta-indicator ${isUp ? 'positive' : 'negative'}`}>
-        <i className={`fas fa-caret-${isUp ? 'up' : 'down'}`} />
-        {isUp ? '+' : ''}{pct}%
-      </span>
-    );
-  };
 
   // 드래그 핸들러
   const handleDragStart = (e: React.DragEvent, index: number) => {
@@ -99,7 +86,8 @@ export default function AssetTable() {
     );
   }
 
-  // 자산 행 렌더링 함수
+  // 자산 행 렌더링 함수 (Unified Compact Layout)
+  // 열 순서: Ticker(sector) / Qty / Return / Avg / Price / Val($)+P/L($) / Val(₩)+P/L(₩) / FX Rate / FX P/L
   const renderAssetRow = (a: Asset & { originalIndex: number }, globalIndex: number) => {
     const i = a.originalIndex;
     const cost = a.qty * a.avg;
@@ -116,53 +104,14 @@ export default function AssetTable() {
     const profitKrwClass = profitKrw >= 0 ? 'text-v64-success' : 'text-v64-danger';
     const fxPL = Math.round(value * (exchangeRate - buyRate));
     const fxClass = fxPL >= 0 ? 'text-v64-success' : 'text-v64-danger';
-    
-    let warningBadge = null;
-    if (pl <= -20) {
-      warningBadge = <span className="warning-badge warning-badge-red" title="심각한 손실">!</span>;
-    } else if (pl <= -10) {
-      warningBadge = <span className="warning-badge warning-badge-yellow" title="주의">!</span>;
-    }
-    
-    const prevPrice = previousPrices[a.ticker] || 0;
+
     const isDragging = draggedIndex === i;
     const isDragOver = dragOverIndex === i;
-    const rowClass = pl >= 0 ? 'asset-row asset-row-profit' : 'asset-row asset-row-loss';
-
-    if (compactMode) {
-      return (
-        <tr 
-          key={i} 
-          className={`transition-all border-b border-white/5 ${isDragging ? 'opacity-80' : ''} ${isDragOver ? 'bg-celestial-purple/20' : ''}`}
-          draggable
-          onDragStart={(e) => handleDragStart(e, i)}
-          onDragOver={(e) => handleDragOver(e, i)}
-          onDragLeave={handleDragLeave}
-          onDrop={(e) => handleDrop(e, i)}
-          onDragEnd={handleDragEnd}
-        >
-          <td className="p-1.5 text-center">
-            <span className="drag-handle cursor-grab active:cursor-grabbing">
-              <i className="fas fa-grip-vertical text-[10px]" />
-            </span>
-          </td>
-          <td className="p-2">
-            <span className="font-display text-[11px]" style={{ color: tickerColor }}>{a.ticker}</span>
-          </td>
-          <td className="p-2 text-right text-[10px] opacity-90">{a.qty}</td>
-          <td className="p-2 text-right text-[10px]">${a.price.toFixed(2)}</td>
-          <td className="p-2 text-right text-[10px]">{formatUSD(value)}</td>
-          <td className={`p-2 text-center text-[10px] font-medium ${plClass}`}>
-            {pl >= 0 ? '+' : ''}{pl.toFixed(1)}%
-          </td>
-        </tr>
-      );
-    }
 
     return (
-      <tr 
-        key={i} 
-        className={`${rowClass} transition-all border-b border-white/5 ${isDragging ? 'opacity-80' : ''} ${isDragOver ? 'bg-celestial-purple/20' : ''}`}
+      <tr
+        key={i}
+        className={`transition-all border-b border-white/5 hover:bg-white/5 ${isDragging ? 'opacity-80' : ''} ${isDragOver ? 'bg-celestial-purple/20' : ''}`}
         draggable
         onDragStart={(e) => handleDragStart(e, i)}
         onDragOver={(e) => handleDragOver(e, i)}
@@ -170,94 +119,77 @@ export default function AssetTable() {
         onDrop={(e) => handleDrop(e, i)}
         onDragEnd={handleDragEnd}
       >
-        <td className="p-2 text-center">
-          <span className="drag-handle cursor-grab active:cursor-grabbing" title="드래그하여 순서 변경">
-            <i className="fas fa-grip-vertical" />
+        {/* Drag Handle */}
+        <td className="p-1 text-center w-6">
+          <span className="drag-handle cursor-grab active:cursor-grabbing opacity-40 hover:opacity-80">
+            <i className="fas fa-grip-vertical text-[9px]" />
           </span>
         </td>
-        <td className="p-3 pl-2 cursor-pointer">
-          <div className="flex items-center gap-3">
-            <div 
-              className="w-8 h-8 flex items-center justify-center border border-white/20 bg-white/5 rounded"
-              style={{ color: tickerColor }}
+        {/* 1. Ticker + Sector */}
+        <td className="p-1.5 pl-2">
+          <div className="flex items-center gap-2">
+            <span className="font-display text-[11px] font-medium" style={{ color: tickerColor }}>{a.ticker}</span>
+            <span
+              className="text-[8px] px-1 py-0.5 rounded border"
+              style={{
+                background: `${sectorInfo.color}10`,
+                borderColor: `${sectorInfo.color}30`,
+                color: sectorInfo.color
+              }}
             >
-              <span className="font-display text-[10px]">{a.ticker}</span>
-            </div>
-            <div className="flex flex-col gap-0.5">
-              <div className="flex items-center gap-1">
-                <span className="text-[10px] opacity-90 font-light">{a.qty}주</span>
-                {warningBadge}
-              </div>
-              <div 
-                className="sector-badge"
-                style={{ 
-                  background: `${sectorInfo.color}10`, 
-                  borderColor: `${sectorInfo.color}30`, 
-                  color: sectorInfo.color 
-                }}
-              >
-                {sectorInfo.emoji} {sectorInfo.label}
-              </div>
-            </div>
-          </div>
-        </td>
-        <td className="p-3 text-center">
-          <div className="flex flex-col">
-            <span className={`${plClass} font-medium text-[11px]`}>
-              {profit >= 0 ? '+' : ''}{formatUSD(profit)}
-            </span>
-            <span className={`${plClass} text-[10px] opacity-80`}>
-              ({pl >= 0 ? '+' : ''}{pl.toFixed(1)}%)
+              {sectorInfo.emoji}
             </span>
           </div>
         </td>
-        <td className="p-3 text-right text-[11px] opacity-80 font-light">${a.avg.toFixed(2)}</td>
-        <td className="p-3 text-right">
-          <div className="flex items-center justify-end">
-            <span className="text-[11px] text-white font-light">${a.price.toFixed(2)}</span>
-            {getDeltaHtml(a.price, prevPrice)}
+        {/* 2. Qty */}
+        <td className="p-1.5 text-center text-[10px] text-white/80">{a.qty}</td>
+        {/* 3. Return % */}
+        <td className={`p-1.5 text-center text-[10px] font-semibold ${plClass}`}>
+          {pl >= 0 ? '+' : ''}{pl.toFixed(1)}%
+        </td>
+        {/* 4. Avg */}
+        <td className="p-1.5 text-right text-[10px] text-white/70">${a.avg.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+        {/* 5. Price */}
+        <td className="p-1.5 text-right text-[10px] text-white/90">${a.price.toFixed(2)}</td>
+        {/* 6. Val($) + P/L($) */}
+        <td className="p-1.5 text-right">
+          <div className="text-[10px] text-white">{formatUSD(value)}</div>
+          <div className={`text-[9px] ${plClass}`}>
+            ({profit >= 0 ? '+' : ''}{formatUSD(profit)})
           </div>
         </td>
-        <td className="p-3 text-right">
-          <div className="flex flex-col">
-            <span className="text-[10px] text-white font-light">{formatUSD(value)}</span>
-            <span className={`text-[9px] ${plClass} font-light`}>
-              ({profit >= 0 ? '+' : ''}{formatUSD(profit)})
-            </span>
+        {/* 7. Val(₩) + P/L(₩) */}
+        <td className="p-1.5 text-right">
+          <div className="text-[10px] text-white/80">₩{valueKrw.toLocaleString()}</div>
+          <div className={`text-[9px] ${profitKrwClass}`}>
+            ({profitKrw >= 0 ? '+' : ''}₩{Math.abs(profitKrw).toLocaleString()})
           </div>
         </td>
-        <td className="p-3 text-right">
-          <div className="flex flex-col">
-            <span className="text-[10px] text-white font-light">₩{valueKrw.toLocaleString()}</span>
-            <span className={`text-[9px] ${profitKrwClass} font-light`}>
-              ({profitKrw >= 0 ? '+' : ''}₩{Math.abs(profitKrw).toLocaleString()})
-            </span>
-          </div>
-        </td>
-        <td className="p-3 text-right text-[10px] text-celestial-gold font-light">
-          ₩{buyRate.toLocaleString()}
-        </td>
-        <td className={`p-3 text-right text-[10px] ${fxClass} font-light`}>
+        {/* 8. FX Rate */}
+        <td className="p-1.5 text-center text-[10px] text-celestial-gold/80">₩{buyRate.toLocaleString()}</td>
+        {/* 9. FX P/L */}
+        <td className={`p-1.5 text-right text-[10px] ${fxClass}`}>
           {fxPL >= 0 ? '+' : ''}₩{Math.abs(fxPL).toLocaleString()}
         </td>
-        <td className="p-3 text-center">
-          <div className="quick-actions">
-            <button 
-              className="quick-action-btn" 
+        {/* Actions */}
+        <td className="p-1 text-center">
+          <div className="flex items-center justify-center gap-1">
+            <button
+              className="w-5 h-5 flex items-center justify-center text-[9px] text-white/50 hover:text-celestial-cyan transition-colors"
               title="편집"
               onClick={() => openEditAssetModal(i)}
             >
               <i className="fas fa-pen" />
             </button>
-            <button 
-              className="quick-action-btn" 
+            <button
+              className="w-5 h-5 flex items-center justify-center text-[9px] text-white/50 hover:text-celestial-gold transition-colors"
               title="차트"
               onClick={() => window.open(`https://finance.yahoo.com/quote/${a.ticker}/chart`, '_blank')}
             >
               <i className="fas fa-chart-line" />
             </button>
-            <button 
-              className="quick-action-btn"
+            <button
+              className="w-5 h-5 flex items-center justify-center text-[9px] text-white/50 hover:text-v64-danger transition-colors"
               title="삭제"
               onClick={() => {
                 if (confirm('Delete?')) removeAsset(i);
@@ -321,38 +253,39 @@ export default function AssetTable() {
               </div>
             </div>
 
-            {/* Asset Table */}
+            {/* Asset Table - Unified Compact Layout */}
+            {/* 열 순서: Ticker(sector) / Qty / Return / Avg / Price / Val($)+P/L($) / Val(₩)+P/L(₩) / FX Rate / FX P/L */}
             {!isCollapsed && (
               <div className="overflow-x-auto bg-black/20">
-                <table className="w-full text-sm font-light border-separate border-spacing-y-0">
-                  {!compactMode && (
-                    <thead className="text-[9px] font-sans uppercase tracking-widest bg-black/30">
-                      <tr>
-                        <th className="p-2 w-8 border-b border-white/10" />
-                        <th className="p-2 text-left border-b border-white/10 font-medium opacity-90">Ticker</th>
-                        <th className="p-2 text-center border-b border-white/10 font-medium opacity-90">Return</th>
-                        <th className="p-2 text-right border-b border-white/10 font-medium opacity-90">Avg</th>
-                        <th className="p-2 text-right border-b border-white/10 font-medium opacity-90">Price</th>
-                        <th className="p-2 text-right border-b border-white/10 font-medium opacity-90">Val($)</th>
-                        <th className="p-2 text-right border-b border-white/10 font-medium opacity-90">Val(₩)</th>
-                        <th className="p-2 text-right border-b border-white/10 font-medium opacity-90">FX Rate</th>
-                        <th className="p-2 text-right border-b border-white/10 font-medium opacity-90">FX P/L</th>
-                        <th className="p-2 text-center w-20 border-b border-white/10" />
-                      </tr>
-                    </thead>
-                  )}
-                  {compactMode && (
-                    <thead className="text-[8px] font-sans uppercase tracking-widest bg-black/30">
-                      <tr>
-                        <th className="p-1.5 w-6 border-b border-white/10" />
-                        <th className="p-2 text-left border-b border-white/10 font-medium opacity-90">Ticker</th>
-                        <th className="p-2 text-right border-b border-white/10 font-medium opacity-90">Qty</th>
-                        <th className="p-2 text-right border-b border-white/10 font-medium opacity-90">Price</th>
-                        <th className="p-2 text-right border-b border-white/10 font-medium opacity-90">Value</th>
-                        <th className="p-2 text-center border-b border-white/10 font-medium opacity-90">P/L</th>
-                      </tr>
-                    </thead>
-                  )}
+                <table className="w-full text-sm font-light border-separate border-spacing-y-0 table-fixed">
+                  <colgroup>
+                    <col className="w-[3%]" />   {/* Drag */}
+                    <col className="w-[10%]" />  {/* Ticker */}
+                    <col className="w-[7%]" />   {/* Qty */}
+                    <col className="w-[9%]" />   {/* Return */}
+                    <col className="w-[10%]" />  {/* Avg */}
+                    <col className="w-[10%]" />  {/* Price */}
+                    <col className="w-[14%]" />  {/* Val($) */}
+                    <col className="w-[14%]" />  {/* Val(₩) */}
+                    <col className="w-[9%]" />   {/* FX Rate */}
+                    <col className="w-[9%]" />   {/* FX P/L */}
+                    <col className="w-[5%]" />   {/* Actions */}
+                  </colgroup>
+                  <thead className="text-[8px] font-sans uppercase tracking-widest bg-black/30">
+                    <tr>
+                      <th className="p-1 border-b border-white/10" />
+                      <th className="p-1.5 text-left border-b border-white/10 font-medium opacity-80">Ticker</th>
+                      <th className="p-1.5 text-center border-b border-white/10 font-medium opacity-80">Qty</th>
+                      <th className="p-1.5 text-center border-b border-white/10 font-medium opacity-80">Return</th>
+                      <th className="p-1.5 text-right border-b border-white/10 font-medium opacity-80">Avg</th>
+                      <th className="p-1.5 text-right border-b border-white/10 font-medium opacity-80">Price</th>
+                      <th className="p-1.5 text-right border-b border-white/10 font-medium opacity-80">Val($)</th>
+                      <th className="p-1.5 text-right border-b border-white/10 font-medium opacity-80">Val(₩)</th>
+                      <th className="p-1.5 text-center border-b border-white/10 font-medium opacity-80">FX Rate</th>
+                      <th className="p-1.5 text-right border-b border-white/10 font-medium opacity-80">FX P/L</th>
+                      <th className="p-1 border-b border-white/10" />
+                    </tr>
+                  </thead>
                   <tbody className="font-light text-gray-300">
                     {group.assets.map((asset, idx) => renderAssetRow(asset, startIndex + idx))}
                   </tbody>

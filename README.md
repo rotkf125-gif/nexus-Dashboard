@@ -1,4 +1,4 @@
-# 🌟 NEXUS CELESTIAL V65.7 - Next.js Edition
+# 🌟 NEXUS CELESTIAL V65.9 - Next.js Edition
 
 개인 투자 포트폴리오 대시보드 (Celestial Glass 테마)
 
@@ -9,6 +9,29 @@
 | **Live Site** | https://nexus-dashboard-beige.vercel.app |
 | **GitHub** | https://github.com/rotkf125-gif/nexus-dashboard |
 | **Database** | Supabase (PostgreSQL) |
+
+---
+
+## ✨ V65.9 변경 사항
+
+### 📊 Stellar Assets 테이블 통합 리디자인
+- **Compact 레이아웃 통합**: 기본/Compact 모드 통합, 단일 레이아웃으로 일원화
+- **열 순서 최적화**: Ticker → Qty → Return → Avg → Price → Val($) → Val(₩) → FX Rate → FX P/L
+- **균등 열 간격**: `table-fixed` + `colgroup`으로 열 너비 균등 배분
+- **P/L 통합 표시**: Val($)에 손익($) 포함, Val(₩)에 손익(₩) 포함
+- **텍스트 크기 최적화**: 헤더 `text-[8px]`, 셀 `text-[10px]`
+- **섹터 표시 간소화**: 섹터 이모지만 표시 (라벨 제거)
+- **액션 버튼 미니화**: `w-5 h-5` 미니 아이콘 버튼
+
+---
+
+## ✨ V65.8 변경 사항
+
+### 🔧 Analytics 정확도 개선
+- **`/api/info/[ticker]` API 신규**: Yahoo Finance chart API 기반 종목 정보 조회
+- **TICKER_SECTOR_MAP 확장**: 200+ 종목 섹터 매핑 (Technology, Finance, Healthcare 등)
+- **ETF_SECTOR_DATA 확장**: QDTE 등 신규 ETF 섹터 비중 추가
+- **AssetModal 섹터 자동 조회**: 티커 입력 시 섹터/이름 자동 조회
 
 ---
 
@@ -590,6 +613,8 @@ npm install
 
 | 버전 | 날짜 | 주요 변경 |
 |------|------|----------|
+| V65.9 | 2026-01-12 | Stellar Assets 테이블 통합 리디자인, 균등 열 간격 |
+| V65.8 | 2026-01-12 | Analytics 정확도 개선, /api/info API, TICKER_SECTOR_MAP 확장 |
 | V65.7 | 2026-01-11 | Income Stream 텍스트 크기 최적화, 카드 레이아웃 개선 |
 | V65.6 | 2025-01-11 | Analytics 전면 개편 (3x4 그리드), 사이드바 탭별 색상, 텍스트 확대 |
 | V65.5 | 2025-01-11 | 가독성 대폭 개선 (텍스트/차트 확대, opacity 증가, DPS+Learning 세로 배치) |
