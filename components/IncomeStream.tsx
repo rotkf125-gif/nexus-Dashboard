@@ -3,6 +3,7 @@
 import { useMemo, useEffect, useRef } from 'react';
 import { useNexus } from '@/lib/context';
 import PredictedDividend from './PredictedDividend';
+import { IncomeCard, WeeklySummary, RecentLogs, IncomeStatData } from './income';
 import { Chart, LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend, BarController, BarElement } from 'chart.js';
 
 Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend, BarController, BarElement);
@@ -16,6 +17,9 @@ const TICKER_COLORS = [
   'rgba(244, 143, 177, 0.8)',
 ];
 
+// 세후 배당금 비율 (15% 이자세)
+const AFTER_TAX_RATE = 0.85;
+
 interface IncomeStreamProps {
   showAnalytics?: boolean;
 }
@@ -24,7 +28,7 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
   const { state, setTradeSums, toast } = useNexus();
   const { assets, dividends, tradeSums } = state;
 
-  // Chart refs for analytics
+  // Chart refs
   const dpsChartRef = useRef<HTMLCanvasElement>(null);
   const dpsChartInstance = useRef<Chart | null>(null);
   const learningChartRef = useRef<HTMLCanvasElement>(null);
@@ -35,41 +39,35 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
     return assets.filter(a => a.type === 'INCOME');
   }, [assets]);
 
-  // 각 INCOME 자산별 통계 계산
-  const incomeStats = useMemo(() => {
-    return incomeAssets.map(asset => {
-      const tickerDividends = dividends.filter(d => d.ticker === asset.ticker);
+  // 배당금 데이터 사전 색인화 (O(n²) → O(n) 최적화)
+  const dividendsByTicker = useMemo(() => {
+    const indexed: Record<string, typeof dividends> = {};
+    dividends.forEach(d => {
+      if (!indexed[d.ticker]) indexed[d.ticker] = [];
+      indexed[d.ticker].push(d);
+    });
+    return indexed;
+  }, [dividends]);
 
-      // 총 배당금 (세후 15%)
+  // 각 INCOME 자산별 통계 계산
+  const incomeStats = useMemo((): IncomeStatData[] => {
+    return incomeAssets.map(asset => {
+      const tickerDividends = dividendsByTicker[asset.ticker] || [];
+
+      // 총 배당금 (세후)
       const totalDividend = tickerDividends.reduce((sum, d) => {
-        const gross = d.qty * d.dps;
-        return sum + gross * 0.85;
+        return sum + d.qty * d.dps * AFTER_TAX_RATE;
       }, 0);
 
-      // 배당 횟수
-      const dividendCount = tickerDividends.length;
-
-      // 평균 DPS (1주당 배당금)
-      const avgDps = dividendCount > 0
-        ? tickerDividends.reduce((sum, d) => sum + d.dps, 0) / dividendCount
+      // 평균 DPS
+      const avgDps = tickerDividends.length > 0
+        ? tickerDividends.reduce((sum, d) => sum + d.dps, 0) / tickerDividends.length
         : 0;
 
-      // 원금 (매수 비용) - PRINCIPAL
       const principal = asset.qty * asset.avg;
-
-      // 평가금 (현재 가치) - VALUATION
       const valuation = asset.qty * asset.price;
-
-      // 미실현 수익금
-      const unrealizedPL = valuation - principal;
-
-      // 매수/매도 합 - TRADE RETURN
       const tradeReturn = tradeSums[asset.ticker] ?? 0;
-
-      // Total Return = 매수/매도 합 + 미실현 수익금 + 누적 배당금
-      const totalReturn = tradeReturn + unrealizedPL + totalDividend;
-
-      // Recovery = 총 누적 배당금 / 원금 × 100
+      const totalReturn = tradeReturn + (valuation - principal) + totalDividend;
       const recoveryPct = principal > 0 ? (totalDividend / principal) * 100 : 0;
 
       return {
@@ -82,23 +80,19 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
         tradeReturn,
         totalReturn,
         recoveryPct,
-        dividendCount,
+        dividendCount: tickerDividends.length,
       };
     });
-  }, [incomeAssets, dividends, tradeSums]);
+  }, [incomeAssets, dividendsByTicker, tradeSums]);
 
-  // Weekly Summary 계산 (현재 보유 수량 기반 예상 주간 배당)
+  // Weekly Summary 계산
   const weeklySummary = useMemo(() => {
-    // 현재 보유 수량 기반 MIN/AVG/MAX 계산
-    let estimatedMin = 0;
-    let estimatedAvg = 0;
-    let estimatedMax = 0;
+    let estimatedMin = 0, estimatedAvg = 0, estimatedMax = 0;
 
     incomeAssets.forEach(asset => {
-      const tickerDividends = dividends.filter(d => d.ticker === asset.ticker);
+      const tickerDividends = dividendsByTicker[asset.ticker] || [];
       if (tickerDividends.length > 0) {
-        // 최근 6개 DPS 추출
-        const recentDps = tickerDividends
+        const recentDps = [...tickerDividends]
           .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
           .slice(0, 6)
           .map(d => d.dps);
@@ -108,29 +102,24 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
           const maxDps = Math.max(...recentDps);
           const avgDps = recentDps.reduce((sum, d) => sum + d, 0) / recentDps.length;
 
-          // 현재 보유 수량 × DPS × 세후 85%
-          estimatedMin += asset.qty * minDps * 0.85;
-          estimatedAvg += asset.qty * avgDps * 0.85;
-          estimatedMax += asset.qty * maxDps * 0.85;
+          estimatedMin += asset.qty * minDps * AFTER_TAX_RATE;
+          estimatedAvg += asset.qty * avgDps * AFTER_TAX_RATE;
+          estimatedMax += asset.qty * maxDps * AFTER_TAX_RATE;
         }
       }
     });
 
-    return {
-      weeklyMin: estimatedMin,
-      weeklyAvg: estimatedAvg,
-      weeklyMax: estimatedMax,
-    };
-  }, [dividends, incomeAssets]);
+    return { weeklyMin: estimatedMin, weeklyAvg: estimatedAvg, weeklyMax: estimatedMax };
+  }, [dividendsByTicker, incomeAssets]);
 
-  // 최근 배당 로그 (최근 5개)
+  // 최근 배당 로그
   const recentLogs = useMemo(() => {
     return [...dividends]
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .slice(0, 5);
   }, [dividends]);
 
-  // Trade Return 입력 (브라우저 prompt 사용)
+  // Trade Return 수정 핸들러
   const handleEditTradeReturn = (ticker: string, currentValue: number) => {
     const input = prompt(`Trade Return (${ticker}):`, currentValue.toString());
     if (input !== null) {
@@ -142,17 +131,16 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
     }
   };
 
-  // ===== Analytics Data (DPS Trend + Learning) =====
+  // ===== Analytics Data =====
   const dpsData = useMemo(() => {
-    const result: { [ticker: string]: { date: string; dps: number }[] } = {};
+    const result: Record<string, { date: string; dps: number }[]> = {};
     incomeAssets.forEach(asset => {
-      const tickerDividends = dividends
-        .filter(d => d.ticker === asset.ticker)
+      const tickerDividends = (dividendsByTicker[asset.ticker] || [])
         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
       result[asset.ticker] = tickerDividends.map(d => ({ date: d.date, dps: d.dps }));
     });
     return result;
-  }, [incomeAssets, dividends]);
+  }, [incomeAssets, dividendsByTicker]);
 
   const avgDpsData = useMemo(() => {
     return incomeAssets.map(asset => {
@@ -163,23 +151,18 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
   }, [incomeAssets, dpsData]);
 
   const monthlyPattern = useMemo(() => {
-    const months: { [key: string]: number } = {};
+    const months: Record<string, number> = {};
     dividends.forEach(d => {
-      const month = d.date.slice(0, 7); // YYYY-MM
-      const amount = d.qty * d.dps * 0.85;
-      months[month] = (months[month] || 0) + amount;
+      const month = d.date.slice(0, 7);
+      months[month] = (months[month] || 0) + d.qty * d.dps * AFTER_TAX_RATE;
     });
-    return Object.entries(months)
-      .sort(([a], [b]) => a.localeCompare(b))
-      .slice(-12);
+    return Object.entries(months).sort(([a], [b]) => a.localeCompare(b)).slice(-12);
   }, [dividends]);
 
   const predictionAccuracy = useMemo(() => {
     if (avgDpsData.length === 0) return { accuracy: 0, totalPredicted: 0, totalActual: 0 };
 
-    let totalPredicted = 0;
-    let totalActual = 0;
-
+    let totalPredicted = 0, totalActual = 0;
     incomeAssets.forEach(asset => {
       const data = dpsData[asset.ticker] || [];
       if (data.length >= 2) {
@@ -198,14 +181,10 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
   useEffect(() => {
     if (!showAnalytics || !dpsChartRef.current) return;
 
-    if (dpsChartInstance.current) {
-      dpsChartInstance.current.destroy();
-    }
+    if (dpsChartInstance.current) dpsChartInstance.current.destroy();
 
     const allDates = new Set<string>();
-    Object.values(dpsData).forEach(data => {
-      data.forEach(d => allDates.add(d.date));
-    });
+    Object.values(dpsData).forEach(data => data.forEach(d => allDates.add(d.date)));
     const sortedDates = Array.from(allDates).sort();
 
     const datasets = incomeAssets.map((asset, i) => {
@@ -262,18 +241,14 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
       },
     });
 
-    return () => {
-      if (dpsChartInstance.current) dpsChartInstance.current.destroy();
-    };
+    return () => { dpsChartInstance.current?.destroy(); };
   }, [showAnalytics, dpsData, incomeAssets]);
 
-  // Learning Chart (월별 배당)
+  // Learning Chart
   useEffect(() => {
     if (!showAnalytics || !learningChartRef.current) return;
 
-    if (learningChartInstance.current) {
-      learningChartInstance.current.destroy();
-    }
+    if (learningChartInstance.current) learningChartInstance.current.destroy();
 
     learningChartInstance.current = new Chart(learningChartRef.current, {
       type: 'bar',
@@ -312,9 +287,7 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
       },
     });
 
-    return () => {
-      if (learningChartInstance.current) learningChartInstance.current.destroy();
-    };
+    return () => { learningChartInstance.current?.destroy(); };
   }, [showAnalytics, monthlyPattern]);
 
   if (incomeAssets.length === 0) {
@@ -326,140 +299,25 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
     );
   }
 
+  const firstTicker = incomeStats[0]?.ticker;
+
   return (
     <div className={showAnalytics ? "space-y-3 md:space-y-4" : "space-y-3"}>
       {showAnalytics ? (
         <>
-          {/* Row 1: PLTY | HOOY | EST. WEEKLY | RECENT LOGS */}
+          {/* Row 1: Income Cards | EST. WEEKLY | RECENT LOGS */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-            {incomeStats.map((stat, i) => {
-              const isGold = i % 2 === 1;
-              const borderClass = isGold ? 'border-celestial-gold/30' : 'border-white/10';
-              const textClass = isGold ? 'text-celestial-gold' : 'text-white';
-              const barBg = isGold ? 'bg-celestial-gold/10' : 'bg-white/5';
-              const barFill = isGold
-                ? 'bg-gradient-to-r from-celestial-gold/50 to-celestial-gold'
-                : 'bg-gradient-to-r from-v64-success/50 to-v64-success';
-
-              const totalReturnColor = stat.totalReturn >= 0 ? 'text-v64-success bg-v64-success/10 border-v64-success/30' : 'text-v64-danger bg-v64-danger/10 border-v64-danger/30';
-
-              return (
-                <div
-                  key={stat.ticker}
-                  className={`inner-glass p-4 rounded-lg border ${borderClass} flex flex-col`}
-                  style={{ minHeight: '280px' }}
-                >
-                  {/* Header: 종목명 + Total Return */}
-                  <div className="flex justify-between items-center mb-3">
-                    <span className={`text-lg font-display tracking-widest ${textClass}`}>
-                      {stat.ticker}
-                    </span>
-                    <span className={`text-[11px] font-semibold px-2 py-0.5 border rounded ${totalReturnColor}`}>
-                      {stat.totalReturn >= 0 ? '+' : ''}${stat.totalReturn.toFixed(2)}
-                    </span>
-                  </div>
-
-                  {/* Stats Grid - 1열 레이아웃 */}
-                  <div className="space-y-2.5 mb-3 flex-1">
-                    {/* QTY */}
-                    <div className="flex items-baseline justify-between">
-                      <span className="text-[10px] text-white/50 tracking-wider uppercase font-medium">QTY</span>
-                      <span className="text-celestial-cyan font-semibold text-[13px]">{stat.qty}주</span>
-                    </div>
-                    {/* DIVIDEND */}
-                    <div className="flex items-baseline justify-between">
-                      <span className="text-[10px] text-white/50 tracking-wider uppercase font-medium">DIVIDEND</span>
-                      <span className="text-v64-success font-semibold text-[13px]">${stat.totalDividend.toFixed(2)}</span>
-                    </div>
-                    {/* PRINCIPAL */}
-                    <div className="flex items-baseline justify-between">
-                      <span className="text-[10px] text-white/50 tracking-wider uppercase font-medium">PRINCIPAL</span>
-                      <span className="text-white/90 font-medium text-[12px]">${stat.principal.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
-                    </div>
-                    {/* VALUATION */}
-                    <div className="flex items-baseline justify-between">
-                      <span className="text-[10px] text-white/50 tracking-wider uppercase font-medium">VALUATION</span>
-                      <span className="text-white/90 font-medium text-[12px]">${stat.valuation.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
-                    </div>
-                    {/* TRADE R. */}
-                    <div className="flex items-baseline justify-between">
-                      <span className="text-[10px] text-white/50 tracking-wider uppercase font-medium">TRADE R.</span>
-                      <span
-                        className={`cursor-pointer hover:opacity-80 font-semibold text-[13px] ${stat.tradeReturn >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}
-                        onClick={() => handleEditTradeReturn(stat.ticker, stat.tradeReturn)}
-                        title="클릭하여 수정"
-                      >
-                        {stat.tradeReturn >= 0 ? '+' : ''}${stat.tradeReturn.toFixed(2)}
-                        <i className="fas fa-pen text-[8px] ml-1 text-white/40" />
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Recovery Progress */}
-                  <div className={`border-t pt-2.5 ${isGold ? 'border-celestial-gold/20' : 'border-white/10'}`}>
-                    <div className="flex justify-between mb-2 text-[10px] tracking-widest">
-                      <span className={`font-medium ${isGold ? 'text-celestial-gold/70' : 'text-white/50'}`}>RECOVERY</span>
-                      <span className={`font-semibold text-[11px] ${stat.recoveryPct >= 100 ? 'text-v64-success' : (isGold ? 'text-celestial-gold' : 'text-white')}`}>
-                        {stat.recoveryPct.toFixed(1)}%
-                      </span>
-                    </div>
-                    <div className={`w-full h-2.5 rounded-full overflow-hidden ${barBg}`}>
-                      <div
-                        className={`h-full transition-all ${stat.recoveryPct >= 100 ? 'bg-v64-success' : barFill}`}
-                        style={{ width: `${Math.min(100, stat.recoveryPct)}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-
-            {/* Est. Weekly */}
-            <div className="inner-glass p-5 text-center rounded border border-celestial-purple/30 flex flex-col justify-center" style={{ minHeight: '280px' }}>
-              <div className="text-[11px] text-celestial-purple tracking-[0.2em] mb-2.5 font-semibold uppercase">
-                EST. WEEKLY
-              </div>
-              <div className="text-[9px] text-white/60 mb-4">(현재 수량 × 최근 6회 DPS)</div>
-              <div className="text-4xl font-display font-semibold text-white mb-5">
-                ${weeklySummary.weeklyAvg.toFixed(2)}
-              </div>
-              <div className="flex flex-col gap-2 text-[11px] font-medium">
-                <div className="flex justify-between px-3">
-                  <span className="text-white/70">MIN:</span>
-                  <span className="text-v64-danger font-semibold">${weeklySummary.weeklyMin.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between px-3">
-                  <span className="text-white/70">MAX:</span>
-                  <span className="text-v64-success font-semibold">${weeklySummary.weeklyMax.toFixed(2)}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Recent Logs */}
-            <div className="inner-glass p-4 rounded flex flex-col" style={{ minHeight: '280px' }}>
-              <div className="flex justify-between items-center mb-3 text-[10px] text-white/80 tracking-widest font-semibold uppercase">
-                <span>RECENT LOGS</span>
-                <i className="fas fa-history text-[9px] text-white/50" />
-              </div>
-              <div className="overflow-y-auto custom-scrollbar flex-grow space-y-2">
-                {recentLogs.length > 0 ? recentLogs.map((d, i) => {
-                  // YYYY-MM-DD → YY/MM/DD
-                  const dateParts = d.date.split('-');
-                  const formattedDate = `${dateParts[0].slice(2)}/${dateParts[1]}/${dateParts[2]}`;
-                  return (
-                    <div key={i} className="flex justify-between text-[10px] font-medium items-center">
-                      <span className="text-white/60 w-16">{formattedDate}</span>
-                      <span className={`w-12 text-center font-semibold ${d.ticker === incomeStats[0]?.ticker ? 'text-white' : 'text-celestial-gold'}`}>
-                        {d.ticker}
-                      </span>
-                      <span className="text-white w-16 text-right font-semibold">${(d.qty * d.dps * 0.85).toFixed(2)}</span>
-                    </div>
-                  );
-                }) : (
-                  <div className="text-[10px] text-white/60 text-center py-4">기록 없음</div>
-                )}
-              </div>
-            </div>
+            {incomeStats.map((stat, i) => (
+              <IncomeCard
+                key={stat.ticker}
+                stat={stat}
+                index={i}
+                compact={false}
+                onEditTradeReturn={handleEditTradeReturn}
+              />
+            ))}
+            <WeeklySummary {...weeklySummary} compact={false} />
+            <RecentLogs logs={recentLogs} firstTicker={firstTicker} compact={false} />
           </div>
 
           {/* Row 2: DPS Trend | Learning */}
@@ -477,12 +335,9 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
                   ))}
                 </div>
               </div>
-
               <div style={{ height: 140 }}>
                 <canvas ref={dpsChartRef} />
               </div>
-
-              {/* Average DPS Cards */}
               <div className="grid grid-cols-2 gap-2.5 mt-3">
                 {avgDpsData.slice(0, 2).map((item, i) => {
                   const isGold = i % 2 === 1;
@@ -506,12 +361,9 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
                 <span className="text-[11px] tracking-widest text-celestial-purple font-medium uppercase">LEARNING</span>
                 <span className="text-[9px] text-white/60 font-medium">Monthly Pattern</span>
               </div>
-
               <div style={{ height: 140 }}>
                 <canvas ref={learningChartRef} />
               </div>
-
-              {/* Learning Stats */}
               <div className="grid grid-cols-3 gap-2.5 mt-3">
                 <div className="inner-glass p-2 rounded text-center">
                   <div className="text-[8px] tracking-widest mb-0.5 text-white/60 font-medium uppercase">RECORDS</div>
@@ -538,133 +390,21 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
         <div className="space-y-3">
           {/* Income Cards */}
           <div className={`grid ${incomeAssets.length === 1 ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'} gap-3`}>
-            {incomeStats.map((stat, i) => {
-              const isGold = i % 2 === 1;
-              const borderClass = isGold ? 'border-celestial-gold/30' : 'border-white/10';
-              const textClass = isGold ? 'text-celestial-gold' : 'text-white';
-              const barBg = isGold ? 'bg-celestial-gold/10' : 'bg-white/5';
-              const barFill = isGold
-                ? 'bg-gradient-to-r from-celestial-gold/50 to-celestial-gold'
-                : 'bg-gradient-to-r from-v64-success/50 to-v64-success';
-
-              const totalReturnColor = stat.totalReturn >= 0 ? 'text-v64-success bg-v64-success/10 border-v64-success/30' : 'text-v64-danger bg-v64-danger/10 border-v64-danger/30';
-
-              return (
-                <div
-                  key={stat.ticker}
-                  className={`inner-glass p-4 rounded-lg border ${borderClass}`}
-                >
-                  {/* Header: 종목명 + Total Return */}
-                  <div className="flex justify-between items-center mb-3">
-                    <span className={`text-base font-display tracking-widest ${textClass}`}>
-                      {stat.ticker}
-                    </span>
-                    <span className={`text-[11px] font-semibold px-2 py-0.5 border rounded ${totalReturnColor}`}>
-                      {stat.totalReturn >= 0 ? '+' : ''}${stat.totalReturn.toFixed(2)}
-                    </span>
-                  </div>
-
-                  {/* Stats Grid - 2열 레이아웃 */}
-                  <div className="space-y-1.5 mb-3">
-                    {/* Row 1: QTY | DIVIDEND */}
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="flex items-baseline gap-1.5">
-                        <span className="text-[10px] text-white/50 tracking-wider uppercase">QTY</span>
-                        <span className="text-celestial-cyan font-semibold text-[13px]">{stat.qty}주</span>
-                      </div>
-                      <div className="flex items-baseline gap-1.5">
-                        <span className="text-[10px] text-white/50 tracking-wider uppercase">DIVIDEND</span>
-                        <span className="text-v64-success font-semibold text-[13px]">${stat.totalDividend.toFixed(2)}</span>
-                      </div>
-                    </div>
-
-                    {/* Row 2: PRINCIPAL | VALUATION */}
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="flex items-baseline gap-1.5">
-                        <span className="text-[10px] text-white/50 tracking-wider uppercase">PRINCIPAL</span>
-                        <span className="text-white/90 font-medium text-[12px]">${stat.principal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                      </div>
-                      <div className="flex items-baseline gap-1.5">
-                        <span className="text-[10px] text-white/50 tracking-wider uppercase">VALUATION</span>
-                        <span className="text-white/90 font-medium text-[12px]">${stat.valuation.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                      </div>
-                    </div>
-
-                    {/* Row 3: TRADE R. */}
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="text-[10px] text-white/50 tracking-wider uppercase">TRADE R.</span>
-                      <span
-                        className={`cursor-pointer hover:opacity-80 font-semibold text-[13px] ${stat.tradeReturn >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}
-                        onClick={() => handleEditTradeReturn(stat.ticker, stat.tradeReturn)}
-                        title="클릭하여 수정"
-                      >
-                        {stat.tradeReturn >= 0 ? '+' : ''}${stat.tradeReturn.toFixed(2)}
-                        <i className="fas fa-pen text-[8px] ml-1 text-white/40" />
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Recovery Progress */}
-                  <div className={`border-t pt-2.5 ${isGold ? 'border-celestial-gold/20' : 'border-white/10'}`}>
-                    <div className="flex justify-between mb-1.5 text-[10px] tracking-widest">
-                      <span className={isGold ? 'text-celestial-gold/70' : 'text-white/50'}>RECOVERY</span>
-                      <span className={`font-semibold text-[11px] ${stat.recoveryPct >= 100 ? 'text-v64-success' : (isGold ? 'text-celestial-gold' : 'text-white')}`}>
-                        {stat.recoveryPct.toFixed(1)}%
-                      </span>
-                    </div>
-                    <div className={`w-full h-2 rounded-full overflow-hidden ${barBg}`}>
-                      <div
-                        className={`h-full transition-all ${stat.recoveryPct >= 100 ? 'bg-v64-success' : barFill}`}
-                        style={{ width: `${Math.min(100, stat.recoveryPct)}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+            {incomeStats.map((stat, i) => (
+              <IncomeCard
+                key={stat.ticker}
+                stat={stat}
+                index={i}
+                compact={true}
+                onEditTradeReturn={handleEditTradeReturn}
+              />
+            ))}
           </div>
 
-          {/* Weekly Summary */}
+          {/* Weekly Summary & Recent Logs */}
           <div className="grid grid-cols-2 gap-3">
-            {/* Est. Weekly */}
-            <div className="inner-glass p-3 text-center rounded border border-celestial-purple/30">
-              <div className="text-[10px] text-celestial-purple tracking-[0.15em] mb-0.5 font-medium uppercase">
-                EST. WEEKLY
-              </div>
-              <div className="text-[8px] text-white/60 mb-1">(현재 수량 × 최근 6회 DPS)</div>
-              <div className="text-lg font-display font-medium text-white">
-                ${weeklySummary.weeklyAvg.toFixed(2)}
-              </div>
-              <div className="flex justify-between mt-1.5 text-[10px] font-medium">
-                <span className="text-white/70">MIN: <span className="text-v64-danger">${weeklySummary.weeklyMin.toFixed(2)}</span></span>
-                <span className="text-white/70">MAX: <span className="text-v64-success">${weeklySummary.weeklyMax.toFixed(2)}</span></span>
-              </div>
-            </div>
-
-            {/* Recent Logs */}
-            <div className="inner-glass p-3 rounded flex flex-col">
-              <div className="flex justify-between items-center mb-2 text-[10px] text-white/80 tracking-widest font-medium uppercase">
-                <span>RECENT LOGS</span>
-                <i className="fas fa-history text-[9px] text-white/50" />
-              </div>
-              <div className="overflow-y-auto custom-scrollbar flex-grow max-h-[80px] space-y-1">
-                {recentLogs.length > 0 ? recentLogs.map((d, i) => {
-                  const dateParts = d.date.split('-');
-                  const formattedDate = `${dateParts[0].slice(2)}/${dateParts[1]}/${dateParts[2]}`;
-                  return (
-                    <div key={i} className="flex justify-between text-[10px] font-medium">
-                      <span className="text-white/60 w-16">{formattedDate}</span>
-                      <span className={`w-12 text-center ${d.ticker === incomeStats[0]?.ticker ? 'text-white' : 'text-celestial-gold'}`}>
-                        {d.ticker}
-                      </span>
-                      <span className="text-white w-14 text-right">${(d.qty * d.dps * 0.85).toFixed(2)}</span>
-                    </div>
-                  );
-                }) : (
-                  <div className="text-[10px] text-white/60 text-center py-2">기록 없음</div>
-                )}
-              </div>
-            </div>
+            <WeeklySummary {...weeklySummary} compact={true} />
+            <RecentLogs logs={recentLogs} firstTicker={firstTicker} compact={true} />
           </div>
 
           {/* Predicted Dividend */}

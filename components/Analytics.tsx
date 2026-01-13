@@ -323,111 +323,80 @@ export default function Analytics({ horizontal = false }: AnalyticsProps) {
     };
   }, [assets]);
 
-  // Total Value 도넛 차트
+  // 모든 도넛 차트 통합 렌더링 (성능 최적화)
   useEffect(() => {
-    if (!totalValueChartRef.current) return;
-    const data = assets.filter(a => a.qty * a.price > 0);
-    if (totalValueChartInstance.current) {
-      totalValueChartInstance.current.destroy();
-    }
-    totalValueChartInstance.current = new Chart(totalValueChartRef.current, {
-      type: 'doughnut',
-      data: {
-        labels: data.map(a => a.ticker),
-        datasets: [{
-          data: data.map(a => a.qty * a.price),
-          backgroundColor: data.map((_, i) => CHART_COLORS[i % CHART_COLORS.length]),
-          borderWidth: 0,
-        }],
+    // 공통 차트 옵션
+    const commonOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false },
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        cutout: '75%',
-        plugins: {
-          legend: { display: false },
-          tooltip: { enabled: false },
-        },
-        animation: { animateRotate: false },
-      },
-    });
-    return () => {
-      if (totalValueChartInstance.current) {
-        totalValueChartInstance.current.destroy();
-        totalValueChartInstance.current = null;
-      }
+      animation: { animateRotate: false },
     };
-  }, [assets]);
 
-  // Sector 도넛 차트
-  useEffect(() => {
-    if (!sectorChartRef.current) return;
-    if (sectorChartInstance.current) {
-      sectorChartInstance.current.destroy();
-    }
-    sectorChartInstance.current = new Chart(sectorChartRef.current, {
-      type: 'doughnut',
-      data: {
-        labels: topSectors.map(([s]) => s),
-        datasets: [{
-          data: topSectors.map(([, w]) => w * 100),
-          backgroundColor: CHART_COLORS.slice(0, topSectors.length),
-          borderWidth: 0,
-        }],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        cutout: '65%',
-        plugins: {
-          legend: { display: false },
-          tooltip: { enabled: false },
+    // Total Value 차트
+    if (totalValueChartRef.current) {
+      if (totalValueChartInstance.current) totalValueChartInstance.current.destroy();
+      const data = assets.filter(a => a.qty * a.price > 0);
+      totalValueChartInstance.current = new Chart(totalValueChartRef.current, {
+        type: 'doughnut',
+        data: {
+          labels: data.map(a => a.ticker),
+          datasets: [{
+            data: data.map(a => a.qty * a.price),
+            backgroundColor: data.map((_, i) => CHART_COLORS[i % CHART_COLORS.length]),
+            borderWidth: 0,
+          }],
         },
-        animation: { animateRotate: false },
-      },
-    });
-    return () => {
-      if (sectorChartInstance.current) {
-        sectorChartInstance.current.destroy();
-        sectorChartInstance.current = null;
-      }
-    };
-  }, [topSectors]);
+        options: { ...commonOptions, cutout: '75%' },
+      });
+    }
 
-  // Type 도넛 차트
-  useEffect(() => {
-    if (!typeChartRef.current) return;
-    if (typeChartInstance.current) {
-      typeChartInstance.current.destroy();
-    }
-    typeChartInstance.current = new Chart(typeChartRef.current, {
-      type: 'doughnut',
-      data: {
-        labels: ['CORE', 'INCOME'],
-        datasets: [{
-          data: [portfolioStats.corePct, portfolioStats.incomePct],
-          backgroundColor: ['#64B5F6', '#FFD700'],
-          borderWidth: 0,
-        }],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        cutout: '65%',
-        plugins: {
-          legend: { display: false },
-          tooltip: { enabled: false },
+    // Sector 차트
+    if (sectorChartRef.current) {
+      if (sectorChartInstance.current) sectorChartInstance.current.destroy();
+      sectorChartInstance.current = new Chart(sectorChartRef.current, {
+        type: 'doughnut',
+        data: {
+          labels: topSectors.map(([s]) => s),
+          datasets: [{
+            data: topSectors.map(([, w]) => w * 100),
+            backgroundColor: CHART_COLORS.slice(0, topSectors.length),
+            borderWidth: 0,
+          }],
         },
-        animation: { animateRotate: false },
-      },
-    });
+        options: { ...commonOptions, cutout: '65%' },
+      });
+    }
+
+    // Type 차트
+    if (typeChartRef.current) {
+      if (typeChartInstance.current) typeChartInstance.current.destroy();
+      typeChartInstance.current = new Chart(typeChartRef.current, {
+        type: 'doughnut',
+        data: {
+          labels: ['CORE', 'INCOME'],
+          datasets: [{
+            data: [portfolioStats.corePct, portfolioStats.incomePct],
+            backgroundColor: ['#64B5F6', '#FFD700'],
+            borderWidth: 0,
+          }],
+        },
+        options: { ...commonOptions, cutout: '65%' },
+      });
+    }
+
     return () => {
-      if (typeChartInstance.current) {
-        typeChartInstance.current.destroy();
-        typeChartInstance.current = null;
-      }
+      totalValueChartInstance.current?.destroy();
+      sectorChartInstance.current?.destroy();
+      typeChartInstance.current?.destroy();
+      totalValueChartInstance.current = null;
+      sectorChartInstance.current = null;
+      typeChartInstance.current = null;
     };
-  }, [portfolioStats.corePct, portfolioStats.incomePct]);
+  }, [assets, topSectors, portfolioStats.corePct, portfolioStats.incomePct]);
 
   // 반원 게이지 그리기
   useEffect(() => {

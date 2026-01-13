@@ -419,12 +419,6 @@ export function getPriceChangeIndicator(
 // DATE HELPER FUNCTIONS
 // ═══════════════════════════════════════════════════════════════
 
-export function getDaysUntilNextDividend(dayOfWeek: number = 4): number {
-  const now = new Date();
-  const currentDay = now.getDay();
-  return (dayOfWeek - currentDay + 7) % 7 || 7;
-}
-
 export function formatDate(date: Date | string): string {
   const d = typeof date === 'string' ? new Date(date) : date;
   return d.toLocaleDateString('ko-KR');
@@ -439,12 +433,116 @@ export function formatDateTime(date: Date | string): string {
 // VALIDATION FUNCTIONS
 // ═══════════════════════════════════════════════════════════════
 
+/**
+ * 티커 유효성 검사
+ * - 1~10자의 영문 대문자 또는 숫자
+ * - 공백 및 특수문자 불허
+ */
 export function isValidTicker(ticker: string): boolean {
-  return /^[A-Z0-9]{1,10}$/.test(ticker.toUpperCase());
+  if (!ticker || typeof ticker !== 'string') return false;
+  const cleaned = ticker.toUpperCase().trim();
+  return cleaned.length > 0 && /^[A-Z0-9]{1,10}$/.test(cleaned);
 }
 
+/**
+ * Google Script URL 유효성 검사
+ */
 export function isValidGoogleScriptUrl(url: string): boolean {
-  return url.startsWith('https://script.google.com/');
+  if (!url || typeof url !== 'string') return false;
+  return url.trim().startsWith('https://script.google.com/');
+}
+
+/**
+ * 수량 유효성 검사
+ * - 0보다 큰 양수만 허용
+ * - 소수점 최대 8자리 (주식 분할 대응)
+ */
+export function isValidQuantity(qty: number | string): boolean {
+  const num = typeof qty === 'string' ? parseFloat(qty) : qty;
+  if (isNaN(num) || !isFinite(num)) return false;
+  if (num <= 0) return false;
+  // 소수점 8자리 이하
+  const decimals = String(num).split('.')[1];
+  return !decimals || decimals.length <= 8;
+}
+
+/**
+ * 가격 유효성 검사
+ * - 0 이상의 양수만 허용 (0 포함 - 무료 주식 등)
+ * - 소수점 최대 4자리
+ */
+export function isValidPrice(price: number | string): boolean {
+  const num = typeof price === 'string' ? parseFloat(price) : price;
+  if (isNaN(num) || !isFinite(num)) return false;
+  if (num < 0) return false;
+  const decimals = String(num).split('.')[1];
+  return !decimals || decimals.length <= 4;
+}
+
+/**
+ * 환율 유효성 검사
+ * - 100 ~ 10000 범위 (현실적인 KRW/USD 환율)
+ */
+export function isValidExchangeRate(rate: number | string): boolean {
+  const num = typeof rate === 'string' ? parseFloat(rate) : rate;
+  if (isNaN(num) || !isFinite(num)) return false;
+  return num >= 100 && num <= 10000;
+}
+
+/**
+ * 섹터 유효성 검사
+ * - 허용된 섹터 목록에 포함되어야 함
+ */
+const VALID_SECTORS = [
+  'Technology', 'Healthcare', 'Finance', 'Energy', 'Consumer',
+  'Industrial', 'RealEstate', 'Utilities', 'Materials', 'Communication',
+  'ETF', 'Crypto', 'Other'
+];
+
+export function isValidSector(sector: string): boolean {
+  if (!sector || typeof sector !== 'string') return false;
+  return VALID_SECTORS.includes(sector.trim());
+}
+
+/**
+ * 자산 타입 유효성 검사
+ */
+const VALID_ASSET_TYPES = ['CORE', 'GROWTH', 'VALUE', 'SPECULATIVE', 'INCOME'];
+
+export function isValidAssetType(type: string): boolean {
+  if (!type || typeof type !== 'string') return false;
+  return VALID_ASSET_TYPES.includes(type.trim().toUpperCase());
+}
+
+/**
+ * Asset 객체 전체 유효성 검사
+ */
+export function validateAsset(asset: Partial<Asset>): { valid: boolean; errors: string[] } {
+  const errors: string[] = [];
+
+  if (!asset.ticker || !isValidTicker(asset.ticker)) {
+    errors.push('유효하지 않은 티커');
+  }
+  if (asset.qty === undefined || !isValidQuantity(asset.qty)) {
+    errors.push('유효하지 않은 수량 (0보다 커야 함)');
+  }
+  if (asset.avg === undefined || !isValidPrice(asset.avg)) {
+    errors.push('유효하지 않은 평균 단가');
+  }
+  if (asset.price === undefined || !isValidPrice(asset.price)) {
+    errors.push('유효하지 않은 현재가');
+  }
+  if (asset.sector && !isValidSector(asset.sector)) {
+    errors.push('유효하지 않은 섹터');
+  }
+  if (asset.type && !isValidAssetType(asset.type)) {
+    errors.push('유효하지 않은 자산 타입');
+  }
+  if (asset.buyRate !== undefined && !isValidExchangeRate(asset.buyRate)) {
+    errors.push('유효하지 않은 매입 환율');
+  }
+
+  return { valid: errors.length === 0, errors };
 }
 
 // ═══════════════════════════════════════════════════════════════

@@ -56,7 +56,6 @@ const defaultState: NexusState = {
   lastSync: null,
   compactMode: false,
   vixAlertDismissed: false,
-  isLive: false,
   isFetching: false,
 };
 
@@ -284,16 +283,25 @@ export function NexusProvider({ children }: { children: ReactNode }) {
     const container = document.getElementById('toast-container');
     if (!container) return;
 
-    const icons = { success: 'check', danger: 'times', warning: 'exclamation', info: 'info' };
+    const icons: Record<string, string> = { success: 'check', danger: 'times', warning: 'exclamation', info: 'info' };
     const toastEl = document.createElement('div');
     toastEl.className = `toast-item toast-${type}`;
     toastEl.style.borderColor = `var(--${type === 'danger' ? 'danger' : type})`;
-    toastEl.innerHTML = `
-      <div style="width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.1)">
-        <i class="fas fa-${icons[type]}" style="font-size:10px"></i>
-      </div>
-      <span style="color:rgba(255,255,255,0.9)">${message}</span>
-    `;
+
+    // XSS 방지: DOM API를 사용하여 안전하게 요소 생성
+    const iconWrapper = document.createElement('div');
+    iconWrapper.style.cssText = 'width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.1)';
+    const icon = document.createElement('i');
+    icon.className = `fas fa-${icons[type]}`;
+    icon.style.fontSize = '10px';
+    iconWrapper.appendChild(icon);
+
+    const messageSpan = document.createElement('span');
+    messageSpan.style.color = 'rgba(255,255,255,0.9)';
+    messageSpan.textContent = message; // textContent로 XSS 방지
+
+    toastEl.appendChild(iconWrapper);
+    toastEl.appendChild(messageSpan);
     container.appendChild(toastEl);
 
     setTimeout(() => {

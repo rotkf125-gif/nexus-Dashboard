@@ -65,7 +65,6 @@ export interface NexusState {
   lastSync: number | null;
   compactMode: boolean;
   vixAlertDismissed: boolean;
-  isLive: boolean;
   isFetching: boolean;
 }
 
