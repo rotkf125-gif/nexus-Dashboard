@@ -39,8 +39,29 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
     return assets.filter(a => a.type === 'INCOME');
   }, [assets]);
 
-  // 배당금 데이터 사전 색인화 (O(n²) → O(n) 최적화)
+  // 최근 12개월 기준 날짜 계산
+  const twelveMonthsAgo = useMemo(() => {
+    const date = new Date();
+    date.setMonth(date.getMonth() - 12);
+    return date;
+  }, []);
+
+  // 배당금 데이터 사전 색인화 (O(n²) → O(n) 최적화) + 최근 12개월 필터링
   const dividendsByTicker = useMemo(() => {
+    const indexed: Record<string, typeof dividends> = {};
+    dividends.forEach(d => {
+      // 최근 12개월 배당금만 포함 (성능 최적화)
+      const dividendDate = new Date(d.date);
+      if (dividendDate >= twelveMonthsAgo) {
+        if (!indexed[d.ticker]) indexed[d.ticker] = [];
+        indexed[d.ticker].push(d);
+      }
+    });
+    return indexed;
+  }, [dividends, twelveMonthsAgo]);
+
+  // 전체 배당금 (과거 포함) - 총 수익 계산용
+  const allDividendsByTicker = useMemo(() => {
     const indexed: Record<string, typeof dividends> = {};
     dividends.forEach(d => {
       if (!indexed[d.ticker]) indexed[d.ticker] = [];
@@ -52,14 +73,15 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
   // 각 INCOME 자산별 통계 계산
   const incomeStats = useMemo((): IncomeStatData[] => {
     return incomeAssets.map(asset => {
-      const tickerDividends = dividendsByTicker[asset.ticker] || [];
+      const tickerDividends = dividendsByTicker[asset.ticker] || []; // 최근 12개월
+      const allTickerDividends = allDividendsByTicker[asset.ticker] || []; // 전체 기간
 
-      // 총 배당금 (세후)
-      const totalDividend = tickerDividends.reduce((sum, d) => {
+      // 총 배당금 (세후) - 전체 기간 사용
+      const totalDividend = allTickerDividends.reduce((sum, d) => {
         return sum + d.qty * d.dps * AFTER_TAX_RATE;
       }, 0);
 
-      // 평균 DPS
+      // 평균 DPS - 최근 12개월 사용 (더 정확한 예측)
       const avgDps = tickerDividends.length > 0
         ? tickerDividends.reduce((sum, d) => sum + d.dps, 0) / tickerDividends.length
         : 0;
@@ -80,10 +102,10 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
         tradeReturn,
         totalReturn,
         recoveryPct,
-        dividendCount: tickerDividends.length,
+        dividendCount: allTickerDividends.length,
       };
     });
-  }, [incomeAssets, dividendsByTicker, tradeSums]);
+  }, [incomeAssets, dividendsByTicker, allDividendsByTicker, tradeSums]);
 
   // Weekly Summary 계산
   const weeklySummary = useMemo(() => {

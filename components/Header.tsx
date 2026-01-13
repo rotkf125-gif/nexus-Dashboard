@@ -4,7 +4,9 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNexus } from '@/lib/context';
 import { supabase } from '@/lib/supabase';
 import { getMarketStateInfo, isDST, MarketState } from '@/lib/utils';
-import { Asset } from '@/lib/types'; // Asset 타입 import 필요
+import { Asset } from '@/lib/types';
+import UndoRedoIndicator from './UndoRedoIndicator';
+import DashboardCustomizer from './DashboardCustomizer';
 
 interface HeaderProps {
   onOpenSettings: () => void;
@@ -422,7 +424,12 @@ export default function Header({ onOpenSettings, onOpenAuth, onOpenFreedom }: He
             <span className="text-[9px] opacity-80">{syncTime}</span>
             <div className="text-lg font-display font-light w-20 text-center">{clock}</div>
           </div>
-          <div className="flex gap-1.5">
+          <div className="flex gap-1.5 items-center">
+            {/* Undo/Redo */}
+            <UndoRedoIndicator />
+            <div className="w-px h-6 bg-white/20 mx-1" />
+            <DashboardCustomizer />
+            <div className="w-px h-6 bg-white/20 mx-1" />
             {/* Auth Button */}
             {user ? (
               <button

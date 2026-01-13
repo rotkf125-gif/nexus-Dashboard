@@ -4,7 +4,13 @@
       "Bash(tree:*)",
       "Bash(npm run build:*)",
       "Bash(git push:*)",
-      "Bash(ls -la \"C:\\\\Users\\\\user\\\\Desktop\\\\nexus-next\\\\components\"\" | grep -v \"^total \")"
+      "Bash(ls -la \"C:\\\\Users\\\\user\\\\Desktop\\\\nexus-next\\\\components\"\" | grep -v \"^total \")",
+      "Bash(git checkout:*)",
+      "Bash(git pull:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(cd:*)",
+      "Bash(npm install:*)"
     ]
   }
 }

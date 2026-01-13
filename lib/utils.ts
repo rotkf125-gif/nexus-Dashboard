@@ -563,3 +563,65 @@ export function safeNumber(value: string | number | null | undefined, fallback: 
   const num = typeof value === 'string' ? parseFloat(value) : value;
   return isNaN(num) ? fallback : num;
 }
+
+// ═══════════════════════════════════════════════════════════════
+// API RETRY UTILITIES
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * 지수 백오프를 사용한 API 요청 재시도
+ * @param fn - 실행할 비동기 함수
+ * @param maxRetries - 최대 재시도 횟수 (기본값: 3)
+ * @param baseDelay - 기본 지연 시간 (ms, 기본값: 1000)
+ * @returns 함수 실행 결과
+ */
+export async function fetchWithRetry<T>(
+  fn: () => Promise<T>,
+  maxRetries: number = 3,
+  baseDelay: number = 1000
+): Promise<T> {
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+
+      // 마지막 시도면 에러 throw
+      if (attempt === maxRetries - 1) {
+        break;
+      }
+
+      // 지수 백오프: 1초, 2초, 4초...
+      const delay = baseDelay * Math.pow(2, attempt);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+
+  throw lastError || new Error('Request failed after retries');
+}
+
+/**
+ * fetch API를 지수 백오프로 재시도
+ * @param url - 요청 URL
+ * @param options - fetch 옵션
+ * @param maxRetries - 최대 재시도 횟수
+ * @returns Response 객체
+ */
+export async function fetchWithExponentialBackoff(
+  url: string,
+  options?: RequestInit,
+  maxRetries: number = 3
+): Promise<Response> {
+  return fetchWithRetry(async () => {
+    const response = await fetch(url, options);
+
+    // 서버 에러(5xx) 또는 429(Too Many Requests)인 경우 재시도
+    if (response.status >= 500 || response.status === 429) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    return response;
+  }, maxRetries);
+}

@@ -3,8 +3,10 @@
 import { useState, useMemo, useCallback } from 'react';
 import { NexusProvider, useNexus } from '@/lib/context';
 import Header from '@/components/Header';
+import PortfolioHealthAlert from '@/components/PortfolioHealthAlert';
 import StrategyBar from '@/components/StrategyBar';
 import AssetTable from '@/components/AssetTable';
+import PortfolioHeatmap from '@/components/PortfolioHeatmap';
 import SimulationHub from '@/components/SimulationHub';
 import Analytics from '@/components/Analytics';
 import AssetModal from '@/components/AssetModal';
@@ -13,10 +15,16 @@ import SettingsModal from '@/components/SettingsModal';
 import AuthModal from '@/components/AuthModal';
 import FreedomModal from '@/components/FreedomModal';
 import IncomeStream from '@/components/IncomeStream';
+import DividendOptimizer from '@/components/DividendOptimizer';
+import AssetTurnover from '@/components/AssetTurnover';
+import RebalanceSuggestion from '@/components/RebalanceSuggestion';
+import MonthlyReport from '@/components/MonthlyReport';
+import StressTest from '@/components/StressTest';
 import PerformanceArena from '@/components/PerformanceArena';
 import HistoricPerformance from '@/components/HistoricPerformance';
 
 type TabType = 'stellar' | 'income' | 'analytics' | 'performance' | 'simulation';
+type ViewMode = 'table' | 'heatmap';
 
 function DashboardContent() {
   const {
@@ -39,6 +47,7 @@ function DashboardContent() {
   const [authOpen, setAuthOpen] = useState(false);
   const [freedomOpen, setFreedomOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('stellar');
+  const [viewMode, setViewMode] = useState<ViewMode>('table');
 
   // INCOME 자산 메모이제이션
   const incomeAssets = useMemo(
@@ -85,6 +94,9 @@ function DashboardContent() {
         onOpenAuth={handleOpenAuth}
         onOpenFreedom={handleOpenFreedom}
       />
+
+      {/* Portfolio Health Alerts */}
+      <PortfolioHealthAlert />
 
       {/* Strategy Bar */}
       <StrategyBar />
@@ -191,17 +203,31 @@ function DashboardContent() {
                   <i className="fas fa-star text-celestial-gold text-xs" /> STELLAR ASSETS
                 </h2>
                 <div className="flex items-center gap-4">
-                  {/* Compact Mode Toggle */}
-                  <label className="compact-toggle">
-                    <input
-                      type="checkbox"
-                      id="compact-toggle"
-                      checked={state.compactMode}
-                      onChange={(e) => setCompactMode(e.target.checked)}
-                    />
-                    <span className="compact-toggle-switch" />
-                    <span>COMPACT</span>
-                  </label>
+                  {/* View Mode Toggle: Table / Heatmap */}
+                  <div className="flex items-center gap-1 inner-glass rounded-lg p-1">
+                    <button
+                      onClick={() => setViewMode('table')}
+                      className={`px-3 py-1.5 rounded text-[10px] font-medium tracking-wide transition-all ${
+                        viewMode === 'table'
+                          ? 'bg-celestial-cyan/20 text-celestial-cyan border border-celestial-cyan/30'
+                          : 'text-white/60 hover:text-white/80'
+                      }`}
+                    >
+                      <i className="fas fa-table mr-1.5" />
+                      TABLE
+                    </button>
+                    <button
+                      onClick={() => setViewMode('heatmap')}
+                      className={`px-3 py-1.5 rounded text-[10px] font-medium tracking-wide transition-all ${
+                        viewMode === 'heatmap'
+                          ? 'bg-celestial-purple/20 text-celestial-purple border border-celestial-purple/30'
+                          : 'text-white/60 hover:text-white/80'
+                      }`}
+                    >
+                      <i className="fas fa-th-large mr-1.5" />
+                      HEATMAP
+                    </button>
+                  </div>
                   <div className="flex gap-3">
                     <button
                       onClick={refreshPrices}
@@ -220,7 +246,7 @@ function DashboardContent() {
               </div>
 
               {/* Dividend Countdown */}
-              {incomeAssets.length > 0 && (
+              {incomeAssets.length > 0 && viewMode === 'table' && (
                 <div className="dividend-countdown mb-4">
                   <i className="fas fa-calendar-alt text-celestial-gold" />
                   <span className="text-white/60">NEXT DIVIDEND</span>
@@ -233,20 +259,26 @@ function DashboardContent() {
                 </div>
               )}
 
-              {/* Asset Table */}
-              <div className="flex flex-col h-[600px]">
-                <div className="flex-1 min-h-0">
-                  <div className="overflow-y-auto custom-scrollbar h-full">
-                    <AssetTable />
+              {/* Asset Table or Heatmap */}
+              {viewMode === 'table' ? (
+                <div className="flex flex-col h-[600px]">
+                  <div className="flex-1 min-h-0">
+                    <div className="overflow-y-auto custom-scrollbar h-full">
+                      <AssetTable />
+                    </div>
                   </div>
                 </div>
-              </div>
+              ) : (
+                <div className="h-[650px]">
+                  <PortfolioHeatmap />
+                </div>
+              )}
             </div>
           )}
 
           {/* Income Stream Tab */}
           {activeTab === 'income' && (
-            <div className="min-h-[800px]">
+            <div className="min-h-[800px] space-y-6">
               <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
                 <h2 className="text-lg font-display tracking-widest flex items-center gap-3 text-white">
                   <i className="fas fa-coins text-celestial-gold text-xs" /> INCOME STREAM
@@ -268,24 +300,44 @@ function DashboardContent() {
                 </div>
               </div>
               <IncomeStream showAnalytics />
+
+              {/* Dividend Optimizer & Asset Turnover */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-4 border-t border-white/10">
+                <div className="inner-glass p-4 rounded-lg">
+                  <DividendOptimizer />
+                </div>
+                <div className="inner-glass p-4 rounded-lg">
+                  <AssetTurnover />
+                </div>
+              </div>
             </div>
           )}
 
           {/* Analytics Tab */}
           {activeTab === 'analytics' && (
-            <div className="min-h-[800px]">
+            <div className="min-h-[800px] space-y-6">
               <Analytics horizontal />
+              {/* Rebalance Suggestion */}
+              <div className="inner-glass p-4 rounded-lg">
+                <RebalanceSuggestion />
+              </div>
             </div>
           )}
 
           {/* Performance Tab */}
           {activeTab === 'performance' && (
-            <div className="grid grid-cols-1 xl:grid-cols-4 gap-5 min-h-[800px]">
-              <div className="xl:col-span-1">
-                <PerformanceArena compact />
+            <div className="space-y-5 min-h-[800px]">
+              <div className="grid grid-cols-1 xl:grid-cols-4 gap-5">
+                <div className="xl:col-span-1">
+                  <PerformanceArena compact />
+                </div>
+                <div className="xl:col-span-3">
+                  <HistoricPerformance />
+                </div>
               </div>
-              <div className="xl:col-span-3">
-                <HistoricPerformance />
+              {/* Monthly Report */}
+              <div className="inner-glass p-4 rounded-lg">
+                <MonthlyReport />
               </div>
             </div>
           )}
@@ -298,8 +350,12 @@ function DashboardContent() {
                   <i className="fas fa-flask text-v64-success" /> SIMULATION
                 </h2>
               </div>
-              <div className="flex-1 overflow-y-auto custom-scrollbar min-h-0">
+              <div className="flex-1 overflow-y-auto custom-scrollbar min-h-0 space-y-5">
                 <SimulationHub />
+                {/* Stress Test */}
+                <div className="inner-glass p-4 rounded-lg">
+                  <StressTest />
+                </div>
               </div>
             </div>
           )}

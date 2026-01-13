@@ -670,3 +670,85 @@ body {
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
+/* ─── PRICE ANIMATION ─── */
+@keyframes priceFlashUp {
+  0% { background-color: rgba(74, 222, 128, 0.4); }
+  100% { background-color: transparent; }
+}
+
+@keyframes priceFlashDown {
+  0% { background-color: rgba(248, 113, 113, 0.4); }
+  100% { background-color: transparent; }
+}
+
+@keyframes countUp {
+  0% { opacity: 0.5; transform: translateY(4px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.price-flash-up {
+  animation: priceFlashUp 1.5s ease-out forwards;
+}
+
+.price-flash-down {
+  animation: priceFlashDown 1.5s ease-out forwards;
+}
+
+.price-count-animation {
+  animation: countUp 0.3s ease-out forwards;
+}
+
+/* Price change indicator pulse */
+.price-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 8px;
+  font-weight: 500;
+  animation: indicatorPulse 2s ease-in-out infinite;
+}
+
+.price-indicator-up {
+  background: rgba(74, 222, 128, 0.2);
+  color: var(--success);
+  border: 1px solid rgba(74, 222, 128, 0.3);
+}
+
+.price-indicator-down {
+  background: rgba(248, 113, 113, 0.2);
+  color: var(--danger);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+}
+
+@keyframes indicatorPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(0.98); }
+}
+
+/* Numeric value highlight */
+.value-highlight {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.value-highlight::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.value-highlight-up::after {
+  background: linear-gradient(90deg, transparent, rgba(74, 222, 128, 0.15), transparent);
+  opacity: 1;
+}
+
+.value-highlight-down::after {
+  background: linear-gradient(90deg, transparent, rgba(248, 113, 113, 0.15), transparent);
+  opacity: 1;
+}

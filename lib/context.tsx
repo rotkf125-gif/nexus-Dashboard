@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { NexusState, Asset, Dividend, MarketData, ThemeType } from './types';
 import { loadState, saveState, loadStateFromSupabase, saveStateToSupabase, saveSnapshot } from './storage';
 import { DEFAULT_EXCHANGE_RATE, API_ENDPOINTS, REFRESH_INTERVALS } from './config';
-import { isValidGoogleScriptUrl } from './utils';
+import { isValidGoogleScriptUrl, fetchWithExponentialBackoff } from './utils';
 
 interface NexusContextType {
   state: NexusState;
@@ -39,6 +39,13 @@ interface NexusContextType {
   closeDividendModal: () => void;
   // Sync status
   isSyncing: boolean;
+  // Undo/Redo
+  undo: () => void;
+  redo: () => void;
+  canUndo: boolean;
+  canRedo: boolean;
+  undoCount: number;
+  redoCount: number;
 }
 
 const defaultState: NexusState = {
@@ -73,6 +80,14 @@ export function NexusProvider({ children }: { children: ReactNode }) {
   
   // Dividend Modal states
   const [dividendModalOpen, setDividendModalOpen] = useState(false);
+
+  // Undo/Redo state
+  const MAX_HISTORY = 10;
+  const [history, setHistory] = useState<{ past: NexusState[]; future: NexusState[] }>({
+    past: [],
+    future: [],
+  });
+  const isUndoRedoAction = useRef(false);
 
   // Debounce timer ref
   const saveTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -160,38 +175,109 @@ export function NexusProvider({ children }: { children: ReactNode }) {
     };
   }, [state, isLoaded]);
 
-  const updateAssets = useCallback((assets: Asset[]) => {
-    setState(prev => ({ ...prev, assets }));
+  // 히스토리에 현재 상태 저장 (Undo용)
+  const saveToHistory = useCallback((currentState: NexusState) => {
+    if (isUndoRedoAction.current) {
+      isUndoRedoAction.current = false;
+      return;
+    }
+    setHistory(prev => ({
+      past: [...prev.past, currentState].slice(-MAX_HISTORY),
+      future: [], // 새 액션 시 future 초기화
+    }));
   }, []);
+
+  // Undo 함수
+  const undo = useCallback(() => {
+    setHistory(prev => {
+      if (prev.past.length === 0) return prev;
+
+      const newPast = prev.past.slice(0, -1);
+      const previousState = prev.past[prev.past.length - 1];
+
+      isUndoRedoAction.current = true;
+      setState(previousState);
+
+      return {
+        past: newPast,
+        future: [state, ...prev.future].slice(0, MAX_HISTORY),
+      };
+    });
+  }, [state]);
+
+  // Redo 함수
+  const redo = useCallback(() => {
+    setHistory(prev => {
+      if (prev.future.length === 0) return prev;
+
+      const nextState = prev.future[0];
+      const newFuture = prev.future.slice(1);
+
+      isUndoRedoAction.current = true;
+      setState(nextState);
+
+      return {
+        past: [...prev.past, state].slice(-MAX_HISTORY),
+        future: newFuture,
+      };
+    });
+  }, [state]);
+
+  const canUndo = history.past.length > 0;
+  const canRedo = history.future.length > 0;
+  const undoCount = history.past.length;
+  const redoCount = history.future.length;
+
+  const updateAssets = useCallback((assets: Asset[]) => {
+    setState(prev => {
+      saveToHistory(prev);
+      return { ...prev, assets };
+    });
+  }, [saveToHistory]);
 
   const addAsset = useCallback((asset: Asset) => {
-    setState(prev => ({ ...prev, assets: [...prev.assets, asset] }));
-  }, []);
+    setState(prev => {
+      saveToHistory(prev);
+      return { ...prev, assets: [...prev.assets, asset] };
+    });
+  }, [saveToHistory]);
 
   const removeAsset = useCallback((index: number) => {
-    setState(prev => ({
-      ...prev,
-      assets: prev.assets.filter((_, i) => i !== index),
-    }));
-  }, []);
+    setState(prev => {
+      saveToHistory(prev);
+      return {
+        ...prev,
+        assets: prev.assets.filter((_, i) => i !== index),
+      };
+    });
+  }, [saveToHistory]);
 
   const updateAsset = useCallback((index: number, updates: Partial<Asset>) => {
-    setState(prev => ({
-      ...prev,
-      assets: prev.assets.map((a, i) => (i === index ? { ...a, ...updates } : a)),
-    }));
-  }, []);
+    setState(prev => {
+      saveToHistory(prev);
+      return {
+        ...prev,
+        assets: prev.assets.map((a, i) => (i === index ? { ...a, ...updates } : a)),
+      };
+    });
+  }, [saveToHistory]);
 
   const addDividend = useCallback((dividend: Dividend) => {
-    setState(prev => ({ ...prev, dividends: [...prev.dividends, dividend] }));
-  }, []);
+    setState(prev => {
+      saveToHistory(prev);
+      return { ...prev, dividends: [...prev.dividends, dividend] };
+    });
+  }, [saveToHistory]);
 
   const removeDividend = useCallback((index: number) => {
-    setState(prev => ({
-      ...prev,
-      dividends: prev.dividends.filter((_, i) => i !== index),
-    }));
-  }, []);
+    setState(prev => {
+      saveToHistory(prev);
+      return {
+        ...prev,
+        dividends: prev.dividends.filter((_, i) => i !== index),
+      };
+    });
+  }, [saveToHistory]);
 
   const updateMarket = useCallback((market: Partial<MarketData>) => {
     setState(prev => ({
@@ -229,14 +315,18 @@ export function NexusProvider({ children }: { children: ReactNode }) {
     setState(prev => ({ ...prev, isFetching: true }));
 
     try {
-      // Fetch market data
-      const marketRes = await fetch(API_ENDPOINTS.MARKET);
-      if (marketRes.ok) {
-        const marketData = await marketRes.json();
-        updateMarket(marketData);
+      // Fetch market data with retry
+      try {
+        const marketRes = await fetchWithExponentialBackoff(API_ENDPOINTS.MARKET);
+        if (marketRes.ok) {
+          const marketData = await marketRes.json();
+          updateMarket(marketData);
+        }
+      } catch {
+        console.warn('Market data fetch failed after retries');
       }
 
-      // Fetch asset prices - useRef 사용
+      // Fetch asset prices with retry - useRef 사용
       const currentAssets = assetsRef.current;
       const previousPrices: Record<string, number> = {};
       currentAssets.forEach(a => {
@@ -246,13 +336,14 @@ export function NexusProvider({ children }: { children: ReactNode }) {
       const updatedAssets = await Promise.all(
         currentAssets.map(async (asset) => {
           try {
-            const res = await fetch(API_ENDPOINTS.PRICE(asset.ticker));
+            const res = await fetchWithExponentialBackoff(API_ENDPOINTS.PRICE(asset.ticker));
             if (res.ok) {
               const data = await res.json();
               return { ...asset, price: data.price };
             }
           } catch {
-            // Keep original price on error
+            // Keep original price on error after retries
+            console.warn(`Price fetch failed for ${asset.ticker} after retries`);
           }
           return asset;
         })
@@ -397,18 +488,24 @@ export function NexusProvider({ children }: { children: ReactNode }) {
   const saveAssetFromModal = useCallback((asset: Asset) => {
     if (editingIndex !== null) {
       // 수정 모드
-      setState(prev => ({
-        ...prev,
-        assets: prev.assets.map((a, i) => (i === editingIndex ? { ...a, ...asset } : a)),
-      }));
+      setState(prev => {
+        saveToHistory(prev);
+        return {
+          ...prev,
+          assets: prev.assets.map((a, i) => (i === editingIndex ? { ...a, ...asset } : a)),
+        };
+      });
       toast('Asset updated', 'success');
     } else {
       // 추가 모드
-      setState(prev => ({ ...prev, assets: [...prev.assets, asset] }));
+      setState(prev => {
+        saveToHistory(prev);
+        return { ...prev, assets: [...prev.assets, asset] };
+      });
       toast('Asset added', 'success');
     }
     closeAssetModal();
-  }, [editingIndex, closeAssetModal, toast]);
+  }, [editingIndex, closeAssetModal, toast, saveToHistory]);
 
   // Dividend Modal functions
   const openDividendModal = useCallback(() => {
@@ -460,6 +557,13 @@ export function NexusProvider({ children }: { children: ReactNode }) {
         closeDividendModal,
         // Sync status
         isSyncing,
+        // Undo/Redo
+        undo,
+        redo,
+        canUndo,
+        canRedo,
+        undoCount,
+        redoCount,
       }}
     >
       {children}
