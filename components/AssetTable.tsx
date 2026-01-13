@@ -8,7 +8,7 @@ import { formatUSD, getReturnColorClass, getPriceChangeIndicator, groupAssetsByT
 
 export default function AssetTable() {
   const { state, removeAsset, openEditAssetModal, updateAssets } = useNexus();
-  const { assets, exchangeRate } = state;
+  const { assets, exchangeRate, previousPrices } = state;
   
   // 드래그 정렬 상태
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
@@ -108,10 +108,18 @@ export default function AssetTable() {
     const isDragging = draggedIndex === i;
     const isDragOver = dragOverIndex === i;
 
+    // 손익에 따른 배경 효과
+    const profitBgClass = profit >= 0 
+      ? 'bg-gradient-to-r from-emerald-500/5 to-transparent' 
+      : 'bg-gradient-to-r from-rose-500/8 to-transparent';
+
+    // 가격 변화 인디케이터
+    const priceChange = getPriceChangeIndicator(a.price, previousPrices[a.ticker] || 0);
+
     return (
       <tr
         key={i}
-        className={`transition-all border-b border-white/5 hover:bg-white/5 ${isDragging ? 'opacity-80' : ''} ${isDragOver ? 'bg-celestial-purple/20' : ''}`}
+        className={`transition-all border-b border-white/5 hover:bg-white/10 ${profitBgClass} ${isDragging ? 'opacity-80' : ''} ${isDragOver ? 'bg-celestial-purple/20' : ''}`}
         draggable
         onDragStart={(e) => handleDragStart(e, i)}
         onDragOver={(e) => handleDragOver(e, i)}
@@ -143,32 +151,53 @@ export default function AssetTable() {
         </td>
         {/* 2. Qty */}
         <td className="p-1.5 text-center text-[10px] text-white/80">{a.qty}</td>
-        {/* 3. Return % */}
-        <td className={`p-1.5 text-center text-[10px] font-semibold ${plClass}`}>
-          {pl >= 0 ? '+' : ''}{pl.toFixed(1)}%
+        {/* 3. Return: 수익금 + (수익률 %) */}
+        <td className={`p-1.5 text-center ${plClass}`}>
+          <div className="text-[10px] font-semibold">
+            {profit >= 0 ? '+' : ''}{formatUSD(profit)}
+          </div>
+          <div className="text-[9px] opacity-80">
+            ({pl >= 0 ? '+' : ''}{pl.toFixed(1)}%)
+          </div>
         </td>
         {/* 4. Avg */}
         <td className="p-1.5 text-right text-[10px] text-white/70">${a.avg.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-        {/* 5. Price */}
-        <td className="p-1.5 text-right text-[10px] text-white/90">${a.price.toFixed(2)}</td>
-        {/* 6. Val($) + P/L($) */}
+        {/* 5. Price + 가격 변화 인디케이터 */}
         <td className="p-1.5 text-right">
+          <div className="flex items-center justify-end gap-1">
+            <span className="text-[10px] text-white/90">${a.price.toFixed(2)}</span>
+            {priceChange && (
+              <span 
+                className={`text-[8px] flex items-center gap-0.5 px-1 py-0.5 rounded ${
+                  priceChange.isUp 
+                    ? 'text-emerald-400 bg-emerald-500/20' 
+                    : 'text-rose-400 bg-rose-500/20'
+                } animate-pulse`}
+              >
+                <i className={`fas fa-caret-${priceChange.isUp ? 'up' : 'down'}`} />
+                <span>{Math.abs(priceChange.pct).toFixed(1)}%</span>
+              </span>
+            )}
+          </div>
+        </td>
+        {/* 6. Val($) + P/L($) */}
+        <td className="p-1.5 pr-1 text-right">
           <div className="text-[10px] text-white">{formatUSD(value)}</div>
           <div className={`text-[9px] ${plClass}`}>
             ({profit >= 0 ? '+' : ''}{formatUSD(profit)})
           </div>
         </td>
         {/* 7. Val(₩) + P/L(₩) */}
-        <td className="p-1.5 text-right">
+        <td className="p-1.5 pl-1 text-right">
           <div className="text-[10px] text-white/80">₩{valueKrw.toLocaleString()}</div>
           <div className={`text-[9px] ${profitKrwClass}`}>
             ({profitKrw >= 0 ? '+' : ''}₩{Math.abs(profitKrw).toLocaleString()})
           </div>
         </td>
         {/* 8. FX Rate */}
-        <td className="p-1.5 text-center text-[10px] text-celestial-gold/80">₩{buyRate.toLocaleString()}</td>
+        <td className="p-1.5 pr-1 text-center text-[10px] text-celestial-gold/80">₩{buyRate.toLocaleString()}</td>
         {/* 9. FX P/L */}
-        <td className={`p-1.5 text-right text-[10px] ${fxClass}`}>
+        <td className={`p-1.5 pl-1 text-right text-[10px] ${fxClass}`}>
           {fxPL >= 0 ? '+' : ''}₩{Math.abs(fxPL).toLocaleString()}
         </td>
         {/* Actions */}
@@ -261,15 +290,15 @@ export default function AssetTable() {
                   <colgroup>
                     <col className="w-[3%]" />   {/* Drag */}
                     <col className="w-[10%]" />  {/* Ticker */}
-                    <col className="w-[7%]" />   {/* Qty */}
-                    <col className="w-[9%]" />   {/* Return */}
-                    <col className="w-[10%]" />  {/* Avg */}
-                    <col className="w-[10%]" />  {/* Price */}
-                    <col className="w-[14%]" />  {/* Val($) */}
-                    <col className="w-[14%]" />  {/* Val(₩) */}
-                    <col className="w-[9%]" />   {/* FX Rate */}
-                    <col className="w-[9%]" />   {/* FX P/L */}
-                    <col className="w-[5%]" />   {/* Actions */}
+                    <col className="w-[6%]" />   {/* Qty */}
+                    <col className="w-[11%]" />  {/* Return */}
+                    <col className="w-[9%]" />   {/* Avg */}
+                    <col className="w-[11%]" />  {/* Price */}
+                    <col className="w-[12%]" />  {/* Val($) */}
+                    <col className="w-[12%]" />  {/* Val(₩) */}
+                    <col className="w-[8%]" />   {/* FX Rate */}
+                    <col className="w-[8%]" />   {/* FX P/L */}
+                    <col className="w-[10%]" />  {/* Actions */}
                   </colgroup>
                   <thead className="text-[8px] font-sans uppercase tracking-widest bg-black/30">
                     <tr>
@@ -279,10 +308,10 @@ export default function AssetTable() {
                       <th className="p-1.5 text-center border-b border-white/10 font-medium opacity-80">Return</th>
                       <th className="p-1.5 text-right border-b border-white/10 font-medium opacity-80">Avg</th>
                       <th className="p-1.5 text-right border-b border-white/10 font-medium opacity-80">Price</th>
-                      <th className="p-1.5 text-right border-b border-white/10 font-medium opacity-80">Val($)</th>
-                      <th className="p-1.5 text-right border-b border-white/10 font-medium opacity-80">Val(₩)</th>
-                      <th className="p-1.5 text-center border-b border-white/10 font-medium opacity-80">FX Rate</th>
-                      <th className="p-1.5 text-right border-b border-white/10 font-medium opacity-80">FX P/L</th>
+                      <th className="p-1.5 pr-1 text-right border-b border-white/10 font-medium opacity-80">Val($)</th>
+                      <th className="p-1.5 pl-1 text-right border-b border-white/10 font-medium opacity-80">Val(₩)</th>
+                      <th className="p-1.5 pr-1 text-center border-b border-white/10 font-medium opacity-80">FX Rate</th>
+                      <th className="p-1.5 pl-1 text-right border-b border-white/10 font-medium opacity-80">FX P/L</th>
                       <th className="p-1 border-b border-white/10" />
                     </tr>
                   </thead>
