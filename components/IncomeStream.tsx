@@ -1,8 +1,9 @@
 'use client';
 
-import { useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNexus } from '@/lib/context';
 import PredictedDividend from './PredictedDividend';
+import DividendCalendar from './DividendCalendar';
 import { IncomeCard, WeeklySummary, RecentLogs, IncomeStatData } from './income';
 import { Chart, LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend, BarController, BarElement } from 'chart.js';
 
@@ -17,7 +18,6 @@ const TICKER_COLORS = [
   'rgba(244, 143, 177, 0.8)',
 ];
 
-// 세후 배당금 비율 (15% 이자세)
 const AFTER_TAX_RATE = 0.85;
 
 interface IncomeStreamProps {
@@ -27,6 +27,7 @@ interface IncomeStreamProps {
 export default function IncomeStream({ showAnalytics = false }: IncomeStreamProps) {
   const { state, setTradeSums, toast } = useNexus();
   const { assets, dividends, tradeSums } = state;
+  const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
 
   // Chart refs
   const dpsChartRef = useRef<HTMLCanvasElement>(null);
@@ -39,18 +40,15 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
     return assets.filter(a => a.type === 'INCOME');
   }, [assets]);
 
-  // 최근 12개월 기준 날짜 계산
   const twelveMonthsAgo = useMemo(() => {
     const date = new Date();
     date.setMonth(date.getMonth() - 12);
     return date;
   }, []);
 
-  // 배당금 데이터 사전 색인화 (O(n²) → O(n) 최적화) + 최근 12개월 필터링
   const dividendsByTicker = useMemo(() => {
     const indexed: Record<string, typeof dividends> = {};
     dividends.forEach(d => {
-      // 최근 12개월 배당금만 포함 (성능 최적화)
       const dividendDate = new Date(d.date);
       if (dividendDate >= twelveMonthsAgo) {
         if (!indexed[d.ticker]) indexed[d.ticker] = [];
@@ -60,7 +58,6 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
     return indexed;
   }, [dividends, twelveMonthsAgo]);
 
-  // 전체 배당금 (과거 포함) - 총 수익 계산용
   const allDividendsByTicker = useMemo(() => {
     const indexed: Record<string, typeof dividends> = {};
     dividends.forEach(d => {
@@ -70,18 +67,15 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
     return indexed;
   }, [dividends]);
 
-  // 각 INCOME 자산별 통계 계산
   const incomeStats = useMemo((): IncomeStatData[] => {
     return incomeAssets.map(asset => {
-      const tickerDividends = dividendsByTicker[asset.ticker] || []; // 최근 12개월
-      const allTickerDividends = allDividendsByTicker[asset.ticker] || []; // 전체 기간
+      const tickerDividends = dividendsByTicker[asset.ticker] || [];
+      const allTickerDividends = allDividendsByTicker[asset.ticker] || [];
 
-      // 총 배당금 (세후) - 전체 기간 사용
       const totalDividend = allTickerDividends.reduce((sum, d) => {
         return sum + d.qty * d.dps * AFTER_TAX_RATE;
       }, 0);
 
-      // 평균 DPS - 최근 12개월 사용 (더 정확한 예측)
       const avgDps = tickerDividends.length > 0
         ? tickerDividends.reduce((sum, d) => sum + d.dps, 0) / tickerDividends.length
         : 0;
@@ -107,7 +101,6 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
     });
   }, [incomeAssets, dividendsByTicker, allDividendsByTicker, tradeSums]);
 
-  // Weekly Summary 계산
   const weeklySummary = useMemo(() => {
     let estimatedMin = 0, estimatedAvg = 0, estimatedMax = 0;
 
@@ -134,14 +127,12 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
     return { weeklyMin: estimatedMin, weeklyAvg: estimatedAvg, weeklyMax: estimatedMax };
   }, [dividendsByTicker, incomeAssets]);
 
-  // 최근 배당 로그
   const recentLogs = useMemo(() => {
     return [...dividends]
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .slice(0, 5);
   }, [dividends]);
 
-  // Trade Return 수정 핸들러
   const handleEditTradeReturn = (ticker: string, currentValue: number) => {
     const input = prompt(`Trade Return (${ticker}):`, currentValue.toString());
     if (input !== null) {
@@ -201,7 +192,7 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
 
   // DPS Trend Chart
   useEffect(() => {
-    if (!showAnalytics || !dpsChartRef.current) return;
+    if (!showAnalytics || viewMode !== 'list' || !dpsChartRef.current) return;
 
     if (dpsChartInstance.current) dpsChartInstance.current.destroy();
 
@@ -264,11 +255,11 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
     });
 
     return () => { dpsChartInstance.current?.destroy(); };
-  }, [showAnalytics, dpsData, incomeAssets]);
+  }, [showAnalytics, viewMode, dpsData, incomeAssets]);
 
   // Learning Chart
   useEffect(() => {
-    if (!showAnalytics || !learningChartRef.current) return;
+    if (!showAnalytics || viewMode !== 'list' || !learningChartRef.current) return;
 
     if (learningChartInstance.current) learningChartInstance.current.destroy();
 
@@ -310,7 +301,7 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
     });
 
     return () => { learningChartInstance.current?.destroy(); };
-  }, [showAnalytics, monthlyPattern]);
+  }, [showAnalytics, viewMode, monthlyPattern]);
 
   if (incomeAssets.length === 0) {
     return (
@@ -325,7 +316,40 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
 
   return (
     <div className={showAnalytics ? "space-y-3 md:space-y-4" : "space-y-3"}>
-      {showAnalytics ? (
+      {/* View Toggle (Only in full analytics mode) */}
+      {showAnalytics && (
+        <div className="flex justify-end mb-2">
+          <div className="flex gap-1 inner-glass rounded p-0.5">
+            <button
+              onClick={() => setViewMode('list')}
+              className={`px-3 py-1.5 text-[10px] rounded transition-all flex items-center gap-1.5 ${
+                viewMode === 'list'
+                  ? 'bg-celestial-gold/20 text-celestial-gold border border-celestial-gold/30'
+                  : 'text-white/60 hover:text-white'
+              }`}
+            >
+              <i className="fas fa-list" />
+              LIST
+            </button>
+            <button
+              onClick={() => setViewMode('calendar')}
+              className={`px-3 py-1.5 text-[10px] rounded transition-all flex items-center gap-1.5 ${
+                viewMode === 'calendar'
+                  ? 'bg-celestial-gold/20 text-celestial-gold border border-celestial-gold/30'
+                  : 'text-white/60 hover:text-white'
+              }`}
+            >
+              <i className="fas fa-calendar-alt" />
+              CALENDAR
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Conditional Rendering based on View Mode */}
+      {viewMode === 'calendar' && showAnalytics ? (
+        <DividendCalendar />
+      ) : showAnalytics ? (
         <>
           {/* Row 1: Income Cards | EST. WEEKLY | RECENT LOGS */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
@@ -408,7 +432,7 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
           </div>
         </>
       ) : (
-        /* Non-Analytics Mode */
+        /* Non-Analytics Mode (Compact List) */
         <div className="space-y-3">
           {/* Income Cards */}
           <div className={`grid ${incomeAssets.length === 1 ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'} gap-3`}>
