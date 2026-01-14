@@ -301,13 +301,10 @@ function DashboardContent() {
               </div>
               <IncomeStream showAnalytics />
 
-              {/* Dividend Optimizer & Asset Turnover */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-4 border-t border-white/10">
+              {/* Dividend Optimizer Only */}
+              <div className="pt-4 border-t border-white/10">
                 <div className="inner-glass p-4 rounded-lg">
                   <DividendOptimizer />
-                </div>
-                <div className="inner-glass p-4 rounded-lg">
-                  <AssetTurnover />
                 </div>
               </div>
             </div>
@@ -317,9 +314,15 @@ function DashboardContent() {
           {activeTab === 'analytics' && (
             <div className="min-h-[800px] space-y-6">
               <Analytics horizontal />
-              {/* Rebalance Suggestion */}
-              <div className="inner-glass p-4 rounded-lg">
-                <RebalanceSuggestion />
+              
+              {/* Rebalance & Asset Turnover Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="inner-glass p-4 rounded-lg">
+                  <RebalanceSuggestion />
+                </div>
+                <div className="inner-glass p-4 rounded-lg">
+                  <AssetTurnover />
+                </div>
               </div>
             </div>
           )}

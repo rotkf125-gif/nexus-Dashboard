@@ -17,7 +17,7 @@ interface HeatmapItem {
 }
 
 // 수익률 기반 색상 계산
-const getReturnColor = (returnPct: number): string => {
+const getReturnColor = (returnPct: number = 0): string => {
   if (returnPct >= 30) return '#15803d';  // 진한 녹색
   if (returnPct >= 20) return '#16a34a';
   if (returnPct >= 10) return '#22c55e';
@@ -32,6 +32,8 @@ const getReturnColor = (returnPct: number): string => {
 // 커스텀 TreeMap 콘텐츠
 const CustomContent = (props: any) => {
   const { x, y, width, height, name, ticker, returnPct, weight } = props;
+  const safeReturnPct = typeof returnPct === 'number' ? returnPct : 0;
+  const safeWeight = typeof weight === 'number' ? weight : 0;
 
   if (width < 40 || height < 30) {
     // 너무 작은 셀은 티커만 표시
@@ -42,7 +44,7 @@ const CustomContent = (props: any) => {
           y={y}
           width={width}
           height={height}
-          fill={getReturnColor(returnPct)}
+          fill={getReturnColor(safeReturnPct)}
           stroke="rgba(0,0,0,0.3)"
           strokeWidth={1}
           rx={2}
@@ -71,7 +73,7 @@ const CustomContent = (props: any) => {
         y={y}
         width={width}
         height={height}
-        fill={getReturnColor(returnPct)}
+        fill={getReturnColor(safeReturnPct)}
         stroke="rgba(0,0,0,0.3)"
         strokeWidth={1}
         rx={4}
@@ -98,7 +100,7 @@ const CustomContent = (props: any) => {
         fontSize={Math.min(11, width / 6)}
         style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
       >
-        {returnPct >= 0 ? '+' : ''}{returnPct.toFixed(1)}%
+        {safeReturnPct >= 0 ? '+' : ''}{safeReturnPct.toFixed(1)}%
       </text>
       {height > 50 && (
         <text
@@ -109,7 +111,7 @@ const CustomContent = (props: any) => {
           fill="rgba(255,255,255,0.7)"
           fontSize={Math.min(9, width / 7)}
         >
-          {weight.toFixed(1)}%
+          {safeWeight.toFixed(1)}%
         </text>
       )}
     </g>
@@ -121,24 +123,29 @@ const CustomTooltip = ({ active, payload }: any) => {
   if (!active || !payload || !payload.length) return null;
 
   const data = payload[0].payload;
-  const profit = data.value - data.cost;
+  // 데이터 안전성 확보
+  const returnPct = typeof data.returnPct === 'number' ? data.returnPct : 0;
+  const weight = typeof data.weight === 'number' ? data.weight : 0;
+  const value = typeof data.value === 'number' ? data.value : 0;
+  const cost = typeof data.cost === 'number' ? data.cost : 0;
+  const profit = value - cost;
 
   return (
     <div className="inner-glass p-3 rounded-lg border border-white/20 shadow-xl">
       <div className="flex items-center gap-2 mb-2">
         <span className="font-bold text-white">{data.ticker}</span>
-        <span className={`text-sm ${data.returnPct >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}>
-          {data.returnPct >= 0 ? '+' : ''}{data.returnPct.toFixed(2)}%
+        <span className={`text-sm ${returnPct >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}>
+          {returnPct >= 0 ? '+' : ''}{returnPct.toFixed(2)}%
         </span>
       </div>
       <div className="space-y-1 text-xs">
         <div className="flex justify-between gap-4">
           <span className="text-white/60">비중</span>
-          <span className="text-white">{data.weight.toFixed(2)}%</span>
+          <span className="text-white">{weight.toFixed(2)}%</span>
         </div>
         <div className="flex justify-between gap-4">
           <span className="text-white/60">평가금</span>
-          <span className="text-white">${data.value.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+          <span className="text-white">${value.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
         </div>
         <div className="flex justify-between gap-4">
           <span className="text-white/60">손익</span>
