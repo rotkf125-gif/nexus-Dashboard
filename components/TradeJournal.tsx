@@ -14,6 +14,12 @@ export default function TradeJournal() {
   const [filterTicker, setFilterTicker] = useState<string>('');
   const [sortBy, setSortBy] = useState<SortBy>('ticker');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+  
+  // 입력 폼 상태
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newDate, setNewDate] = useState('');
+  const [newTicker, setNewTicker] = useState('');
+  const [newAmount, setNewAmount] = useState('');
 
   // 티커 목록 가져오기 (assets에서)
   const allTickers = useMemo(() => {
@@ -94,13 +100,131 @@ export default function TradeJournal() {
     }
   };
 
+  const handleAddTrade = () => {
+    if (!newTicker.trim()) {
+      alert('티커를 입력하세요');
+      return;
+    }
+    if (!newDate) {
+      alert('날짜를 선택하세요');
+      return;
+    }
+    if (!newAmount || newAmount.trim() === '') {
+      alert('금액을 입력하세요');
+      return;
+    }
+
+    const amount = parseFloat(newAmount);
+    if (isNaN(amount)) {
+      alert('올바른 금액을 입력하세요');
+      return;
+    }
+
+    // 기존 값에 누적
+    const currentAmount = tradeSums[newTicker.toUpperCase()] || 0;
+    setTradeSums(newTicker.toUpperCase(), currentAmount + amount);
+
+    // 폼 초기화
+    setNewDate('');
+    setNewTicker('');
+    setNewAmount('');
+    setShowAddForm(false);
+  };
+
+  const handleCancelAdd = () => {
+    setNewDate('');
+    setNewTicker('');
+    setNewAmount('');
+    setShowAddForm(false);
+  };
+
   return (
     <div className="space-y-4">
       {/* Title */}
-      <div className="flex items-center gap-2 mb-2">
-        <i className="fas fa-receipt text-celestial-gold text-lg"></i>
-        <h2 className="text-xl font-bold text-white tracking-wider">TRADE JOURNAL</h2>
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <i className="fas fa-receipt text-celestial-gold text-lg"></i>
+          <h2 className="text-xl font-bold text-white tracking-wider">TRADE JOURNAL</h2>
+        </div>
+        <button
+          onClick={() => {
+            setShowAddForm(!showAddForm);
+            if (!showAddForm) {
+              const today = new Date().toISOString().split('T')[0];
+              setNewDate(today);
+            }
+          }}
+          className="celestial-btn text-[9px]"
+        >
+          <i className={`fas fa-${showAddForm ? 'times' : 'plus'} mr-1`} />
+          {showAddForm ? 'CANCEL' : 'ADD TRADE'}
+        </button>
       </div>
+
+      {/* Add Trade Form */}
+      {showAddForm && (
+        <div className="glass-card p-4 space-y-3 border border-celestial-cyan/20">
+          <div className="grid grid-cols-3 gap-3">
+            {/* Date */}
+            <div>
+              <label className="text-[10px] text-white/50 block mb-1 tracking-widest font-medium">
+                DATE
+              </label>
+              <input
+                type="date"
+                value={newDate}
+                onChange={(e) => setNewDate(e.target.value)}
+                className="glass-input py-2 w-full rounded-lg text-sm"
+              />
+            </div>
+
+            {/* Ticker */}
+            <div>
+              <label className="text-[10px] text-white/50 block mb-1 tracking-widest font-medium">
+                TICKER
+              </label>
+              <input
+                type="text"
+                value={newTicker}
+                onChange={(e) => setNewTicker(e.target.value.toUpperCase())}
+                className="glass-input py-2 w-full uppercase font-semibold rounded-lg text-sm"
+                placeholder="e.g. AAPL"
+              />
+            </div>
+
+            {/* Amount */}
+            <div>
+              <label className="text-[10px] text-white/50 block mb-1 tracking-widest font-medium">
+                AMOUNT (+/-)
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                value={newAmount}
+                onChange={(e) => setNewAmount(e.target.value)}
+                className="glass-input py-2 w-full rounded-lg text-sm"
+                placeholder="0.00"
+              />
+            </div>
+          </div>
+
+          {/* Buttons */}
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={handleCancelAdd}
+              className="celestial-btn border-white/20 text-white/50 text-[9px]"
+            >
+              CANCEL
+            </button>
+            <button
+              onClick={handleAddTrade}
+              className="celestial-btn text-[9px]"
+            >
+              CONFIRM
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Summary Statistics */}
       <div className="grid grid-cols-2 gap-3">

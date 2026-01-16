@@ -11,7 +11,6 @@ import SimulationHub from '@/components/SimulationHub';
 import Analytics from '@/components/Analytics';
 import AssetModal from '@/components/AssetModal';
 import DividendModal from '@/components/DividendModal';
-import TradeModal from '@/components/TradeModal';
 import TradeJournal from '@/components/TradeJournal';
 import SettingsModal from '@/components/SettingsModal';
 import AuthModal from '@/components/AuthModal';
@@ -39,11 +38,6 @@ function DashboardContent() {
     dividendModalOpen,
     closeDividendModal,
     openDividendModal,
-    tradeModalOpen,
-    closeTradeModal,
-    saveTradeFromModal,
-    editingTrade,
-    openAddTradeModal,
     syncFromSheet,
     state,
     refreshPrices,
@@ -92,12 +86,6 @@ function DashboardContent() {
         exchangeRate={state.exchangeRate}
       />
       <DividendModal isOpen={dividendModalOpen} onClose={closeDividendModal} />
-      <TradeModal
-        isOpen={tradeModalOpen}
-        onClose={closeTradeModal}
-        onSave={saveTradeFromModal}
-        editingTrade={editingTrade}
-      />
       <SettingsModal isOpen={settingsOpen} onClose={handleCloseSettings} />
       <AuthModal isOpen={authOpen} onClose={handleCloseAuth} onAuthChange={() => {}} />
       <FreedomModal isOpen={freedomOpen} onClose={handleCloseFreedom} />
@@ -258,13 +246,6 @@ function DashboardContent() {
                       className="celestial-btn text-[10px]"
                     >
                       <i className="fas fa-sync-alt" />
-                    </button>
-                    <button
-                      onClick={openAddTradeModal}
-                      className="celestial-btn text-[10px]"
-                      style={{ borderColor: 'rgba(251,191,36,0.4)', color: '#FBB424' }}
-                    >
-                      TRADE LOG
                     </button>
                     <button
                       onClick={openAddAssetModal}
