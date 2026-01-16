@@ -47,6 +47,15 @@ export default function TradeJournal() {
   const stats = useMemo(() => {
     const buyCount = tradeLogs.filter(t => t.type === 'BUY').length;
     const sellCount = tradeLogs.filter(t => t.type === 'SELL').length;
+    
+    // 디버깅: tradeLogs와 tradeSums 상태 확인
+    if (tradeLogs.length > 0) {
+      console.log('[TradeJournal] tradeLogs:', tradeLogs);
+      console.log('[TradeJournal] tradeSums:', tradeSums);
+      console.log('[TradeJournal] BUY 거래:', tradeLogs.filter(t => t.type === 'BUY'));
+      console.log('[TradeJournal] SELL 거래:', tradeLogs.filter(t => t.type === 'SELL'));
+    }
+    
     // tradeSums가 비어있거나 값이 없을 경우를 대비해 안전하게 합산
     const totalRealized = tradeSums && typeof tradeSums === 'object' 
       ? Object.values(tradeSums).reduce((sum, val) => {
@@ -54,6 +63,8 @@ export default function TradeJournal() {
           return sum + numVal;
         }, 0)
       : 0;
+
+    console.log('[TradeJournal] 계산된 totalRealized:', totalRealized);
 
     return {
       totalTrades: tradeLogs.length,
@@ -245,18 +256,43 @@ export default function TradeJournal() {
 
                   {/* Right: Realized P&L & Actions */}
                   <div className="flex items-center gap-3">
-                    {trade.type === 'SELL' && tradeSums[trade.ticker] !== undefined ? (
-                      <div className="text-[11px] text-white/70">
-                        <span className="text-white/50">Realized P&L:</span>{' '}
-                        <span className={`font-bold ${tradeSums[trade.ticker] >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}>
-                          {tradeSums[trade.ticker] >= 0 ? '+' : ''}{formatUSD(tradeSums[trade.ticker])}
-                        </span>
-                      </div>
+                    {trade.type === 'SELL' ? (
+                      // SELL 거래: BUY 포지션이 있으면 실현 손익 표시, 없으면 거래 금액 표시
+                      // tradeSums[ticker]가 있고 값이 BUY 기반 계산값인지 확인하기 위해
+                      // 같은 티커의 BUY 거래가 있는지 확인
+                      (() => {
+                        const hasBuyForTicker = tradeLogs.some(
+                          t => t.ticker === trade.ticker && 
+                          t.type === 'BUY' && 
+                          new Date(t.date).getTime() <= new Date(trade.date).getTime()
+                        );
+                        
+                        // BUY가 있으면 실현 손익 표시, 없으면 거래 금액 표시
+                        if (hasBuyForTicker && tradeSums[trade.ticker] !== undefined) {
+                          return (
+                            <div className="text-[11px] text-white/70">
+                              <span className="text-white/50">Realized P&L:</span>{' '}
+                              <span className={`font-bold ${tradeSums[trade.ticker] >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}>
+                                {tradeSums[trade.ticker] >= 0 ? '+' : ''}{formatUSD(tradeSums[trade.ticker])}
+                              </span>
+                            </div>
+                          );
+                        } else {
+                          // BUY가 없거나 tradeSums에 값이 없으면 거래 금액 표시
+                          return (
+                            <div className="text-[11px] text-white/70">
+                              <span className="text-white/50">Trade Amount:</span>{' '}
+                              <span className="font-bold text-danger">
+                                +{formatUSD(amount)}
+                              </span>
+                            </div>
+                          );
+                        }
+                      })()
                     ) : (
-                      <div className={`font-bold text-sm ${
-                        trade.type === 'BUY' ? 'text-celestial-cyan' : 'text-danger'
-                      }`}>
-                        {trade.type === 'BUY' ? '-' : '+'}{formatUSD(amount)}
+                      // BUY 거래는 거래 금액 표시
+                      <div className={`font-bold text-sm text-celestial-cyan`}>
+                        -{formatUSD(amount)}
                       </div>
                     )}
                     <div className="flex items-center gap-1">

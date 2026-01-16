@@ -134,6 +134,19 @@ export function NexusProvider({ children }: { children: ReactNode }) {
         let remainingQty = qty;
         let sellValue = qty * price - fee; // 매도 금액 (수수료 차감)
 
+        // BUY 포지션이 없으면 거래 금액을 그대로 표시 (실현 손익 대신 거래 금액)
+        if (positions[ticker].length === 0) {
+          // BUY 없이 SELL만 있는 경우, 거래 금액을 realizedPnL에 저장
+          // (실제 실현 손익이 아니지만, 거래 금액을 표시하기 위함)
+          if (realizedPnL[ticker] === undefined || realizedPnL[ticker] === 0) {
+            realizedPnL[ticker] = sellValue;
+          } else {
+            // 이미 다른 SELL 거래가 있으면 누적 (단순 합산)
+            realizedPnL[ticker] += sellValue;
+          }
+          return;
+        }
+
         while (remainingQty > 0 && positions[ticker].length > 0) {
           const oldestPosition = positions[ticker][0];
 
@@ -141,7 +154,8 @@ export function NexusProvider({ children }: { children: ReactNode }) {
             // 전체 포지션 매도
             const costBasis = oldestPosition.qty * oldestPosition.price + oldestPosition.fee;
             const saleProceeds = (oldestPosition.qty / qty) * sellValue;
-            realizedPnL[ticker] += saleProceeds - costBasis;
+            const pnl = saleProceeds - costBasis;
+            realizedPnL[ticker] += pnl;
 
             remainingQty -= oldestPosition.qty;
             positions[ticker].shift();
@@ -149,15 +163,26 @@ export function NexusProvider({ children }: { children: ReactNode }) {
             // 일부 포지션 매도
             const costBasis = remainingQty * oldestPosition.price + (remainingQty / oldestPosition.qty) * oldestPosition.fee;
             const saleProceeds = (remainingQty / qty) * sellValue;
-            realizedPnL[ticker] += saleProceeds - costBasis;
+            const pnl = saleProceeds - costBasis;
+            realizedPnL[ticker] += pnl;
 
             oldestPosition.qty -= remainingQty;
             oldestPosition.fee *= (oldestPosition.qty / (oldestPosition.qty + remainingQty)); // 비례 배분
             remainingQty = 0;
           }
         }
+
+        // 매도 후 남은 수량이 있으면 경고 (BUY 포지션 부족)
+        if (remainingQty > 0) {
+          console.warn(`[TradeJournal] 매도 수량이 BUY 포지션보다 많습니다. 티커: ${ticker}, 남은 수량: ${remainingQty}`);
+        }
       }
     });
+
+    // 디버깅: 계산 결과 로그
+    if (Object.keys(realizedPnL).length > 0) {
+      console.log('[TradeJournal] 계산된 실현 손익:', realizedPnL);
+    }
 
     return realizedPnL;
   }, []);
