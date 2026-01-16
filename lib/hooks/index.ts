@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// NEXUS V65.1 - Custom Hooks Index
+// NEXUS V1.7 - Custom Hooks Index
 // ═══════════════════════════════════════════════════════════════
 
 export { usePortfolio } from './usePortfolio';

@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// NEXUS V65.1 - Price Refresh Hook
+// NEXUS V1.7 - Price Refresh Hook
 // ═══════════════════════════════════════════════════════════════
 
 import { useState, useCallback, useRef, useEffect } from 'react';

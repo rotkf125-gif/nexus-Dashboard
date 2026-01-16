@@ -15,6 +15,7 @@ import TradeJournal from '@/components/TradeJournal';
 import SettingsModal from '@/components/SettingsModal';
 import AuthModal from '@/components/AuthModal';
 import FreedomModal from '@/components/FreedomModal';
+import ExportModal from '@/components/ExportModal';
 import IncomeStream from '@/components/IncomeStream';
 import DividendOptimizer from '@/components/DividendOptimizer';
 import AssetTurnover from '@/components/AssetTurnover';
@@ -47,6 +48,7 @@ function DashboardContent() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [freedomOpen, setFreedomOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('stellar');
   const [viewMode, setViewMode] = useState<ViewMode>('table');
   const [isColSettingsOpen, setIsColSettingsOpen] = useState(false);
@@ -73,6 +75,8 @@ function DashboardContent() {
   const handleCloseAuth = useCallback(() => setAuthOpen(false), []);
   const handleOpenFreedom = useCallback(() => setFreedomOpen(true), []);
   const handleCloseFreedom = useCallback(() => setFreedomOpen(false), []);
+  const handleOpenExport = useCallback(() => setExportOpen(true), []);
+  const handleCloseExport = useCallback(() => setExportOpen(false), []);
 
   return (
     <div className="max-w-[1900px] mx-auto p-2 md:p-4 lg:p-6 space-y-3 md:space-y-5">
@@ -89,12 +93,14 @@ function DashboardContent() {
       <SettingsModal isOpen={settingsOpen} onClose={handleCloseSettings} />
       <AuthModal isOpen={authOpen} onClose={handleCloseAuth} onAuthChange={() => {}} />
       <FreedomModal isOpen={freedomOpen} onClose={handleCloseFreedom} />
+      <ExportModal isOpen={exportOpen} onClose={handleCloseExport} />
 
       {/* Header */}
       <Header
         onOpenSettings={handleOpenSettings}
         onOpenAuth={handleOpenAuth}
         onOpenFreedom={handleOpenFreedom}
+        onOpenExport={handleOpenExport}
       />
 
       {/* Portfolio Health Alerts */}

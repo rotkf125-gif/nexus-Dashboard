@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// NEXUS V65.1 - Supabase Storage Management
+// NEXUS V1.7 - Supabase Storage Management
 // ═══════════════════════════════════════════════════════════════
 
 import { Asset, Dividend, TimelineEntry, TradeSums, NexusState, TradeLog } from './types';

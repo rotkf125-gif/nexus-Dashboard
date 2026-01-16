@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// NEXUS V65.1 - Toast Notification Hook
+// NEXUS V1.7 - Toast Notification Hook
 // ═══════════════════════════════════════════════════════════════
 
 import { useCallback } from 'react';

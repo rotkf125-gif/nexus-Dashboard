@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// NEXUS V65.1 - Modal Management Hook
+// NEXUS V1.7 - Modal Management Hook
 // ═══════════════════════════════════════════════════════════════
 
 import { useState, useCallback } from 'react';

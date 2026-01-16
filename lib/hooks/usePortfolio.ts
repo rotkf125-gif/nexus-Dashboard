@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// NEXUS V65.1 - Portfolio Calculation Hook
+// NEXUS V1.7 - Portfolio Calculation Hook
 // ═══════════════════════════════════════════════════════════════
 
 import { useMemo } from 'react';

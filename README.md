@@ -1,4 +1,4 @@
-# 🌟 NEXUS DASHBOARD v1.6
+# 🌟 NEXUS DASHBOARD v1.7
 
 개인 투자 포트폴리오 관리 대시보드
 
@@ -12,16 +12,41 @@
 
 ---
 
-## ✨ v1.6 주요 변경 사항
+## ✨ v1.7 주요 변경 사항
 
-### 📝 매매 일지 (Trade Journal)
-- **거래 기록 관리**: 매수(Buy)/매도(Sell) 거래 내역을 날짜별로 기록하고 관리하는 전용 섹션 추가.
-- **실현 손익 자동 계산 (FIFO)**: 선입선출(First-In-First-Out) 방식을 적용하여 매도 시 실현 손익을 자동으로 계산합니다.
-- **수익률 분석**: 종목별 실현 손익 TOP 5 및 전체 거래 통계를 제공합니다.
+### 🏗️ 아키텍처 리팩토링
+- **Context 분리**: 기존 모놀리식 `NexusContext`를 6개의 도메인별 Context로 분리
+  - `SharedContext`: 전역 상태, 히스토리, 영속성
+  - `PortfolioContext`: 자산 관리
+  - `DividendContext`: 배당 관리
+  - `TradeContext`: 거래 관리
+  - `MarketContext`: 시장 데이터
+  - `UIContext`: 테마, 모달, 토스트
+- **호환성 레이어**: 기존 `useNexus` 훅 유지로 하위 호환성 보장
 
-### 🐛 시스템 안정성 (Stability)
-- **타임존 로직 개선**: `lib/utils.ts`의 타임존 변환 로직을 UTC 기반으로 수정하여, 실행 환경(CI/CD, 로컬 등)에 관계없이 일관된 시간을 보장합니다.
-- **테스트 커버리지**: 타임존 관련 단위 테스트를 보강하여 신뢰성을 높였습니다.
+### 📤 Export 기능 개선 (Gems 최적화)
+- **ExportModal**: 5가지 Export 형식 선택 UI
+  - **전체 분석**: Freedom V30 Gems용 전체 데이터
+  - **빠른 요약**: 핵심 지표만 (30초 분석용)
+  - **배당 분석**: 배당/인컴 중심 데이터
+  - **리밸런싱**: 포트폴리오 최적화 분석용
+  - **JSON**: 원본 데이터 (개발용)
+- **Markdown 테이블 형식**: Gems가 파싱하기 좋은 구조화된 출력
+
+### 🧩 컴포넌트 분해
+- **Header**: `PortfolioSummary`, `MarketIndicators`, `HeaderControls`로 분리
+- **IncomeStream**: `DPSTrendChart`, `LearningChart` 추출
+
+### 🛠️ 코드 품질 개선
+- **에러 처리 표준화**: `lib/errors.ts` - `NexusError`, `APIError` 등 커스텀 에러 클래스
+- **상수 중앙화**: `lib/config.ts` - `TAX_CONFIG`, `UI_CONFIG` 추가
+- **커스텀 훅 확장**: `usePortfolioStats`, `useDividendStats`, `useTradeStats`
+- **테스트 추가**: 74개 단위 테스트 (hooks, errors 포함)
+
+### 📝 Trade Journal 개선
+- **간소화된 입력**: 티커 + 실현금액(+/-) 수기 입력 방식
+- **TradeModal 제거**: 인라인 입력 폼으로 대체
+- **삭제 기능 개선**: `removeTradeSum`으로 완전 삭제
 
 ---
 
@@ -32,7 +57,7 @@
 - **Stellar Assets** (Cyan): 전체 자산 관리 테이블 및 히트맵
 - **Income Stream** (Gold): 배당 수익 분석, 캘린더 뷰, 최적화
 - **Analytics** (Purple): 리스크 분석, 포트폴리오 인사이트, 투자 성향 진단
-- **Performance** (Green): 벤치마크 대비 성과 추적, 월간 리포트, 매매 일지(New)
+- **Performance** (Green): 벤치마크 대비 성과 추적, 월간 리포트
 - **Simulation** (Orange): What-If 및 스트레스 테스트
 
 ### 🎨 UI/UX 디자인
@@ -56,7 +81,7 @@ CREATE TABLE IF NOT EXISTS portfolios (
   user_id TEXT PRIMARY KEY,
   assets JSONB DEFAULT '[]',
   dividends JSONB DEFAULT '[]',
-  trade_logs JSONB DEFAULT '[]', -- v1.6 Added
+  trade_logs JSONB DEFAULT '[]',
   trade_sums JSONB DEFAULT '{}',
   market JSONB DEFAULT '{}',
   exchange_rate NUMERIC DEFAULT 1450,
@@ -106,28 +131,45 @@ nexus-next/
 ├── app/
 │   ├── page.tsx              # 메인 대시보드 (Tab Controller)
 │   ├── layout.tsx            # 루트 레이아웃
-│   └── api/                  # Server-side API Routes
+│   └── api/                   # Server-side API Routes
 ├── components/
-│   ├── TradeJournal.tsx      # 매매 일지 (New v1.6)
-│   ├── TradeModal.tsx        # 거래 기록 모달 (New v1.6)
-│   ├── DividendCalendar.tsx  # 배당 캘린더
-│   ├── AssetTable.tsx        # 자산 관리 테이블
-│   ├── AssetTableRow.tsx     # 최적화된 테이블 행
-│   ├── Analytics.tsx         # 리스크 분석
-│   ├── IncomeStream.tsx      # 배당 흐름
-│   ├── PortfolioHeatmap.tsx  # 트리맵 시각화
-│   └── ...
+│   ├── TradeJournal.tsx       # 매매 일지 (간소화)
+│   ├── ExportModal.tsx        # Export 선택 모달 (New v1.7)
+│   ├── DividendCalendar.tsx   # 배당 캘린더
+│   ├── AssetTable.tsx         # 자산 관리 테이블
+│   ├── Analytics.tsx          # 리스크 분석
+│   ├── IncomeStream.tsx       # 배당 흐름
+│   ├── headerParts/           # Header 서브 컴포넌트 (New v1.7)
+│   │   ├── PortfolioSummary.tsx
+│   │   ├── MarketIndicators.tsx
+│   │   └── HeaderControls.tsx
+│   └── income/                # Income 서브 컴포넌트 (New v1.7)
+│       ├── DPSTrendChart.tsx
+│       └── LearningChart.tsx
 ├── lib/
+│   ├── contexts/              # 분리된 Context (New v1.7)
+│   │   ├── SharedContext.tsx
+│   │   ├── PortfolioContext.tsx
+│   │   ├── DividendContext.tsx
+│   │   ├── TradeContext.tsx
+│   │   ├── MarketContext.tsx
+│   │   ├── UIContext.tsx
+│   │   └── index.tsx
 │   ├── hooks/
-│   │   ├── useAssetTable.ts    # 테이블 로직 훅
-│   │   ├── useRiskAnalytics.ts # 리스크 분석 훅
-│   │   └── usePortfolio.ts
-│   ├── market-data.ts        # 시장 데이터 상수
-│   ├── supabase.ts           # Supabase 클라이언트
-│   ├── context.tsx           # 전역 상태 관리 (TradeLog 추가)
-│   └── utils.ts              # 유틸리티 함수 (Timezone Fix)
+│   │   ├── usePortfolioStats.ts  # (New v1.7)
+│   │   ├── useDividendStats.ts   # (New v1.7)
+│   │   ├── useTradeStats.ts      # (New v1.7)
+│   │   └── ...
+│   ├── __tests__/             # 단위 테스트 (New v1.7)
+│   │   ├── hooks.test.ts
+│   │   └── errors.test.ts
+│   ├── context.tsx            # 호환성 레이어 (리팩토링)
+│   ├── config.ts              # 설정 상수 (확장)
+│   ├── errors.ts              # 에러 처리 (New v1.7)
+│   ├── export.ts              # Export 유틸리티 (New v1.7)
+│   └── utils.ts               # 유틸리티 함수
 └── styles/
-    └── globals.css           # Global Styles
+    └── globals.css            # Global Styles
 ```
 
 ---
@@ -138,8 +180,9 @@ nexus-next/
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
 - **Database**: Supabase (PostgreSQL)
-- **State Management**: React Context + Hooks
+- **State Management**: React Context (분리된 도메인별 Context)
 - **Charts**: Chart.js, Recharts
+- **Testing**: Vitest (74 tests)
 - **Icons**: FontAwesome
 
 ---
@@ -148,6 +191,7 @@ nexus-next/
 
 | 버전 | 날짜 | 주요 변경 |
 |------|------|----------|
+| v1.7 | 2026-01-17 | 🏗️ Context 분리 리팩토링, 📤 Export 기능 개선 (Gems 최적화), 🧩 컴포넌트 분해, 🛠️ 에러 처리 표준화, ✅ 테스트 74개 |
 | v1.6 | 2026-01-17 | 📝 매매 일지(Trade Journal) 추가, 💰 FIFO 손익 계산, 🐛 타임존 버그 수정 |
 | v1.5 | 2026-01-14 | 📅 배당 캘린더 추가, ⚡ AssetTable 성능 최적화, 🔄 IncomeStream 뷰 토글 기능 |
 | v1.4 | 2026-01-14 | 🔄 탭 구조 재편 (AssetTurnover 이동), ⚡ Analytics 리팩토링, 🐛 히트맵 버그 수정 |
