@@ -11,6 +11,8 @@ import SimulationHub from '@/components/SimulationHub';
 import Analytics from '@/components/Analytics';
 import AssetModal from '@/components/AssetModal';
 import DividendModal from '@/components/DividendModal';
+import TradeModal from '@/components/TradeModal';
+import TradeJournal from '@/components/TradeJournal';
 import SettingsModal from '@/components/SettingsModal';
 import AuthModal from '@/components/AuthModal';
 import FreedomModal from '@/components/FreedomModal';
@@ -37,6 +39,11 @@ function DashboardContent() {
     dividendModalOpen,
     closeDividendModal,
     openDividendModal,
+    tradeModalOpen,
+    closeTradeModal,
+    saveTradeFromModal,
+    editingTrade,
+    openAddTradeModal,
     syncFromSheet,
     state,
     refreshPrices,
@@ -48,6 +55,7 @@ function DashboardContent() {
   const [freedomOpen, setFreedomOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('stellar');
   const [viewMode, setViewMode] = useState<ViewMode>('table');
+  const [isColSettingsOpen, setIsColSettingsOpen] = useState(false);
 
   // INCOME 자산 메모이제이션
   const incomeAssets = useMemo(
@@ -84,6 +92,12 @@ function DashboardContent() {
         exchangeRate={state.exchangeRate}
       />
       <DividendModal isOpen={dividendModalOpen} onClose={closeDividendModal} />
+      <TradeModal
+        isOpen={tradeModalOpen}
+        onClose={closeTradeModal}
+        onSave={saveTradeFromModal}
+        editingTrade={editingTrade}
+      />
       <SettingsModal isOpen={settingsOpen} onClose={handleCloseSettings} />
       <AuthModal isOpen={authOpen} onClose={handleCloseAuth} onAuthChange={() => {}} />
       <FreedomModal isOpen={freedomOpen} onClose={handleCloseFreedom} />
@@ -203,6 +217,16 @@ function DashboardContent() {
                   <i className="fas fa-star text-celestial-gold text-xs" /> STELLAR ASSETS
                 </h2>
                 <div className="flex items-center gap-4">
+                  {/* Column Settings Button */}
+                  <button
+                    onClick={() => setIsColSettingsOpen(!isColSettingsOpen)}
+                    className="celestial-btn text-[9px] flex items-center gap-1.5"
+                    title="컬럼 설정"
+                  >
+                    <i className="fas fa-columns" />
+                    <span className="hidden sm:inline">컬럼</span>
+                  </button>
+
                   {/* View Mode Toggle: Table / Heatmap */}
                   <div className="flex items-center gap-1 inner-glass rounded-lg p-1">
                     <button
@@ -236,6 +260,13 @@ function DashboardContent() {
                       <i className="fas fa-sync-alt" />
                     </button>
                     <button
+                      onClick={openAddTradeModal}
+                      className="celestial-btn text-[10px]"
+                      style={{ borderColor: 'rgba(251,191,36,0.4)', color: '#FBB424' }}
+                    >
+                      TRADE LOG
+                    </button>
+                    <button
                       onClick={openAddAssetModal}
                       className="celestial-btn text-[10px]"
                     >
@@ -264,7 +295,10 @@ function DashboardContent() {
                 <div className="flex flex-col h-[600px]">
                   <div className="flex-1 min-h-0">
                     <div className="overflow-y-auto custom-scrollbar h-full">
-                      <AssetTable />
+                      <AssetTable
+                        isColSettingsOpen={isColSettingsOpen}
+                        setIsColSettingsOpen={setIsColSettingsOpen}
+                      />
                     </div>
                   </div>
                 </div>
@@ -273,6 +307,14 @@ function DashboardContent() {
                   <PortfolioHeatmap />
                 </div>
               )}
+
+              {/* Trade Journal Section */}
+              <div className="mt-8 pt-6 border-t border-white/10">
+                <h3 className="text-base font-display tracking-widest flex items-center gap-3 text-white mb-4">
+                  <i className="fas fa-receipt text-celestial-gold text-xs" /> TRADE JOURNAL
+                </h3>
+                <TradeJournal />
+              </div>
             </div>
           )}
 

@@ -7,10 +7,14 @@ import AssetTableRow from './AssetTableRow';
 import { TYPE_INFO, TYPE_ORDER, TYPE_COLORS, CHART_COLORS, SECTORS } from '@/lib/config';
 import { formatUSD, getPriceChangeIndicator } from '@/lib/utils';
 
-export default function AssetTable() {
+interface AssetTableProps {
+  isColSettingsOpen?: boolean;
+  setIsColSettingsOpen?: (open: boolean) => void;
+}
+
+export default function AssetTable({ isColSettingsOpen = false, setIsColSettingsOpen }: AssetTableProps = {}) {
   const { state, removeAsset, openEditAssetModal, updateAssets } = useNexus();
   const { assets, exchangeRate, previousPrices } = state;
-  const [isColSettingsOpen, setIsColSettingsOpen] = useState(false);
 
   const {
     groupedAssets,
@@ -43,61 +47,49 @@ export default function AssetTable() {
 
   return (
     <div className="space-y-4">
-      {/* 컬럼 설정 버튼 */}
-      <div className="flex justify-end mb-2">
-        <div className="relative">
-          <button
-            onClick={() => setIsColSettingsOpen(!isColSettingsOpen)}
-            className="celestial-btn text-[9px] flex items-center gap-1.5"
-            title="컬럼 설정"
-          >
-            <i className="fas fa-columns" />
-            <span className="hidden sm:inline">컬럼</span>
-          </button>
-          {isColSettingsOpen && (
-            <>
-              <div
-                className="fixed inset-0 z-40"
-                onClick={() => setIsColSettingsOpen(false)}
-              />
-              <div className="absolute right-0 top-full mt-2 z-50 inner-glass p-3 rounded-lg min-w-[180px] shadow-lg border border-white/20">
-                <div className="text-[10px] text-white/60 mb-2 uppercase tracking-wider">표시할 컬럼</div>
-                <div className="space-y-1.5">
-                  {COLUMNS.map(col => (
-                    <label
-                      key={col.key}
-                      className="flex items-center gap-2 cursor-pointer hover:bg-white/5 p-1.5 rounded transition-colors"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={isColumnVisible(col.key)}
-                        onChange={() => toggleColumn(col.key)}
-                        className="w-3.5 h-3.5 rounded border-white/30 bg-white/10 checked:bg-celestial-cyan checked:border-celestial-cyan"
-                      />
-                      <span className="text-[11px] text-white/80">{col.label}</span>
-                      <span className="text-[9px] text-white/40 ml-auto">{col.labelEng}</span>
-                    </label>
-                  ))}
-                </div>
-                <div className="mt-2 pt-2 border-t border-white/10 flex gap-2">
-                  <button
-                    onClick={() => resetColumns('all')}
-                    className="text-[9px] text-celestial-cyan hover:underline"
-                  >
-                    모두 표시
-                  </button>
-                  <button
-                    onClick={() => resetColumns('default')}
-                    className="text-[9px] text-white/60 hover:underline"
-                  >
-                    기본값
-                  </button>
-                </div>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
+      {/* 컬럼 설정 드롭다운 (버튼은 page.tsx로 이동) */}
+      {isColSettingsOpen && setIsColSettingsOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-40"
+            onClick={() => setIsColSettingsOpen(false)}
+          />
+          <div className="absolute right-0 top-[60px] z-50 inner-glass p-3 rounded-lg min-w-[180px] shadow-lg border border-white/20">
+            <div className="text-[10px] text-white/60 mb-2 uppercase tracking-wider">표시할 컬럼</div>
+            <div className="space-y-1.5">
+              {COLUMNS.map(col => (
+                <label
+                  key={col.key}
+                  className="flex items-center gap-2 cursor-pointer hover:bg-white/5 p-1.5 rounded transition-colors"
+                >
+                  <input
+                    type="checkbox"
+                    checked={isColumnVisible(col.key)}
+                    onChange={() => toggleColumn(col.key)}
+                    className="w-3.5 h-3.5 rounded border-white/30 bg-white/10 checked:bg-celestial-cyan checked:border-celestial-cyan"
+                  />
+                  <span className="text-[11px] text-white/80">{col.label}</span>
+                  <span className="text-[9px] text-white/40 ml-auto">{col.labelEng}</span>
+                </label>
+              ))}
+            </div>
+            <div className="mt-2 pt-2 border-t border-white/10 flex gap-2">
+              <button
+                onClick={() => resetColumns('all')}
+                className="text-[9px] text-celestial-cyan hover:underline"
+              >
+                모두 표시
+              </button>
+              <button
+                onClick={() => resetColumns('default')}
+                className="text-[9px] text-white/60 hover:underline"
+              >
+                기본값
+              </button>
+            </div>
+          </div>
+        </>
+      )}
 
       {TYPE_ORDER.map(type => {
         const group = groupedAssets[type];

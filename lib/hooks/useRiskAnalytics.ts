@@ -54,13 +54,38 @@ export function getRiskLabel(level: RiskLevel): string {
 }
 
 export function useRiskAnalytics(assets: Asset[], market: MarketData) {
+  // 같은 티커를 하나로 통합
+  const mergedAssets = useMemo(() => {
+    const merged: Record<string, Asset & { totalValue: number; totalCost: number }> = {};
+
+    assets.forEach(asset => {
+      if (!merged[asset.ticker]) {
+        merged[asset.ticker] = {
+          ...asset,
+          totalValue: asset.qty * asset.price,
+          totalCost: asset.qty * asset.avg,
+        };
+      } else {
+        // 같은 티커가 있으면 수량과 총 가치를 합산
+        merged[asset.ticker].qty += asset.qty;
+        merged[asset.ticker].totalValue += asset.qty * asset.price;
+        merged[asset.ticker].totalCost += asset.qty * asset.avg;
+        // 평균 가격 재계산
+        merged[asset.ticker].price = merged[asset.ticker].totalValue / merged[asset.ticker].qty;
+        merged[asset.ticker].avg = merged[asset.ticker].totalCost / merged[asset.ticker].qty;
+      }
+    });
+
+    return Object.values(merged);
+  }, [assets]);
+
   // 포트폴리오 섹터 분산도 계산
   const portfolioSectorWeights = useMemo(() => {
-    const totalValue = assets.reduce((sum, a) => sum + a.qty * a.price, 0);
+    const totalValue = mergedAssets.reduce((sum, a) => sum + a.totalValue, 0);
     if (totalValue === 0) return {};
     const sectorWeights: Record<string, number> = {};
-    assets.forEach(asset => {
-      const assetWeight = (asset.qty * asset.price) / totalValue;
+    mergedAssets.forEach(asset => {
+      const assetWeight = asset.totalValue / totalValue;
       const etfSectors = ETF_SECTOR_DATA[asset.ticker];
       if (etfSectors) {
         Object.entries(etfSectors).forEach(([sector, weight]) => {
@@ -72,7 +97,7 @@ export function useRiskAnalytics(assets: Asset[], market: MarketData) {
       }
     });
     return sectorWeights;
-  }, [assets]);
+  }, [mergedAssets]);
 
   const topSectors = useMemo(() => {
     return Object.entries(portfolioSectorWeights)
@@ -112,11 +137,11 @@ export function useRiskAnalytics(assets: Asset[], market: MarketData) {
   }, [portfolioSectorWeights]);
 
   const maxAssetWeight = useMemo(() => {
-    const totalValue = assets.reduce((sum, a) => sum + a.qty * a.price, 0);
+    const totalValue = mergedAssets.reduce((sum, a) => sum + a.totalValue, 0);
     if (totalValue === 0) return 0;
-    const weights = assets.map(a => (a.qty * a.price) / totalValue);
+    const weights = mergedAssets.map(a => a.totalValue / totalValue);
     return Math.max(...weights, 0);
-  }, [assets]);
+  }, [mergedAssets]);
 
   const topSectorWeight = useMemo(() => {
     const weights = Object.values(portfolioSectorWeights);
@@ -136,22 +161,22 @@ export function useRiskAnalytics(assets: Asset[], market: MarketData) {
   const riskColor = getRiskColor(riskLevel);
 
   const portfolioStats = useMemo(() => {
-    const totalValue = assets.reduce((sum, a) => sum + (a.qty * a.price), 0);
-    const assetWeights = assets
+    const totalValue = mergedAssets.reduce((sum, a) => sum + a.totalValue, 0);
+    const assetWeights = mergedAssets
       .map(a => ({
         ticker: a.ticker,
-        value: a.qty * a.price,
-        weight: totalValue > 0 ? (a.qty * a.price / totalValue) * 100 : 0,
+        value: a.totalValue,
+        weight: totalValue > 0 ? (a.totalValue / totalValue) * 100 : 0,
       }))
       .sort((a, b) => b.weight - a.weight);
 
-    const coreValue = assets.filter(a => a.type !== 'INCOME').reduce((s, a) => s + a.qty * a.price, 0);
-    const incomeValue = assets.filter(a => a.type === 'INCOME').reduce((s, a) => s + a.qty * a.price, 0);
+    const coreValue = mergedAssets.filter(a => a.type !== 'INCOME').reduce((s, a) => s + a.totalValue, 0);
+    const incomeValue = mergedAssets.filter(a => a.type === 'INCOME').reduce((s, a) => s + a.totalValue, 0);
 
-    const sorted = assets
+    const sorted = mergedAssets
       .map(a => {
-        const value = a.qty * a.price;
-        const cost = a.qty * a.avg;
+        const value = a.totalValue;
+        const cost = a.totalCost;
         const returnPct = cost > 0 ? ((value - cost) / cost) * 100 : 0;
         return { ticker: a.ticker, returnPct };
       })
@@ -170,7 +195,7 @@ export function useRiskAnalytics(assets: Asset[], market: MarketData) {
       top3,
       bottom3,
     };
-  }, [assets]);
+  }, [mergedAssets]);
 
   return {
     riskMetrics,

@@ -1,4 +1,4 @@
-# 🌟 NEXUS DASHBOARD v1.5
+# 🌟 NEXUS DASHBOARD v1.6
 
 개인 투자 포트폴리오 관리 대시보드
 
@@ -12,19 +12,16 @@
 
 ---
 
-## ✨ v1.5 주요 변경 사항
+## ✨ v1.6 주요 변경 사항
 
-### 📅 배당 캘린더 (Dividend Calendar)
-- **캘린더 뷰 추가**: `Income Stream` 탭에서 리스트/캘린더 뷰를 자유롭게 전환할 수 있습니다.
-- **직관적인 시각화**: 월별 배당 내역을 달력 형태로 확인하고, 일별 배당 총액과 종목별 지급 내역(컬러 도트)을 한눈에 파악합니다.
+### 📝 매매 일지 (Trade Journal)
+- **거래 기록 관리**: 매수(Buy)/매도(Sell) 거래 내역을 날짜별로 기록하고 관리하는 전용 섹션 추가.
+- **실현 손익 자동 계산 (FIFO)**: 선입선출(First-In-First-Out) 방식을 적용하여 매도 시 실현 손익을 자동으로 계산합니다.
+- **수익률 분석**: 종목별 실현 손익 TOP 5 및 전체 거래 통계를 제공합니다.
 
-### ⚡ 성능 최적화 (Optimization)
-- **AssetTable 리팩토링**: `useAssetTable` 커스텀 훅을 도입하여 데이터 로직과 UI를 분리했습니다.
-- **렌더링 효율화**: `AssetTableRow` 컴포넌트를 분리하고 `React.memo`를 적용하여, 드래그 앤 드롭 등 상호작용 시 불필요한 리렌더링을 방지했습니다.
-
-### 🔄 탭 구조 재편 (Refined Tab Architecture)
-- **Income 탭 정제**: 순수 배당 및 현금흐름 분석에 집중하도록 `AssetTurnover` 제거.
-- **Analytics 탭 강화**: 리스크 분석과 투자 성향 진단을 결합. `AssetTurnover`를 이동시키고 `RebalanceSuggestion`과 나란히 배치하여 기술적/행동적 분석을 통합.
+### 🐛 시스템 안정성 (Stability)
+- **타임존 로직 개선**: `lib/utils.ts`의 타임존 변환 로직을 UTC 기반으로 수정하여, 실행 환경(CI/CD, 로컬 등)에 관계없이 일관된 시간을 보장합니다.
+- **테스트 커버리지**: 타임존 관련 단위 테스트를 보강하여 신뢰성을 높였습니다.
 
 ---
 
@@ -35,7 +32,7 @@
 - **Stellar Assets** (Cyan): 전체 자산 관리 테이블 및 히트맵
 - **Income Stream** (Gold): 배당 수익 분석, 캘린더 뷰, 최적화
 - **Analytics** (Purple): 리스크 분석, 포트폴리오 인사이트, 투자 성향 진단
-- **Performance** (Green): 벤치마크 대비 성과 추적 및 월간 리포트
+- **Performance** (Green): 벤치마크 대비 성과 추적, 월간 리포트, 매매 일지(New)
 - **Simulation** (Orange): What-If 및 스트레스 테스트
 
 ### 🎨 UI/UX 디자인
@@ -59,6 +56,7 @@ CREATE TABLE IF NOT EXISTS portfolios (
   user_id TEXT PRIMARY KEY,
   assets JSONB DEFAULT '[]',
   dividends JSONB DEFAULT '[]',
+  trade_logs JSONB DEFAULT '[]', -- v1.6 Added
   trade_sums JSONB DEFAULT '{}',
   market JSONB DEFAULT '{}',
   exchange_rate NUMERIC DEFAULT 1450,
@@ -110,23 +108,24 @@ nexus-next/
 │   ├── layout.tsx            # 루트 레이아웃
 │   └── api/                  # Server-side API Routes
 ├── components/
-│   ├── DividendCalendar.tsx  # 배당 캘린더 (New)
-│   ├── AssetTable.tsx        # 자산 관리 테이블 (Optimized)
-│   ├── AssetTableRow.tsx     # 최적화된 테이블 행 (New)
+│   ├── TradeJournal.tsx      # 매매 일지 (New v1.6)
+│   ├── TradeModal.tsx        # 거래 기록 모달 (New v1.6)
+│   ├── DividendCalendar.tsx  # 배당 캘린더
+│   ├── AssetTable.tsx        # 자산 관리 테이블
+│   ├── AssetTableRow.tsx     # 최적화된 테이블 행
 │   ├── Analytics.tsx         # 리스크 분석
-│   ├── AssetTurnover.tsx     # 회전율/성향 분석
-│   ├── IncomeStream.tsx      # 배당 흐름 (Refactored)
+│   ├── IncomeStream.tsx      # 배당 흐름
 │   ├── PortfolioHeatmap.tsx  # 트리맵 시각화
 │   └── ...
 ├── lib/
 │   ├── hooks/
-│   │   ├── useAssetTable.ts    # 테이블 로직 훅 (New)
+│   │   ├── useAssetTable.ts    # 테이블 로직 훅
 │   │   ├── useRiskAnalytics.ts # 리스크 분석 훅
 │   │   └── usePortfolio.ts
 │   ├── market-data.ts        # 시장 데이터 상수
 │   ├── supabase.ts           # Supabase 클라이언트
-│   ├── context.tsx           # 전역 상태 관리
-│   └── utils.ts              # 유틸리티 함수
+│   ├── context.tsx           # 전역 상태 관리 (TradeLog 추가)
+│   └── utils.ts              # 유틸리티 함수 (Timezone Fix)
 └── styles/
     └── globals.css           # Global Styles
 ```
@@ -149,6 +148,7 @@ nexus-next/
 
 | 버전 | 날짜 | 주요 변경 |
 |------|------|----------|
+| v1.6 | 2026-01-17 | 📝 매매 일지(Trade Journal) 추가, 💰 FIFO 손익 계산, 🐛 타임존 버그 수정 |
 | v1.5 | 2026-01-14 | 📅 배당 캘린더 추가, ⚡ AssetTable 성능 최적화, 🔄 IncomeStream 뷰 토글 기능 |
 | v1.4 | 2026-01-14 | 🔄 탭 구조 재편 (AssetTurnover 이동), ⚡ Analytics 리팩토링, 🐛 히트맵 버그 수정 |
 | v1.3 | 2026-01-13 | 🔒 보안 강화, 🧩 컴포넌트 분리, ⚡ 성능 최적화 |

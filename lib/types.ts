@@ -31,6 +31,18 @@ export interface Dividend {
   dps: number;
 }
 
+export type TradeType = 'BUY' | 'SELL';
+
+export interface TradeLog {
+  id: string;
+  date: string;
+  ticker: string;
+  type: TradeType;
+  qty: number;
+  price: number;
+  fee: number;
+}
+
 export interface TimelineEntry {
   date: string;
   cost: number;
@@ -53,6 +65,7 @@ export interface TradeSums {
 export interface NexusState {
   assets: Asset[];
   dividends: Dividend[];
+  tradeLogs: TradeLog[];
   timeline: TimelineEntry[];
   exchangeRate: number;
   tradeSums: TradeSums;
@@ -141,6 +154,11 @@ export interface AssetModalProps extends ModalProps {
   editingAsset: Asset | null;
   editingIndex: number | null;
   exchangeRate: number;
+}
+
+export interface TradeModalProps extends ModalProps {
+  onSave: (trade: TradeLog) => void;
+  editingTrade: TradeLog | null;
 }
 
 // ═══════════════════════════════════════════════════════════════

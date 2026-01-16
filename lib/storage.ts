@@ -2,7 +2,7 @@
 // NEXUS V65.1 - Supabase Storage Management
 // ═══════════════════════════════════════════════════════════════
 
-import { Asset, Dividend, TimelineEntry, TradeSums, NexusState } from './types';
+import { Asset, Dividend, TimelineEntry, TradeSums, NexusState, TradeLog } from './types';
 import { DEFAULT_ASSETS, DEFAULT_EXCHANGE_RATE } from './config';
 import { supabase, getUserId } from './supabase';
 import { toKSTISOString, getKSTNow } from './utils';
@@ -14,6 +14,7 @@ const isBrowser = typeof window !== 'undefined';
 const DEFAULT_STATE: Partial<NexusState> = {
   assets: DEFAULT_ASSETS,
   dividends: [],
+  tradeLogs: [],
   timeline: [],
   exchangeRate: DEFAULT_EXCHANGE_RATE,
   tradeSums: {},
@@ -53,6 +54,7 @@ export async function loadStateFromSupabase(): Promise<Partial<NexusState>> {
     return {
       assets: data.assets || DEFAULT_ASSETS,
       dividends: data.dividends || [],
+      tradeLogs: data.trade_logs || [],
       timeline: [],
       exchangeRate: data.exchange_rate || DEFAULT_EXCHANGE_RATE,
       tradeSums: data.trade_sums || {},
@@ -81,6 +83,7 @@ export async function saveStateToSupabase(state: Partial<NexusState>): Promise<b
         user_id: userId,
         assets: state.assets,
         dividends: state.dividends,
+        trade_logs: state.tradeLogs,
         trade_sums: state.tradeSums,
         market: state.market,
         exchange_rate: state.exchangeRate,
@@ -116,6 +119,7 @@ async function createInitialPortfolio(userId: string): Promise<void> {
         user_id: userId,
         assets: DEFAULT_ASSETS,
         dividends: [],
+        trade_logs: [],
         trade_sums: {},
         exchange_rate: DEFAULT_EXCHANGE_RATE,
         strategy: '',
@@ -134,6 +138,7 @@ async function createInitialPortfolio(userId: string): Promise<void> {
 const STORAGE_KEYS = {
   ASSETS: 'nexus_assets_v62',
   DIVIDENDS: 'nexus_dividends',
+  TRADE_LOGS: 'nexus_trade_logs',
   TIMELINE: 'nexus_timeline',
   RATE: 'nexus_rate',
   TRADE_SUMS: 'nexus_trade_sums',
@@ -159,6 +164,7 @@ function loadStateFromLocalStorage(): Partial<NexusState> {
   return {
     assets: safeParse<Asset[]>(localStorage.getItem(STORAGE_KEYS.ASSETS), DEFAULT_ASSETS),
     dividends: safeParse<Dividend[]>(localStorage.getItem(STORAGE_KEYS.DIVIDENDS), []),
+    tradeLogs: safeParse<TradeLog[]>(localStorage.getItem(STORAGE_KEYS.TRADE_LOGS), []),
     timeline: safeParse<TimelineEntry[]>(localStorage.getItem(STORAGE_KEYS.TIMELINE), []),
     exchangeRate: parseFloat(localStorage.getItem(STORAGE_KEYS.RATE) || '') || DEFAULT_EXCHANGE_RATE,
     tradeSums: safeParse<TradeSums>(localStorage.getItem(STORAGE_KEYS.TRADE_SUMS), {}),
@@ -175,6 +181,7 @@ function saveStateToLocalStorage(state: Partial<NexusState>): void {
 
   if (state.assets) localStorage.setItem(STORAGE_KEYS.ASSETS, JSON.stringify(state.assets));
   if (state.dividends) localStorage.setItem(STORAGE_KEYS.DIVIDENDS, JSON.stringify(state.dividends));
+  if (state.tradeLogs) localStorage.setItem(STORAGE_KEYS.TRADE_LOGS, JSON.stringify(state.tradeLogs));
   if (state.timeline) localStorage.setItem(STORAGE_KEYS.TIMELINE, JSON.stringify(state.timeline));
   if (state.exchangeRate) localStorage.setItem(STORAGE_KEYS.RATE, state.exchangeRate.toString());
   if (state.tradeSums) localStorage.setItem(STORAGE_KEYS.TRADE_SUMS, JSON.stringify(state.tradeSums));
@@ -289,6 +296,7 @@ export function exportData(state: Partial<NexusState>): string {
   return JSON.stringify({
     assets: state.assets,
     dividends: state.dividends,
+    tradeLogs: state.tradeLogs,
     timeline: state.timeline,
     tradeSums: state.tradeSums,
     exchangeRate: state.exchangeRate,
@@ -303,6 +311,7 @@ export function importData(jsonString: string): Partial<NexusState> | null {
     return {
       assets: data.assets || [],
       dividends: data.dividends || [],
+      tradeLogs: data.tradeLogs || [],
       timeline: data.timeline || [],
       tradeSums: data.tradeSums || {},
       exchangeRate: data.exchangeRate || DEFAULT_EXCHANGE_RATE,

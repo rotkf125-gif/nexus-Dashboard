@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
-import { NexusState, Asset, Dividend, MarketData, ThemeType } from './types';
+import { NexusState, Asset, Dividend, MarketData, ThemeType, TradeLog, TradeSums } from './types';
 import { loadState, saveState, loadStateFromSupabase, saveStateToSupabase, saveSnapshot } from './storage';
 import { DEFAULT_EXCHANGE_RATE, API_ENDPOINTS, REFRESH_INTERVALS } from './config';
 import { isValidGoogleScriptUrl, fetchWithExponentialBackoff } from './utils';
@@ -14,6 +14,9 @@ interface NexusContextType {
   updateAsset: (index: number, asset: Partial<Asset>) => void;
   addDividend: (dividend: Dividend) => void;
   removeDividend: (index: number) => void;
+  addTradeLog: (trade: TradeLog) => void;
+  updateTradeLog: (id: string, trade: TradeLog) => void;
+  removeTradeLog: (id: string) => void;
   updateMarket: (market: Partial<MarketData>) => void;
   setExchangeRate: (rate: number) => void;
   setTradeSums: (ticker: string, amount: number) => void;
@@ -37,6 +40,14 @@ interface NexusContextType {
   setDividendModalOpen: (open: boolean) => void;
   openDividendModal: () => void;
   closeDividendModal: () => void;
+  // Trade Modal states
+  tradeModalOpen: boolean;
+  setTradeModalOpen: (open: boolean) => void;
+  editingTrade: TradeLog | null;
+  openAddTradeModal: () => void;
+  openEditTradeModal: (trade: TradeLog) => void;
+  closeTradeModal: () => void;
+  saveTradeFromModal: (trade: TradeLog) => void;
   // Sync status
   isSyncing: boolean;
   // Undo/Redo
@@ -51,6 +62,7 @@ interface NexusContextType {
 const defaultState: NexusState = {
   assets: [],
   dividends: [],
+  tradeLogs: [],
   timeline: [],
   exchangeRate: DEFAULT_EXCHANGE_RATE,
   tradeSums: {},
@@ -77,9 +89,13 @@ export function NexusProvider({ children }: { children: ReactNode }) {
   const [assetModalOpen, setAssetModalOpen] = useState(false);
   const [editingAsset, setEditingAsset] = useState<Asset | null>(null);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  
+
   // Dividend Modal states
   const [dividendModalOpen, setDividendModalOpen] = useState(false);
+
+  // Trade Modal states
+  const [tradeModalOpen, setTradeModalOpen] = useState(false);
+  const [editingTrade, setEditingTrade] = useState<TradeLog | null>(null);
 
   // Undo/Redo state
   const MAX_HISTORY = 10;
@@ -278,6 +294,86 @@ export function NexusProvider({ children }: { children: ReactNode }) {
       };
     });
   }, [saveToHistory]);
+
+  // FIFO 회계 로직: 매매일지에서 실현 손익 자동 계산
+  const calculateTradeReturns = useCallback((tradeLogs: TradeLog[]): TradeSums => {
+    // ticker별로 포지션 추적
+    const positions: Record<string, Array<{ qty: number; price: number; fee: number }>> = {};
+    const realizedPnL: Record<string, number> = {};
+
+    // 날짜순 정렬
+    const sortedLogs = [...tradeLogs].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    sortedLogs.forEach(log => {
+      const { ticker, type, qty, price, fee } = log;
+
+      if (!positions[ticker]) {
+        positions[ticker] = [];
+        realizedPnL[ticker] = 0;
+      }
+
+      if (type === 'BUY') {
+        // 매수: 포지션에 추가
+        positions[ticker].push({ qty, price, fee });
+      } else if (type === 'SELL') {
+        // 매도: FIFO 방식으로 가장 오래된 포지션부터 매도
+        let remainingQty = qty;
+        let sellValue = qty * price - fee; // 매도 금액 (수수료 차감)
+
+        while (remainingQty > 0 && positions[ticker].length > 0) {
+          const oldestPosition = positions[ticker][0];
+
+          if (oldestPosition.qty <= remainingQty) {
+            // 전체 포지션 매도
+            const costBasis = oldestPosition.qty * oldestPosition.price + oldestPosition.fee;
+            const saleProceeds = (oldestPosition.qty / qty) * sellValue;
+            realizedPnL[ticker] += saleProceeds - costBasis;
+
+            remainingQty -= oldestPosition.qty;
+            positions[ticker].shift();
+          } else {
+            // 일부 포지션 매도
+            const costBasis = remainingQty * oldestPosition.price + (remainingQty / oldestPosition.qty) * oldestPosition.fee;
+            const saleProceeds = (remainingQty / qty) * sellValue;
+            realizedPnL[ticker] += saleProceeds - costBasis;
+
+            oldestPosition.qty -= remainingQty;
+            oldestPosition.fee *= (oldestPosition.qty / (oldestPosition.qty + remainingQty)); // 비례 배분
+            remainingQty = 0;
+          }
+        }
+      }
+    });
+
+    return realizedPnL;
+  }, []);
+
+  const addTradeLog = useCallback((trade: TradeLog) => {
+    setState(prev => {
+      saveToHistory(prev);
+      const newTradeLogs = [...prev.tradeLogs, trade];
+      const newTradeSums = calculateTradeReturns(newTradeLogs);
+      return { ...prev, tradeLogs: newTradeLogs, tradeSums: newTradeSums };
+    });
+  }, [saveToHistory, calculateTradeReturns]);
+
+  const updateTradeLog = useCallback((id: string, trade: TradeLog) => {
+    setState(prev => {
+      saveToHistory(prev);
+      const newTradeLogs = prev.tradeLogs.map(t => t.id === id ? trade : t);
+      const newTradeSums = calculateTradeReturns(newTradeLogs);
+      return { ...prev, tradeLogs: newTradeLogs, tradeSums: newTradeSums };
+    });
+  }, [saveToHistory, calculateTradeReturns]);
+
+  const removeTradeLog = useCallback((id: string) => {
+    setState(prev => {
+      saveToHistory(prev);
+      const newTradeLogs = prev.tradeLogs.filter(t => t.id !== id);
+      const newTradeSums = calculateTradeReturns(newTradeLogs);
+      return { ...prev, tradeLogs: newTradeLogs, tradeSums: newTradeSums };
+    });
+  }, [saveToHistory, calculateTradeReturns]);
 
   const updateMarket = useCallback((market: Partial<MarketData>) => {
     setState(prev => ({
@@ -516,6 +612,35 @@ export function NexusProvider({ children }: { children: ReactNode }) {
     setDividendModalOpen(false);
   }, []);
 
+  // Trade Modal functions
+  const openAddTradeModal = useCallback(() => {
+    setEditingTrade(null);
+    setTradeModalOpen(true);
+  }, []);
+
+  const openEditTradeModal = useCallback((trade: TradeLog) => {
+    setEditingTrade(trade);
+    setTradeModalOpen(true);
+  }, []);
+
+  const closeTradeModal = useCallback(() => {
+    setTradeModalOpen(false);
+    setEditingTrade(null);
+  }, []);
+
+  const saveTradeFromModal = useCallback((trade: TradeLog) => {
+    if (editingTrade !== null) {
+      // 수정 모드
+      updateTradeLog(editingTrade.id, trade);
+      toast('Trade updated', 'success');
+    } else {
+      // 추가 모드
+      addTradeLog(trade);
+      toast('Trade added', 'success');
+    }
+    closeTradeModal();
+  }, [editingTrade, addTradeLog, updateTradeLog, closeTradeModal, toast]);
+
   if (!isLoaded) {
     return <div className="min-h-screen flex items-center justify-center">
       <i className="fas fa-spinner spinner text-2xl opacity-50" />
@@ -532,6 +657,9 @@ export function NexusProvider({ children }: { children: ReactNode }) {
         updateAsset,
         addDividend,
         removeDividend,
+        addTradeLog,
+        updateTradeLog,
+        removeTradeLog,
         updateMarket,
         setExchangeRate,
         setTradeSums,
@@ -555,6 +683,14 @@ export function NexusProvider({ children }: { children: ReactNode }) {
         setDividendModalOpen,
         openDividendModal,
         closeDividendModal,
+        // Trade Modal states
+        tradeModalOpen,
+        setTradeModalOpen,
+        editingTrade,
+        openAddTradeModal,
+        openEditTradeModal,
+        closeTradeModal,
+        saveTradeFromModal,
         // Sync status
         isSyncing,
         // Undo/Redo

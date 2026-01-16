@@ -92,19 +92,47 @@ export default function MonthlyReport() {
     return distribution;
   }, [assets]);
 
-  // 상위 종목
+  // 상위 종목 (같은 티커 통합)
   const topAssets = useMemo(() => {
-    return [...assets]
-      .map(a => ({
-        ticker: a.ticker,
-        type: a.type,
-        value: a.qty * a.price,
-        profit: (a.qty * a.price) - (a.qty * a.avg),
-        returnPct: a.avg > 0 ? ((a.price - a.avg) / a.avg) * 100 : 0,
+    // 같은 티커를 하나로 통합
+    const merged: Record<string, { ticker: string; type: string; value: number; cost: number }> = {};
+
+    assets.forEach(a => {
+      const value = a.qty * a.price;
+      const cost = a.qty * a.avg;
+
+      if (!merged[a.ticker]) {
+        merged[a.ticker] = {
+          ticker: a.ticker,
+          type: a.type,
+          value,
+          cost,
+        };
+      } else {
+        merged[a.ticker].value += value;
+        merged[a.ticker].cost += cost;
+      }
+    });
+
+    return Object.values(merged)
+      .map(m => ({
+        ticker: m.ticker,
+        type: m.type,
+        value: m.value,
+        profit: m.value - m.cost,
+        returnPct: m.cost > 0 ? ((m.value - m.cost) / m.cost) * 100 : 0,
       }))
       .sort((a, b) => b.value - a.value)
       .slice(0, 5);
   }, [assets]);
+
+  // 거래 수익 상위 5개 (ticker별)
+  const topTradeReturns = useMemo(() => {
+    return Object.entries(tradeSums)
+      .map(([ticker, pnl]) => ({ ticker, pnl }))
+      .sort((a, b) => b.pnl - a.pnl)
+      .slice(0, 5);
+  }, [tradeSums]);
 
   // 최근 N개월 배당금 합계
   const recentDividends = useMemo(() => {
@@ -150,6 +178,13 @@ export default function MonthlyReport() {
       ...topAssets.map((a, i) =>
         `${i + 1}. ${a.ticker} - ${formatUSD(a.value)} (${a.returnPct >= 0 ? '+' : ''}${a.returnPct.toFixed(1)}%)`
       ),
+      '',
+      '[ TOP 5 TRADE RETURNS ]',
+      ...(topTradeReturns.length > 0
+        ? topTradeReturns.map((t, i) =>
+            `${i + 1}. ${t.ticker} - ${t.pnl >= 0 ? '+' : ''}${formatUSD(t.pnl)}`
+          )
+        : ['No trade data available']),
       '',
       '[ TYPE DISTRIBUTION ]',
       ...Object.entries(typeDistribution).map(([type, data]) => {
@@ -364,6 +399,31 @@ export default function MonthlyReport() {
           </div>
         </div>
       </div>
+
+      {/* Top Trade Returns */}
+      {topTradeReturns.length > 0 && (
+        <div className="inner-glass p-3 rounded-lg">
+          <div className="text-[9px] text-white/60 uppercase mb-2">거래 수익 상위 5개 (ticker별)</div>
+          <div className="space-y-2">
+            {topTradeReturns.map((trade, i) => (
+              <div key={trade.ticker} className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="w-4 text-[9px] text-white/40">{i + 1}</span>
+                  <span
+                    className="text-[10px] font-medium"
+                    style={{ color: CHART_COLORS[i % CHART_COLORS.length] }}
+                  >
+                    {trade.ticker}
+                  </span>
+                </div>
+                <span className={`text-[10px] font-semibold ${trade.pnl >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}>
+                  {trade.pnl >= 0 ? '+' : ''}{formatUSD(trade.pnl)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Report Preview */}
       <div className="inner-glass p-3 rounded-lg">

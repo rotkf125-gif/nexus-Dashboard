@@ -50,18 +50,20 @@ export default function RebalanceSuggestion() {
   // 자산 변경 시 목표 비중 업데이트 (새 자산 추가/제거)
   useEffect(() => {
     setTargetWeights(prev => {
+      // 같은 티커를 하나로 통합한 티커 목록
+      const uniqueTickers = Array.from(new Set(assets.map(a => a.ticker)));
       const existingTickers = new Set(prev.map(t => t.ticker));
-      const currentTickers = new Set(assets.map(a => a.ticker));
+      const currentTickers = new Set(uniqueTickers);
 
       // 삭제된 자산 제거
       const filtered = prev.filter(t => currentTickers.has(t.ticker));
 
       // 새 자산 추가 (균등 배분)
-      const newAssets = assets.filter(a => !existingTickers.has(a.ticker));
-      if (newAssets.length > 0) {
-        const equalWeight = 100 / assets.length;
-        newAssets.forEach(a => {
-          filtered.push({ ticker: a.ticker, targetPct: equalWeight });
+      const newTickers = uniqueTickers.filter(ticker => !existingTickers.has(ticker));
+      if (newTickers.length > 0) {
+        const equalWeight = 100 / uniqueTickers.length;
+        newTickers.forEach(ticker => {
+          filtered.push({ ticker, targetPct: equalWeight });
         });
       }
 
@@ -69,12 +71,37 @@ export default function RebalanceSuggestion() {
     });
   }, [assets]);
 
+  // 같은 티커를 하나로 통합
+  const mergedAssets = useMemo(() => {
+    const merged: Record<string, { ticker: string; type: string; qty: number; price: number; totalValue: number }> = {};
+
+    assets.forEach(asset => {
+      if (!merged[asset.ticker]) {
+        merged[asset.ticker] = {
+          ticker: asset.ticker,
+          type: asset.type,
+          qty: asset.qty,
+          price: asset.price,
+          totalValue: asset.qty * asset.price,
+        };
+      } else {
+        // 같은 티커가 있으면 수량과 총 가치를 합산
+        merged[asset.ticker].qty += asset.qty;
+        merged[asset.ticker].totalValue += asset.qty * asset.price;
+        // 평균 가격 재계산
+        merged[asset.ticker].price = merged[asset.ticker].totalValue / merged[asset.ticker].qty;
+      }
+    });
+
+    return Object.values(merged);
+  }, [assets]);
+
   // 현재 포트폴리오 분석
   const portfolioAnalysis = useMemo(() => {
-    const totalValue = assets.reduce((sum, a) => sum + a.qty * a.price, 0);
+    const totalValue = mergedAssets.reduce((sum, a) => sum + a.totalValue, 0);
 
-    return assets.map(asset => {
-      const value = asset.qty * asset.price;
+    return mergedAssets.map(asset => {
+      const value = asset.totalValue;
       const currentPct = totalValue > 0 ? (value / totalValue) * 100 : 0;
       const target = targetWeights.find(t => t.ticker === asset.ticker);
       const targetPct = target?.targetPct || 0;
@@ -102,7 +129,7 @@ export default function RebalanceSuggestion() {
         price: asset.price,
       };
     });
-  }, [assets, targetWeights]);
+  }, [mergedAssets, targetWeights]);
 
   // 전체 통계
   const totalTargetPct = useMemo(() =>
@@ -111,8 +138,8 @@ export default function RebalanceSuggestion() {
   );
 
   const totalValue = useMemo(() =>
-    assets.reduce((sum, a) => sum + a.qty * a.price, 0),
-    [assets]
+    mergedAssets.reduce((sum, a) => sum + a.totalValue, 0),
+    [mergedAssets]
   );
 
   // 편집 모드 시작
@@ -122,7 +149,7 @@ export default function RebalanceSuggestion() {
       weights[t.ticker] = t.targetPct;
     });
     // 목표 비중이 없는 자산은 현재 비중으로 초기화
-    assets.forEach(a => {
+    mergedAssets.forEach(a => {
       if (weights[a.ticker] === undefined) {
         const currentPct = portfolioAnalysis.find(p => p.ticker === a.ticker)?.currentPct || 0;
         weights[a.ticker] = Math.round(currentPct * 10) / 10;
@@ -134,7 +161,7 @@ export default function RebalanceSuggestion() {
 
   // 편집 저장
   const saveEdit = () => {
-    const newWeights = assets.map(a => ({
+    const newWeights = mergedAssets.map(a => ({
       ticker: a.ticker,
       targetPct: tempWeights[a.ticker] || 0,
     }));
@@ -146,9 +173,9 @@ export default function RebalanceSuggestion() {
 
   // 균등 배분
   const distributeEvenly = () => {
-    const equalWeight = Math.round((100 / assets.length) * 10) / 10;
+    const equalWeight = Math.round((100 / mergedAssets.length) * 10) / 10;
     const weights: Record<string, number> = {};
-    assets.forEach(a => {
+    mergedAssets.forEach(a => {
       weights[a.ticker] = equalWeight;
     });
     setTempWeights(weights);

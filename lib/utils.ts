@@ -31,7 +31,7 @@ export function isDST(date: Date = new Date()): boolean {
  */
 export function utcToKST(utcDate: Date): Date {
   const kst = new Date(utcDate);
-  kst.setHours(kst.getUTCHours() + 9);
+  kst.setUTCHours(kst.getUTCHours() + 9);
   return kst;
 }
 
@@ -40,7 +40,7 @@ export function utcToKST(utcDate: Date): Date {
  */
 export function kstToUTC(kstDate: Date): Date {
   const utc = new Date(kstDate);
-  utc.setHours(utc.getHours() - 9);
+  utc.setUTCHours(utc.getUTCHours() - 9);
   return utc;
 }
 
@@ -56,12 +56,12 @@ export function getKSTNow(): Date {
  */
 export function formatKST(date: Date, includeSeconds: boolean = true): string {
   const kst = utcToKST(date);
-  const year = kst.getFullYear();
-  const month = String(kst.getMonth() + 1).padStart(2, '0');
-  const day = String(kst.getDate()).padStart(2, '0');
-  const hours = String(kst.getHours()).padStart(2, '0');
-  const minutes = String(kst.getMinutes()).padStart(2, '0');
-  const seconds = String(kst.getSeconds()).padStart(2, '0');
+  const year = kst.getUTCFullYear();
+  const month = String(kst.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(kst.getUTCDate()).padStart(2, '0');
+  const hours = String(kst.getUTCHours()).padStart(2, '0');
+  const minutes = String(kst.getUTCMinutes()).padStart(2, '0');
+  const seconds = String(kst.getUTCSeconds()).padStart(2, '0');
 
   if (includeSeconds) {
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds} KST`;
