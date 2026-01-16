@@ -47,7 +47,13 @@ export default function TradeJournal() {
   const stats = useMemo(() => {
     const buyCount = tradeLogs.filter(t => t.type === 'BUY').length;
     const sellCount = tradeLogs.filter(t => t.type === 'SELL').length;
-    const totalRealized = Object.values(tradeSums).reduce((sum, val) => sum + val, 0);
+    // tradeSums가 비어있거나 값이 없을 경우를 대비해 안전하게 합산
+    const totalRealized = tradeSums && typeof tradeSums === 'object' 
+      ? Object.values(tradeSums).reduce((sum, val) => {
+          const numVal = typeof val === 'number' ? val : parseFloat(String(val)) || 0;
+          return sum + numVal;
+        }, 0)
+      : 0;
 
     return {
       totalTrades: tradeLogs.length,
@@ -81,6 +87,12 @@ export default function TradeJournal() {
 
   return (
     <div className="space-y-4">
+      {/* Title */}
+      <div className="flex items-center gap-2 mb-2">
+        <i className="fas fa-receipt text-celestial-gold text-lg"></i>
+        <h2 className="text-xl font-bold text-white tracking-wider">TRADE JOURNAL</h2>
+      </div>
+
       {/* Summary Statistics */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="glass-card p-3 text-center">
@@ -231,13 +243,22 @@ export default function TradeJournal() {
                     </div>
                   </div>
 
-                  {/* Right: Amount & Actions */}
+                  {/* Right: Realized P&L & Actions */}
                   <div className="flex items-center gap-3">
-                    <div className={`font-bold text-sm ${
-                      trade.type === 'BUY' ? 'text-celestial-cyan' : 'text-danger'
-                    }`}>
-                      {trade.type === 'BUY' ? '-' : '+'}{formatUSD(amount)}
-                    </div>
+                    {trade.type === 'SELL' && tradeSums[trade.ticker] !== undefined ? (
+                      <div className="text-[11px] text-white/70">
+                        <span className="text-white/50">Realized P&L:</span>{' '}
+                        <span className={`font-bold ${tradeSums[trade.ticker] >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}>
+                          {tradeSums[trade.ticker] >= 0 ? '+' : ''}{formatUSD(tradeSums[trade.ticker])}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className={`font-bold text-sm ${
+                        trade.type === 'BUY' ? 'text-celestial-cyan' : 'text-danger'
+                      }`}>
+                        {trade.type === 'BUY' ? '-' : '+'}{formatUSD(amount)}
+                      </div>
+                    )}
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => openEditTradeModal(trade)}

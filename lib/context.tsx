@@ -109,17 +109,86 @@ export function NexusProvider({ children }: { children: ReactNode }) {
   const saveTimerRef = useRef<NodeJS.Timeout | null>(null);
   const snapshotIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  // FIFO 회계 로직: 매매일지에서 실현 손익 자동 계산
+  const calculateTradeReturns = useCallback((tradeLogs: TradeLog[]): TradeSums => {
+    // ticker별로 포지션 추적
+    const positions: Record<string, Array<{ qty: number; price: number; fee: number }>> = {};
+    const realizedPnL: Record<string, number> = {};
+
+    // 날짜순 정렬
+    const sortedLogs = [...tradeLogs].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    sortedLogs.forEach(log => {
+      const { ticker, type, qty, price, fee } = log;
+
+      if (!positions[ticker]) {
+        positions[ticker] = [];
+        realizedPnL[ticker] = 0;
+      }
+
+      if (type === 'BUY') {
+        // 매수: 포지션에 추가
+        positions[ticker].push({ qty, price, fee });
+      } else if (type === 'SELL') {
+        // 매도: FIFO 방식으로 가장 오래된 포지션부터 매도
+        let remainingQty = qty;
+        let sellValue = qty * price - fee; // 매도 금액 (수수료 차감)
+
+        while (remainingQty > 0 && positions[ticker].length > 0) {
+          const oldestPosition = positions[ticker][0];
+
+          if (oldestPosition.qty <= remainingQty) {
+            // 전체 포지션 매도
+            const costBasis = oldestPosition.qty * oldestPosition.price + oldestPosition.fee;
+            const saleProceeds = (oldestPosition.qty / qty) * sellValue;
+            realizedPnL[ticker] += saleProceeds - costBasis;
+
+            remainingQty -= oldestPosition.qty;
+            positions[ticker].shift();
+          } else {
+            // 일부 포지션 매도
+            const costBasis = remainingQty * oldestPosition.price + (remainingQty / oldestPosition.qty) * oldestPosition.fee;
+            const saleProceeds = (remainingQty / qty) * sellValue;
+            realizedPnL[ticker] += saleProceeds - costBasis;
+
+            oldestPosition.qty -= remainingQty;
+            oldestPosition.fee *= (oldestPosition.qty / (oldestPosition.qty + remainingQty)); // 비례 배분
+            remainingQty = 0;
+          }
+        }
+      }
+    });
+
+    return realizedPnL;
+  }, []);
+
   // Load from Supabase on mount
   useEffect(() => {
     const loadData = async () => {
       try {
         // 먼저 localStorage에서 빠르게 로드 (즉시 표시)
         const localState = loadState();
-        setState(prev => ({ ...prev, ...localState }));
+        setState(prev => {
+          const newState = { ...prev, ...localState };
+          // tradeLogs가 있으면 tradeSums 재계산
+          if (localState.tradeLogs && localState.tradeLogs.length > 0) {
+            const newTradeSums = calculateTradeReturns(localState.tradeLogs);
+            return { ...newState, tradeSums: newTradeSums };
+          }
+          return newState;
+        });
         
         // 그 다음 Supabase에서 로드 (최신 데이터)
         const supabaseState = await loadStateFromSupabase();
-        setState(prev => ({ ...prev, ...supabaseState }));
+        setState(prev => {
+          const newState = { ...prev, ...supabaseState };
+          // tradeLogs가 있으면 tradeSums 재계산
+          if (supabaseState.tradeLogs && supabaseState.tradeLogs.length > 0) {
+            const newTradeSums = calculateTradeReturns(supabaseState.tradeLogs);
+            return { ...newState, tradeSums: newTradeSums };
+          }
+          return newState;
+        });
       } catch (error) {
         console.error('Failed to load state:', error);
       } finally {
@@ -128,7 +197,7 @@ export function NexusProvider({ children }: { children: ReactNode }) {
     };
     
     loadData();
-  }, []);
+  }, [calculateTradeReturns]);
 
   // 30분 간격 스냅샷 저장
   const stateRef = useRef(state);
@@ -294,59 +363,6 @@ export function NexusProvider({ children }: { children: ReactNode }) {
       };
     });
   }, [saveToHistory]);
-
-  // FIFO 회계 로직: 매매일지에서 실현 손익 자동 계산
-  const calculateTradeReturns = useCallback((tradeLogs: TradeLog[]): TradeSums => {
-    // ticker별로 포지션 추적
-    const positions: Record<string, Array<{ qty: number; price: number; fee: number }>> = {};
-    const realizedPnL: Record<string, number> = {};
-
-    // 날짜순 정렬
-    const sortedLogs = [...tradeLogs].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-    sortedLogs.forEach(log => {
-      const { ticker, type, qty, price, fee } = log;
-
-      if (!positions[ticker]) {
-        positions[ticker] = [];
-        realizedPnL[ticker] = 0;
-      }
-
-      if (type === 'BUY') {
-        // 매수: 포지션에 추가
-        positions[ticker].push({ qty, price, fee });
-      } else if (type === 'SELL') {
-        // 매도: FIFO 방식으로 가장 오래된 포지션부터 매도
-        let remainingQty = qty;
-        let sellValue = qty * price - fee; // 매도 금액 (수수료 차감)
-
-        while (remainingQty > 0 && positions[ticker].length > 0) {
-          const oldestPosition = positions[ticker][0];
-
-          if (oldestPosition.qty <= remainingQty) {
-            // 전체 포지션 매도
-            const costBasis = oldestPosition.qty * oldestPosition.price + oldestPosition.fee;
-            const saleProceeds = (oldestPosition.qty / qty) * sellValue;
-            realizedPnL[ticker] += saleProceeds - costBasis;
-
-            remainingQty -= oldestPosition.qty;
-            positions[ticker].shift();
-          } else {
-            // 일부 포지션 매도
-            const costBasis = remainingQty * oldestPosition.price + (remainingQty / oldestPosition.qty) * oldestPosition.fee;
-            const saleProceeds = (remainingQty / qty) * sellValue;
-            realizedPnL[ticker] += saleProceeds - costBasis;
-
-            oldestPosition.qty -= remainingQty;
-            oldestPosition.fee *= (oldestPosition.qty / (oldestPosition.qty + remainingQty)); // 비례 배분
-            remainingQty = 0;
-          }
-        }
-      }
-    });
-
-    return realizedPnL;
-  }, []);
 
   const addTradeLog = useCallback((trade: TradeLog) => {
     setState(prev => {
