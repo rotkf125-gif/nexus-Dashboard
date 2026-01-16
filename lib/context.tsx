@@ -172,17 +172,8 @@ export function NexusProvider({ children }: { children: ReactNode }) {
           }
         }
 
-        // 매도 후 남은 수량이 있으면 경고 (BUY 포지션 부족)
-        if (remainingQty > 0) {
-          console.warn(`[TradeJournal] 매도 수량이 BUY 포지션보다 많습니다. 티커: ${ticker}, 남은 수량: ${remainingQty}`);
-        }
       }
     });
-
-    // 디버깅: 계산 결과 로그
-    if (Object.keys(realizedPnL).length > 0) {
-      console.log('[TradeJournal] 계산된 실현 손익:', realizedPnL);
-    }
 
     return realizedPnL;
   }, []);
@@ -195,10 +186,15 @@ export function NexusProvider({ children }: { children: ReactNode }) {
         const localState = loadState();
         setState(prev => {
           const newState = { ...prev, ...localState };
-          // tradeLogs가 있으면 tradeSums 재계산
+          // tradeLogs가 있으면 tradeSums 재계산하되, 기존 수동 입력 값은 보존
           if (localState.tradeLogs && localState.tradeLogs.length > 0) {
-            const newTradeSums = calculateTradeReturns(localState.tradeLogs);
-            return { ...newState, tradeSums: newTradeSums };
+            const calculatedTradeSums = calculateTradeReturns(localState.tradeLogs);
+            // 기존 tradeSums와 병합 (기존 값 우선, 계산 값은 보조)
+            const mergedTradeSums = {
+              ...calculatedTradeSums,
+              ...(localState.tradeSums || {}),
+            };
+            return { ...newState, tradeSums: mergedTradeSums };
           }
           return newState;
         });
@@ -207,10 +203,16 @@ export function NexusProvider({ children }: { children: ReactNode }) {
         const supabaseState = await loadStateFromSupabase();
         setState(prev => {
           const newState = { ...prev, ...supabaseState };
-          // tradeLogs가 있으면 tradeSums 재계산
+          // tradeLogs가 있으면 tradeSums 재계산하되, 기존 수동 입력 값은 보존
           if (supabaseState.tradeLogs && supabaseState.tradeLogs.length > 0) {
-            const newTradeSums = calculateTradeReturns(supabaseState.tradeLogs);
-            return { ...newState, tradeSums: newTradeSums };
+            const calculatedTradeSums = calculateTradeReturns(supabaseState.tradeLogs);
+            // 기존 tradeSums와 병합 (기존 값 우선, 계산 값은 보조)
+            const mergedTradeSums = {
+              ...calculatedTradeSums,
+              ...(supabaseState.tradeSums || {}),
+              ...(prev.tradeSums || {}), // 현재 상태의 수동 입력 값도 보존
+            };
+            return { ...newState, tradeSums: mergedTradeSums };
           }
           return newState;
         });
@@ -430,11 +432,14 @@ export function NexusProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const setTradeSums = useCallback((ticker: string, amount: number) => {
-    setState(prev => ({
-      ...prev,
-      tradeSums: { ...prev.tradeSums, [ticker]: amount },
-    }));
-  }, []);
+    setState(prev => {
+      saveToHistory(prev);
+      return {
+        ...prev,
+        tradeSums: { ...prev.tradeSums, [ticker]: amount },
+      };
+    });
+  }, [saveToHistory]);
 
   const setStrategy = useCallback((strategy: string) => {
     setState(prev => ({ ...prev, strategy }));
