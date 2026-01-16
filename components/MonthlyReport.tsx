@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { useNexus } from '@/lib/context';
 import { formatUSD } from '@/lib/utils';
-import { CHART_COLORS, TYPE_INFO } from '@/lib/config';
+import { CHART_COLORS, TYPE_INFO, TAX_CONFIG } from '@/lib/config';
 
 interface MonthlyData {
   month: string;
@@ -15,7 +15,7 @@ interface MonthlyData {
   trades: number;
 }
 
-const AFTER_TAX_RATE = 0.85;
+const { AFTER_TAX_RATE } = TAX_CONFIG;
 
 export default function MonthlyReport() {
   const { state, toast } = useNexus();

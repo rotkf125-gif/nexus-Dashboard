@@ -142,3 +142,22 @@ export const REFRESH_INTERVALS = {
   MARKET: 30000,     // 30 seconds
   SNAPSHOT: 1800000, // 30 minutes
 } as const;
+
+// ═══════════════════════════════════════════════════════════════
+// TAX CONFIGURATION
+// ═══════════════════════════════════════════════════════════════
+
+export const TAX_CONFIG = {
+  AFTER_TAX_RATE: 0.85,      // 세후 배당 비율 (15% 원천징수)
+  DIVIDEND_TAX_RATE: 0.15,   // 배당 세율
+} as const;
+
+// ═══════════════════════════════════════════════════════════════
+// UI CONFIGURATION
+// ═══════════════════════════════════════════════════════════════
+
+export const UI_CONFIG = {
+  TOAST_DURATION: 3000,      // 토스트 표시 시간 (ms)
+  DEBOUNCE_DELAY: 1000,      // 저장 디바운스 (ms)
+  MAX_HISTORY: 10,           // Undo/Redo 히스토리 최대 개수
+} as const;

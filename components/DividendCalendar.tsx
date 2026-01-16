@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { useNexus } from '@/lib/context';
 import { formatUSD } from '@/lib/utils';
-import { CHART_COLORS } from '@/lib/config';
+import { CHART_COLORS, TAX_CONFIG } from '@/lib/config';
 
 // 날짜 유틸리티
 const getDaysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
@@ -27,7 +27,7 @@ export default function DividendCalendar() {
         const day = dDate.getDate();
         if (!data[day]) data[day] = { total: 0, items: [] };
         
-        const amount = d.qty * d.dps * 0.85; // 세후
+        const amount = d.qty * d.dps * TAX_CONFIG.AFTER_TAX_RATE; // 세후
         data[day].total += amount;
         data[day].items.push({ ...d, amount });
       }

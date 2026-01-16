@@ -1,24 +1,17 @@
 'use client';
 
-import { useState, useMemo, useEffect, useRef } from 'react';
+// ═══════════════════════════════════════════════════════════════
+// Income Stream - 인컴 자산 관리 컴포넌트 (리팩토링)
+// ═══════════════════════════════════════════════════════════════
+
+import { useState, useMemo } from 'react';
 import { useNexus } from '@/lib/context';
+import { TAX_CONFIG } from '@/lib/config';
 import PredictedDividend from './PredictedDividend';
 import DividendCalendar from './DividendCalendar';
-import { IncomeCard, WeeklySummary, RecentLogs, IncomeStatData } from './income';
-import { Chart, LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend, BarController, BarElement } from 'chart.js';
+import { IncomeCard, WeeklySummary, RecentLogs, DPSTrendChart, LearningChart, IncomeStatData } from './income';
 
-Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend, BarController, BarElement);
-
-const TICKER_COLORS = [
-  'rgba(255, 255, 255, 0.7)',
-  'rgba(255, 215, 0, 0.9)',
-  'rgba(129, 199, 132, 0.8)',
-  'rgba(179, 157, 219, 0.8)',
-  'rgba(96, 165, 250, 0.8)',
-  'rgba(244, 143, 177, 0.8)',
-];
-
-const AFTER_TAX_RATE = 0.85;
+const { AFTER_TAX_RATE } = TAX_CONFIG;
 
 interface IncomeStreamProps {
   showAnalytics?: boolean;
@@ -29,23 +22,19 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
   const { assets, dividends, tradeSums } = state;
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
 
-  // Chart refs
-  const dpsChartRef = useRef<HTMLCanvasElement>(null);
-  const dpsChartInstance = useRef<Chart | null>(null);
-  const learningChartRef = useRef<HTMLCanvasElement>(null);
-  const learningChartInstance = useRef<Chart | null>(null);
-
   // INCOME 타입 자산만 필터링
   const incomeAssets = useMemo(() => {
     return assets.filter(a => a.type === 'INCOME');
   }, [assets]);
 
+  // 12개월 전 날짜
   const twelveMonthsAgo = useMemo(() => {
     const date = new Date();
     date.setMonth(date.getMonth() - 12);
     return date;
   }, []);
 
+  // 티커별 배당 (최근 12개월)
   const dividendsByTicker = useMemo(() => {
     const indexed: Record<string, typeof dividends> = {};
     dividends.forEach(d => {
@@ -58,6 +47,7 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
     return indexed;
   }, [dividends, twelveMonthsAgo]);
 
+  // 티커별 전체 배당
   const allDividendsByTicker = useMemo(() => {
     const indexed: Record<string, typeof dividends> = {};
     dividends.forEach(d => {
@@ -67,6 +57,7 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
     return indexed;
   }, [dividends]);
 
+  // 인컴 통계 계산
   const incomeStats = useMemo((): IncomeStatData[] => {
     return incomeAssets.map(asset => {
       const tickerDividends = dividendsByTicker[asset.ticker] || [];
@@ -101,6 +92,7 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
     });
   }, [incomeAssets, dividendsByTicker, allDividendsByTicker, tradeSums]);
 
+  // 주간 예상 배당
   const weeklySummary = useMemo(() => {
     let estimatedMin = 0, estimatedAvg = 0, estimatedMax = 0;
 
@@ -127,12 +119,14 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
     return { weeklyMin: estimatedMin, weeklyAvg: estimatedAvg, weeklyMax: estimatedMax };
   }, [dividendsByTicker, incomeAssets]);
 
+  // 최근 배당 로그
   const recentLogs = useMemo(() => {
     return [...dividends]
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .slice(0, 5);
   }, [dividends]);
 
+  // Trade Return 수정 핸들러
   const handleEditTradeReturn = (ticker: string, currentValue: number) => {
     const input = prompt(`Trade Return (${ticker}):`, currentValue.toString());
     if (input !== null) {
@@ -169,7 +163,7 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
       const month = d.date.slice(0, 7);
       months[month] = (months[month] || 0) + d.qty * d.dps * AFTER_TAX_RATE;
     });
-    return Object.entries(months).sort(([a], [b]) => a.localeCompare(b)).slice(-12);
+    return Object.entries(months).sort(([a], [b]) => a.localeCompare(b)).slice(-12) as [string, number][];
   }, [dividends]);
 
   const predictionAccuracy = useMemo(() => {
@@ -190,119 +184,7 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
     return { accuracy, totalPredicted, totalActual };
   }, [incomeAssets, dpsData, avgDpsData]);
 
-  // DPS Trend Chart
-  useEffect(() => {
-    if (!showAnalytics || viewMode !== 'list' || !dpsChartRef.current) return;
-
-    if (dpsChartInstance.current) dpsChartInstance.current.destroy();
-
-    const allDates = new Set<string>();
-    Object.values(dpsData).forEach(data => data.forEach(d => allDates.add(d.date)));
-    const sortedDates = Array.from(allDates).sort();
-
-    const datasets = incomeAssets.map((asset, i) => {
-      const data = dpsData[asset.ticker] || [];
-      const dateMap = new Map(data.map(d => [d.date, d.dps]));
-      return {
-        label: asset.ticker,
-        data: sortedDates.map(date => dateMap.get(date) || null),
-        borderColor: TICKER_COLORS[i % TICKER_COLORS.length],
-        backgroundColor: TICKER_COLORS[i % TICKER_COLORS.length],
-        borderWidth: 2,
-        pointRadius: 3,
-        pointHoverRadius: 5,
-        tension: 0.3,
-        spanGaps: true,
-      };
-    });
-
-    dpsChartInstance.current = new Chart(dpsChartRef.current, {
-      type: 'line',
-      data: {
-        labels: sortedDates.map(d => {
-          const parts = d.split('-');
-          return `${parts[0].slice(2)}/${parts[1]}/${parts[2]}`;
-        }),
-        datasets,
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: false,
-        interaction: { mode: 'index', intersect: false },
-        scales: {
-          x: {
-            grid: { color: 'rgba(255, 255, 255, 0.05)' },
-            ticks: { color: 'rgba(255, 255, 255, 0.5)', font: { size: 9 }, maxTicksLimit: 6 },
-          },
-          y: {
-            grid: { color: 'rgba(255, 255, 255, 0.05)' },
-            ticks: { color: 'rgba(255, 255, 255, 0.5)', font: { size: 9 }, callback: (v) => `$${Number(v).toFixed(2)}` },
-          },
-        },
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: 'rgba(10, 15, 41, 0.95)',
-            titleColor: 'rgba(255, 255, 255, 0.8)',
-            bodyColor: 'rgba(255, 255, 255, 0.7)',
-            borderColor: 'rgba(255, 255, 255, 0.1)',
-            borderWidth: 1,
-            callbacks: { label: (ctx) => `${ctx.dataset.label}: $${ctx.parsed.y?.toFixed(4) || '0'}` },
-          },
-        },
-      },
-    });
-
-    return () => { dpsChartInstance.current?.destroy(); };
-  }, [showAnalytics, viewMode, dpsData, incomeAssets]);
-
-  // Learning Chart
-  useEffect(() => {
-    if (!showAnalytics || viewMode !== 'list' || !learningChartRef.current) return;
-
-    if (learningChartInstance.current) learningChartInstance.current.destroy();
-
-    learningChartInstance.current = new Chart(learningChartRef.current, {
-      type: 'bar',
-      data: {
-        labels: monthlyPattern.map(([m]) => m.slice(2).replace('-', '/')),
-        datasets: [{
-          label: 'Monthly Dividend',
-          data: monthlyPattern.map(([, v]) => v),
-          backgroundColor: 'rgba(96, 165, 250, 0.6)',
-          borderColor: 'rgba(96, 165, 250, 1)',
-          borderWidth: 1,
-          borderRadius: 4,
-        }],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: false,
-        scales: {
-          x: {
-            grid: { display: false },
-            ticks: { color: 'rgba(255, 255, 255, 0.5)', font: { size: 8 } },
-          },
-          y: {
-            grid: { color: 'rgba(255, 255, 255, 0.05)' },
-            ticks: { color: 'rgba(255, 255, 255, 0.5)', font: { size: 9 }, callback: (v) => `$${v}` },
-          },
-        },
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: 'rgba(10, 15, 41, 0.95)',
-            callbacks: { label: (ctx) => `$${ctx.parsed.y?.toFixed(2) ?? '0'}` },
-          },
-        },
-      },
-    });
-
-    return () => { learningChartInstance.current?.destroy(); };
-  }, [showAnalytics, viewMode, monthlyPattern]);
-
+  // Empty state
   if (incomeAssets.length === 0) {
     return (
       <div className="text-center py-8 opacity-50">
@@ -368,67 +250,16 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
 
           {/* Row 2: DPS Trend | Learning */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4">
-            {/* DPS Trend */}
-            <div className="inner-glass p-4 rounded" style={{ minHeight: '280px' }}>
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-[11px] tracking-widest text-celestial-cyan font-medium uppercase">DPS TREND</span>
-                <div className="flex items-center gap-3 text-[9px] font-medium">
-                  {incomeAssets.slice(0, 3).map((asset, i) => (
-                    <span key={asset.ticker} className="flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: TICKER_COLORS[i] }} />
-                      <span className="text-white/70">{asset.ticker}</span>
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <div style={{ height: 140 }}>
-                <canvas ref={dpsChartRef} />
-              </div>
-              <div className="grid grid-cols-2 gap-2.5 mt-3">
-                {avgDpsData.slice(0, 2).map((item, i) => {
-                  const isGold = i % 2 === 1;
-                  return (
-                    <div key={item.ticker} className={`inner-glass p-2 rounded text-center ${isGold ? 'border border-celestial-gold/30' : ''}`}>
-                      <div className={`text-[8px] tracking-widest mb-0.5 font-medium uppercase ${isGold ? 'text-celestial-gold/70' : 'text-white/60'}`}>
-                        {item.ticker} AVG
-                      </div>
-                      <div className={`text-[12px] font-display font-medium ${isGold ? 'text-celestial-gold' : 'text-white'}`}>
-                        ${item.avgDps.toFixed(4)}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Learning */}
-            <div className="inner-glass p-4 rounded" style={{ minHeight: '280px' }}>
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-[11px] tracking-widest text-celestial-purple font-medium uppercase">LEARNING</span>
-                <span className="text-[9px] text-white/60 font-medium">Monthly Pattern</span>
-              </div>
-              <div style={{ height: 140 }}>
-                <canvas ref={learningChartRef} />
-              </div>
-              <div className="grid grid-cols-3 gap-2.5 mt-3">
-                <div className="inner-glass p-2 rounded text-center">
-                  <div className="text-[8px] tracking-widest mb-0.5 text-white/60 font-medium uppercase">RECORDS</div>
-                  <div className="text-[12px] font-display font-medium text-white">{dividends.length}</div>
-                </div>
-                <div className="inner-glass p-2 rounded text-center border border-celestial-purple/30">
-                  <div className="text-[8px] tracking-widest mb-0.5 text-celestial-purple/70 font-medium uppercase">ACCURACY</div>
-                  <div className="text-[12px] font-display font-medium text-celestial-purple">{predictionAccuracy.accuracy.toFixed(0)}%</div>
-                </div>
-                <div className="inner-glass p-2 rounded text-center">
-                  <div className="text-[8px] tracking-widest mb-0.5 text-white/60 font-medium uppercase">AVG/MO</div>
-                  <div className="text-[12px] font-display font-medium text-v64-success">
-                    ${monthlyPattern.length > 0
-                      ? (monthlyPattern.reduce((s, [, v]) => s + v, 0) / monthlyPattern.length).toFixed(0)
-                      : '0'}
-                  </div>
-                </div>
-              </div>
-            </div>
+            <DPSTrendChart
+              incomeAssets={incomeAssets}
+              dpsData={dpsData}
+              avgDpsData={avgDpsData}
+            />
+            <LearningChart
+              monthlyPattern={monthlyPattern}
+              dividendCount={dividends.length}
+              predictionAccuracy={predictionAccuracy}
+            />
           </div>
         </>
       ) : (

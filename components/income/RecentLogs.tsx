@@ -1,6 +1,7 @@
 'use client';
 
 import { Dividend } from '@/lib/types';
+import { TAX_CONFIG } from '@/lib/config';
 
 interface RecentLogsProps {
   logs: Dividend[];
@@ -28,7 +29,7 @@ export default function RecentLogs({ logs, firstTicker, compact = false }: Recen
               <span className={`w-12 text-center ${d.ticker === firstTicker ? 'text-white' : 'text-celestial-gold'}`}>
                 {d.ticker}
               </span>
-              <span className="text-white w-14 text-right">${(d.qty * d.dps * 0.85).toFixed(2)}</span>
+              <span className="text-white w-14 text-right">${(d.qty * d.dps * TAX_CONFIG.AFTER_TAX_RATE).toFixed(2)}</span>
             </div>
           )) : (
             <div className="text-[10px] text-white/60 text-center py-2">기록 없음</div>
@@ -51,7 +52,7 @@ export default function RecentLogs({ logs, firstTicker, compact = false }: Recen
             <span className={`w-12 text-center font-semibold ${d.ticker === firstTicker ? 'text-white' : 'text-celestial-gold'}`}>
               {d.ticker}
             </span>
-            <span className="text-white w-16 text-right font-semibold">${(d.qty * d.dps * 0.85).toFixed(2)}</span>
+            <span className="text-white w-16 text-right font-semibold">${(d.qty * d.dps * TAX_CONFIG.AFTER_TAX_RATE).toFixed(2)}</span>
           </div>
         )) : (
           <div className="text-[10px] text-white/60 text-center py-4">기록 없음</div>

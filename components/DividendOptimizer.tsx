@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import { useNexus } from '@/lib/context';
+import { TAX_CONFIG } from '@/lib/config';
 
 interface OptimizationSuggestion {
   type: 'reinvest' | 'rebalance' | 'yield' | 'concentration';
@@ -13,7 +14,7 @@ interface OptimizationSuggestion {
   action?: string;
 }
 
-const AFTER_TAX_RATE = 0.85;
+const { AFTER_TAX_RATE } = TAX_CONFIG;
 
 export default function DividendOptimizer() {
   const { state } = useNexus();

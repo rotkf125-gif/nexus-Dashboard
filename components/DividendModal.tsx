@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useNexus } from '@/lib/context';
+import { TAX_CONFIG } from '@/lib/config';
 import { Dividend } from '@/lib/types';
 
 interface DividendModalProps {
@@ -59,7 +60,7 @@ export default function DividendModal({ isOpen, onClose }: DividendModalProps) {
   // 세후 배당금 계산 (15% 세금)
   const afterTax = useMemo(() => {
     const gross = qty * dps;
-    return gross * 0.85;
+    return gross * TAX_CONFIG.AFTER_TAX_RATE;
   }, [qty, dps]);
 
   const handleSave = () => {

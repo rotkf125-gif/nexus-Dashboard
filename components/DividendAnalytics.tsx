@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useMemo } from 'react';
 import { useNexus } from '@/lib/context';
+import { TAX_CONFIG } from '@/lib/config';
 import { Chart, LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend, BarController, BarElement } from 'chart.js';
 
 Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend, BarController, BarElement);
@@ -56,7 +57,7 @@ export default function DividendAnalytics() {
     const months: { [key: string]: number } = {};
     dividends.forEach(d => {
       const month = d.date.slice(0, 7); // YYYY-MM
-      const amount = d.qty * d.dps * 0.85;
+      const amount = d.qty * d.dps * TAX_CONFIG.AFTER_TAX_RATE;
       months[month] = (months[month] || 0) + amount;
     });
     return Object.entries(months)
