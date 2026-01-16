@@ -8,7 +8,7 @@ type SortBy = 'ticker' | 'amount';
 type SortOrder = 'asc' | 'desc';
 
 export default function TradeJournal() {
-  const { state, setTradeSums } = useNexus();
+  const { state, setTradeSums, removeTradeSum } = useNexus();
   const { tradeSums } = state;
 
   const [filterTicker, setFilterTicker] = useState<string>('');
@@ -22,13 +22,12 @@ export default function TradeJournal() {
 
   // 필터링 & 정렬
   const filteredAndSortedTickers = useMemo(() => {
-    // tradeSums에 있는 티커 + assets에 있는 티커 모두 포함
-    const tickersWithTrade = new Set([
-      ...Object.keys(tradeSums || {}),
-      ...allTickers,
-    ]);
+    // tradeSums에 값이 있는 티커만 표시 (0이 아닌 값)
+    const tickersWithTrade = Object.keys(tradeSums || {}).filter(
+      ticker => tradeSums[ticker] !== undefined && tradeSums[ticker] !== null && tradeSums[ticker] !== 0
+    );
 
-    let tickers = Array.from(tickersWithTrade);
+    let tickers = [...tickersWithTrade];
 
     // 필터링
     if (filterTicker) {
@@ -91,7 +90,7 @@ export default function TradeJournal() {
 
   const handleDelete = (ticker: string) => {
     if (confirm(`${ticker}의 거래 기록을 삭제하시겠습니까?`)) {
-      setTradeSums(ticker, 0);
+      removeTradeSum(ticker);
     }
   };
 

@@ -20,6 +20,7 @@ interface NexusContextType {
   updateMarket: (market: Partial<MarketData>) => void;
   setExchangeRate: (rate: number) => void;
   setTradeSums: (ticker: string, amount: number) => void;
+  removeTradeSum: (ticker: string) => void;
   setStrategy: (strategy: string) => void;
   syncFromSheet: () => Promise<void>;
   refreshPrices: () => Promise<void>;
@@ -434,9 +435,30 @@ export function NexusProvider({ children }: { children: ReactNode }) {
   const setTradeSums = useCallback((ticker: string, amount: number) => {
     setState(prev => {
       saveToHistory(prev);
+      // amount가 0이고 키가 없으면 제거, 0이 아니거나 기존에 키가 있으면 설정
+      const newTradeSums = { ...prev.tradeSums };
+      if (amount === 0 && newTradeSums[ticker] === 0) {
+        // 완전히 제거
+        delete newTradeSums[ticker];
+      } else {
+        // 값 설정
+        newTradeSums[ticker] = amount;
+      }
       return {
         ...prev,
-        tradeSums: { ...prev.tradeSums, [ticker]: amount },
+        tradeSums: newTradeSums,
+      };
+    });
+  }, [saveToHistory]);
+
+  const removeTradeSum = useCallback((ticker: string) => {
+    setState(prev => {
+      saveToHistory(prev);
+      const newTradeSums = { ...prev.tradeSums };
+      delete newTradeSums[ticker];
+      return {
+        ...prev,
+        tradeSums: newTradeSums,
       };
     });
   }, [saveToHistory]);
@@ -709,6 +731,7 @@ export function NexusProvider({ children }: { children: ReactNode }) {
         updateMarket,
         setExchangeRate,
         setTradeSums,
+        removeTradeSum,
         setStrategy,
         syncFromSheet,
         refreshPrices,
