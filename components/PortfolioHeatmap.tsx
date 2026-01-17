@@ -58,6 +58,7 @@ const CustomContent = (props: any) => {
             fill="#fff"
             fontSize={Math.min(10, width / 4)}
             fontWeight="bold"
+            style={{ textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}
           >
             {ticker}
           </text>
@@ -87,7 +88,7 @@ const CustomContent = (props: any) => {
         fill="#fff"
         fontSize={Math.min(14, width / 5)}
         fontWeight="bold"
-        style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
+        style={{ textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}
       >
         {ticker}
       </text>
@@ -96,9 +97,9 @@ const CustomContent = (props: any) => {
         y={y + height / 2 + 8}
         textAnchor="middle"
         dominantBaseline="middle"
-        fill="rgba(255,255,255,0.9)"
+        fill="rgba(255,255,255,0.95)"
         fontSize={Math.min(11, width / 6)}
-        style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
+        style={{ textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}
       >
         {safeReturnPct >= 0 ? '+' : ''}{safeReturnPct.toFixed(1)}%
       </text>
@@ -108,8 +109,9 @@ const CustomContent = (props: any) => {
           y={y + height / 2 + 22}
           textAnchor="middle"
           dominantBaseline="middle"
-          fill="rgba(255,255,255,0.7)"
+          fill="rgba(255,255,255,0.8)"
           fontSize={Math.min(9, width / 7)}
+          style={{ textShadow: '0 1px 2px rgba(0,0,0,0.6)' }}
         >
           {safeWeight.toFixed(1)}%
         </text>
@@ -131,25 +133,25 @@ const CustomTooltip = ({ active, payload }: any) => {
   const profit = value - cost;
 
   return (
-    <div className="inner-glass p-3 rounded-lg border border-white/20 shadow-xl">
-      <div className="flex items-center gap-2 mb-2">
-        <span className="font-bold text-white">{data.ticker}</span>
-        <span className={`text-sm ${returnPct >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}>
+    <div className="bg-gray-900/95 backdrop-blur-sm p-3 rounded-lg border border-white/20 shadow-2xl z-50">
+      <div className="flex items-center gap-2 mb-2 pb-2 border-b border-white/10">
+        <span className="font-bold text-lg text-white drop-shadow-md">{data.ticker}</span>
+        <span className={`text-sm font-bold px-1.5 py-0.5 rounded ${returnPct >= 0 ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
           {returnPct >= 0 ? '+' : ''}{returnPct.toFixed(2)}%
         </span>
       </div>
-      <div className="space-y-1 text-xs">
-        <div className="flex justify-between gap-4">
-          <span className="text-white/60">비중</span>
-          <span className="text-white">{weight.toFixed(2)}%</span>
+      <div className="space-y-1.5 text-xs font-medium">
+        <div className="flex justify-between gap-6 items-center">
+          <span className="text-gray-400">비중</span>
+          <span className="text-white font-bold">{weight.toFixed(2)}%</span>
         </div>
-        <div className="flex justify-between gap-4">
-          <span className="text-white/60">평가금</span>
-          <span className="text-white">${value.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+        <div className="flex justify-between gap-6 items-center">
+          <span className="text-gray-400">평가금</span>
+          <span className="text-white text-sm">${value.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
         </div>
-        <div className="flex justify-between gap-4">
-          <span className="text-white/60">손익</span>
-          <span className={profit >= 0 ? 'text-v64-success' : 'text-v64-danger'}>
+        <div className="flex justify-between gap-6 items-center">
+          <span className="text-gray-400">손익</span>
+          <span className={`text-sm ${profit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
             {profit >= 0 ? '+' : ''}${Math.abs(profit).toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </span>
         </div>

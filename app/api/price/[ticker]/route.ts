@@ -5,6 +5,7 @@
 // ═══════════════════════════════════════════════════════════════
 
 import { NextRequest, NextResponse } from 'next/server';
+import { createErrorResponse, APIError } from '@/lib/api-utils';
 
 export async function GET(
   request: NextRequest,
@@ -18,7 +19,7 @@ export async function GET(
 
   try {
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1m&range=1d`;
-    
+
     const response = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
@@ -27,14 +28,14 @@ export async function GET(
     });
 
     if (!response.ok) {
-      throw new Error(`Yahoo Finance responded with ${response.status}`);
+      throw new APIError(response.status, `Yahoo Finance responded with ${response.status}`, 'VENDOR_ERROR');
     }
 
     const data = await response.json();
     const meta = data.chart?.result?.[0]?.meta;
-    
+
     if (!meta) {
-      throw new Error('Invalid data format');
+      throw new APIError(502, 'Invalid data format from Yahoo Finance', 'INVALID_DATA');
     }
 
     // 시장 상태 확인
@@ -62,10 +63,7 @@ export async function GET(
       timestamp: Date.now(),
     });
   } catch (error) {
-    console.error(`Error fetching ${ticker}:`, error);
-    return NextResponse.json(
-      { error: `Failed to fetch ${ticker}`, ticker },
-      { status: 500 }
-    );
+    // Standardized Error Handling
+    return createErrorResponse(error);
   }
 }
