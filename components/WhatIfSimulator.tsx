@@ -2,6 +2,64 @@
 
 import { useState, useMemo } from 'react';
 import { useNexus } from '@/lib/context';
+import { FREEDOM_CONFIG } from '@/lib/config';
+import { GeopoliticalRiskLevel } from '@/lib/types';
+
+// ═══════════════════════════════════════════════════════════════
+// FREEDOM v31.0 - Enhanced What-If Simulator
+// CounterfactualSimulator + GeopoliticalRiskAgent 통합
+// ═══════════════════════════════════════════════════════════════
+
+// v31.0: 지정학적 시나리오 프리셋
+const GEOPOLITICAL_PRESETS = {
+  'taiwan-crisis': {
+    name: '대만 해협 위기',
+    description: '중국-대만 긴장 고조',
+    rateChange: 50,
+    nasdaqChange: -15,
+    vixLevel: 45,
+    krwDelta: 100,
+    sectorImpacts: { Technology: -25, Semiconductors: -40, Energy: 10, Defense: 15 },
+  },
+  'oil-shock': {
+    name: '에너지 위기',
+    description: '중동 분쟁으로 인한 유가 급등',
+    rateChange: 75,
+    nasdaqChange: -10,
+    vixLevel: 35,
+    krwDelta: 80,
+    sectorImpacts: { Energy: 30, Technology: -15, Industrial: -20, Consumer: -15 },
+  },
+  'fed-pivot': {
+    name: 'Fed 긴급 금리 인상',
+    description: '인플레이션 대응 긴급 금리 인상',
+    rateChange: 100,
+    nasdaqChange: -20,
+    vixLevel: 40,
+    krwDelta: 50,
+    sectorImpacts: { Technology: -25, RealEstate: -30, Finance: -10, Utilities: -15 },
+  },
+  'recession': {
+    name: '경기 침체',
+    description: '글로벌 경기 침체 진입',
+    rateChange: -100,
+    nasdaqChange: -25,
+    vixLevel: 50,
+    krwDelta: 120,
+    sectorImpacts: { Technology: -30, Consumer: -25, Industrial: -35, Healthcare: -10 },
+  },
+  'recovery': {
+    name: '경기 회복',
+    description: '경기 회복 및 금리 인하',
+    rateChange: -50,
+    nasdaqChange: 15,
+    vixLevel: 15,
+    krwDelta: -50,
+    sectorImpacts: { Technology: 20, Consumer: 15, Industrial: 18, RealEstate: 12 },
+  },
+};
+
+type PresetKey = keyof typeof GEOPOLITICAL_PRESETS;
 
 export default function WhatIfSimulator() {
   const { state } = useNexus();
@@ -10,6 +68,7 @@ export default function WhatIfSimulator() {
   const [nasdaqChange, setNasdaqChange] = useState(0);   // % (-30 to +30)
   const [krwRate, setKrwRate] = useState(state.exchangeRate || 1450);
   const [vixLevel, setVixLevel] = useState(15);
+  const [selectedPreset, setSelectedPreset] = useState<PresetKey | null>(null);
 
   // 시나리오 영향 계산
   const impacts = useMemo(() => {
@@ -69,15 +128,90 @@ export default function WhatIfSimulator() {
     };
   }, [rateChange, nasdaqChange, krwRate, vixLevel, state.assets, state.exchangeRate]);
 
+  // v31.0: 지정학적 리스크 레벨 계산
+  const geopoliticalRiskLevel = useMemo((): GeopoliticalRiskLevel => {
+    if (vixLevel >= 35) return 'RED';
+    if (vixLevel >= 25) return 'ORANGE';
+    if (vixLevel >= 20) return 'YELLOW';
+    return 'GREEN';
+  }, [vixLevel]);
+
+  const riskLevelInfo = FREEDOM_CONFIG.GEOPOLITICAL_RISK_LEVELS[geopoliticalRiskLevel];
+
+  // v31.0: 프리셋 적용
+  const applyPreset = (presetKey: PresetKey) => {
+    const preset = GEOPOLITICAL_PRESETS[presetKey];
+    setRateChange(preset.rateChange);
+    setNasdaqChange(preset.nasdaqChange);
+    setVixLevel(preset.vixLevel);
+    setKrwRate((state.exchangeRate || 1450) + preset.krwDelta);
+    setSelectedPreset(presetKey);
+  };
+
   const handleReset = () => {
     setRateChange(0);
     setNasdaqChange(0);
     setKrwRate(state.exchangeRate || 1450);
     setVixLevel(15);
+    setSelectedPreset(null);
   };
 
   return (
     <div className="space-y-3">
+      {/* v31.0: Geopolitical Scenario Presets */}
+      <div className="inner-glass p-3 rounded-xl">
+        <div className="text-[9px] text-celestial-purple tracking-widest mb-2 flex items-center">
+          <i className="fas fa-globe mr-2" />
+          GEOPOLITICAL SCENARIOS
+          <span className="ml-2 text-[8px] px-1.5 py-0.5 rounded bg-celestial-purple/20">v31.0</span>
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {(Object.keys(GEOPOLITICAL_PRESETS) as PresetKey[]).map(key => {
+            const preset = GEOPOLITICAL_PRESETS[key];
+            const isSelected = selectedPreset === key;
+            return (
+              <button
+                key={key}
+                onClick={() => applyPreset(key)}
+                className={`px-2 py-1 text-[8px] rounded border transition-all ${
+                  isSelected
+                    ? 'bg-celestial-purple/20 border-celestial-purple/50 text-celestial-purple'
+                    : 'bg-white/5 border-white/10 text-white/60 hover:border-white/30'
+                }`}
+                title={preset.description}
+              >
+                {preset.name}
+              </button>
+            );
+          })}
+        </div>
+        {selectedPreset && (
+          <div className="mt-2 text-[9px] text-white/50">
+            {GEOPOLITICAL_PRESETS[selectedPreset].description}
+          </div>
+        )}
+      </div>
+
+      {/* v31.0: Risk Level Indicator */}
+      <div 
+        className="inner-glass p-3 rounded-xl flex items-center justify-between"
+        style={{ borderColor: `${riskLevelInfo.color}30`, borderWidth: 1 }}
+      >
+        <div className="flex items-center gap-2">
+          <span className="text-lg">{riskLevelInfo.emoji}</span>
+          <div>
+            <div className="text-[9px] text-white/50">RISK LEVEL</div>
+            <div className="text-[11px] font-medium" style={{ color: riskLevelInfo.color }}>
+              {riskLevelInfo.label}
+            </div>
+          </div>
+        </div>
+        <div className="text-right">
+          <div className="text-[9px] text-white/50">ACTION</div>
+          <div className="text-[10px] text-white/70">{riskLevelInfo.action}</div>
+        </div>
+      </div>
+
       {/* Interest Rate */}
       <div className="inner-glass p-3 rounded-xl">
         <div className="flex justify-between items-center mb-1">
@@ -184,12 +318,36 @@ export default function WhatIfSimulator() {
         </div>
       </div>
 
+      {/* v31.0: Counterfactual Analysis */}
+      {selectedPreset && (
+        <div className="inner-glass p-3 rounded-xl bg-celestial-purple/5">
+          <div className="text-[9px] text-celestial-purple tracking-widest mb-2 flex items-center">
+            <i className="fas fa-chart-line mr-2" />
+            COUNTERFACTUAL ANALYSIS
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-[9px]">
+            {Object.entries(GEOPOLITICAL_PRESETS[selectedPreset].sectorImpacts).map(([sector, impact]) => {
+              const sectorAssets = state.assets.filter(a => a.sector === sector);
+              if (sectorAssets.length === 0) return null;
+              return (
+                <div key={sector} className="flex justify-between">
+                  <span className="text-white/60">{sector}</span>
+                  <span className={impact >= 0 ? 'text-v64-success' : 'text-v64-danger'}>
+                    {impact >= 0 ? '+' : ''}{impact}%
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Reset Button */}
       <button
         onClick={handleReset}
         className="text-[10px] text-white/40 hover:text-white transition-colors w-full text-center py-2"
       >
-        RESET
+        RESET ALL
       </button>
     </div>
   );

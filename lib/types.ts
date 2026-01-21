@@ -248,3 +248,216 @@ export interface WidgetData {
   marketState: string;
   exchangeRate: number;
 }
+
+// ═══════════════════════════════════════════════════════════════
+// FREEDOM v31.0 AGENT MESH TYPES
+// Agent Mesh 아키텍처 기반 AI 분석 시스템 타입 정의
+// ═══════════════════════════════════════════════════════════════
+
+/** 분석 모드: quick(빠른), standard(일반), deep(정밀) */
+export type AnalysisMode = 'quick' | 'standard' | 'deep';
+
+/** 지정학적 리스크 레벨 */
+export type GeopoliticalRiskLevel = 'GREEN' | 'YELLOW' | 'ORANGE' | 'RED';
+
+/** 데이터 출처 신뢰도 등급 */
+export type SourceTier = 'S' | 'A' | 'B' | 'C';
+
+/** 에이전트 상태 */
+export type AgentStatus = 'active' | 'warning' | 'inactive' | 'error';
+
+// 에이전트 기여도
+export interface AgentContribution {
+  id: string;
+  name: string;
+  status: AgentStatus;
+  contribution: number;
+  keyFinding: string;
+  dataQuality: number;
+}
+
+// 에이전트 합의
+export interface AgentConsensus {
+  topic: string;
+  agreementLevel: 'full' | 'partial' | 'disagreement';
+  agentCount: number;
+  totalAgents: number;
+  dissentingView?: string;
+}
+
+// 출처 참조
+export interface SourceReference {
+  name: string;
+  tier: SourceTier;
+  dataType: string;
+  confidence: number;
+  url?: string;
+}
+
+// 지정학적 이슈
+export interface GeopoliticalIssue {
+  issue: string;
+  status: GeopoliticalRiskLevel;
+  impactSectors: string[];
+  portfolioExposure: number;
+}
+
+// 지정학적 리스크
+export interface GeopoliticalRisk {
+  level: GeopoliticalRiskLevel;
+  issues: GeopoliticalIssue[];
+  recommendations: string[];
+}
+
+// QuantHead 분석 결과
+export interface QuantAnalysis {
+  portfolioMetrics: {
+    totalValue: number;
+    totalCost: number;
+    returnPct: number;
+    concentrationRisk: number;
+    diversificationScore: number;
+  };
+  sectorAllocation: Array<{
+    sector: string;
+    weight: number;
+    status: string;
+  }>;
+  topHoldings: Array<{
+    ticker: string;
+    weight: number;
+    returnPct: number;
+  }>;
+}
+
+// MacroHead 분석 결과
+export interface MacroAnalysis {
+  marketEnvironment: {
+    vix: number;
+    vixStatus: string;
+    tnx: number;
+    tnxStatus: string;
+    dxy?: number;
+    dxyStatus?: string;
+  };
+  centralBankPolicy: {
+    fed?: {
+      currentRate: number;
+      outlook: string;
+      nextMeeting?: string;
+    };
+    bok?: {
+      currentRate: number;
+      outlook: string;
+      rateDiff?: number;
+    };
+  };
+  macroIndicators: string[];
+}
+
+// RiskHead 분석 결과
+export interface RiskAnalysis {
+  geopoliticalRisk: GeopoliticalRisk;
+  sectorRisk: Array<{
+    sector: string;
+    level: GeopoliticalRiskLevel;
+    reason: string;
+  }>;
+  marketRisk: {
+    volatility: GeopoliticalRiskLevel;
+    liquidity: GeopoliticalRiskLevel;
+    sentiment: string;
+  };
+  overallLevel: GeopoliticalRiskLevel;
+  recommendedAction: string;
+}
+
+/**
+ * Freedom 분석 결과 (전체)
+ * API 응답을 구조화된 형태로 파싱할 때 사용
+ * 현재는 마크다운 텍스트로 반환되어 직접 사용되지 않음
+ * 향후 구조화된 응답 파싱 시 활용 예정
+ */
+export interface FreedomAnalysisResult {
+  mode: AnalysisMode;
+  timestamp: string;
+  agents: AgentContribution[];
+  consensus: AgentConsensus[];
+  crossValidation: {
+    consistencyScore: number;
+    conflictsResolved: number;
+    resolutionMethod: string;
+  };
+  quantAnalysis: QuantAnalysis;
+  macroAnalysis: MacroAnalysis;
+  riskAnalysis?: RiskAnalysis; // Deep 모드에서만
+  scenarios: {
+    base: { probability: number; description: string };
+    bull: { probability: number; description: string };
+    bear: { probability: number; description: string };
+  };
+  actionItems: {
+    high: string[];
+    medium: string[];
+    low: string[];
+  };
+  confidence: {
+    overall: number;
+    hydraConfidence: number;
+    agentConsensus: number;
+    sourceConfidence: number;
+  };
+  sources: SourceReference[];
+  disclaimer: string;
+}
+
+/**
+ * Freedom API 요청 타입
+ * FreedomModal에서 API 호출 시 사용되는 페이로드 구조
+ */
+export interface FreedomAnalysisRequest {
+  portfolioData: {
+    timestamp: string;
+    userProfile: {
+      strategy: string;
+      riskTolerance: string;
+    };
+    summary: {
+      totalValue: number;
+      totalCost: number;
+      totalReturn: number;
+      totalReturnPct: number | string;
+    };
+    groups: {
+      bySector: Array<{
+        name: string;
+        weight: string;
+        returnPct: number | string;
+        assetCount: number;
+      }>;
+      byType: Array<{
+        name: string;
+        weight: string;
+        returnPct: number | string;
+        assetCount: number;
+      }>;
+    };
+    income: {
+      annualTotal: string;
+      monthlyTrend: string;
+      payingAssetsCount: number;
+    };
+    assets: Array<{
+      ticker: string;
+      qty: number;
+      avg: number;
+      price: number;
+      weight: string;
+      returnPct: number | string;
+      sector: string;
+      type: string;
+    }>;
+    market: MarketData;
+  };
+  mode: AnalysisMode;
+}

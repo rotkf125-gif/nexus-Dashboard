@@ -10,7 +10,12 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(cd:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(wc:*)",
+      "Bash(git fetch:*)",
+      "Bash(grep:*)",
+      "Bash(xargs:*)",
+      "Bash(git rm:*)"
     ]
   }
 }

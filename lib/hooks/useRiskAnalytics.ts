@@ -1,22 +1,41 @@
 import { useMemo } from 'react';
-import { Asset, MarketData, RiskMetrics, RiskLevel } from '../types';
+import { Asset, MarketData, RiskMetrics, RiskLevel, GeopoliticalRiskLevel } from '../types';
 import { ETF_SECTOR_DATA, SECTOR_CORRELATIONS } from '../market-data';
+import { SECTOR_SENSITIVITY, VIX_THRESHOLDS, RISK_THRESHOLDS } from '../config';
+
+// ═══════════════════════════════════════════════════════════════
+// FREEDOM v31.0 - Enhanced Risk Analytics (RiskHead Integration)
+// 최적화: config에서 민감도 데이터 참조 (중복 제거)
+// ═══════════════════════════════════════════════════════════════
 
 function calculateRiskMetrics(
   diversificationScore: number,
   topSectorWeight: number,
   vix: number,
-  maxAssetWeight: number
+  maxAssetWeight: number,
+  geopoliticalScore?: number,
+  rateScore?: number
 ): RiskMetrics {
   const volatilityScore = Math.max(0, Math.min(100, 100 - (vix - 12) * 3.5));
   const sectorConcentration = Math.max(0, Math.min(100, 100 - (topSectorWeight * 100)));
   const concentrationRisk = Math.max(0, Math.min(100, 100 - (maxAssetWeight * 100 * 1.5)));
+  
+  // v31.0: 지정학적/금리 리스크 반영
+  const geoAdjustment = geopoliticalScore !== undefined ? (100 - geopoliticalScore) * 0.1 : 0;
+  const rateAdjustment = rateScore !== undefined ? (100 - rateScore) * 0.05 : 0;
+  
   const overallScore = Math.round(
-    diversificationScore * 0.25 +
-    sectorConcentration * 0.20 +
-    volatilityScore * 0.25 +
-    concentrationRisk * 0.30
+    Math.max(0, Math.min(100,
+      diversificationScore * 0.20 +
+      sectorConcentration * 0.15 +
+      volatilityScore * 0.25 +
+      concentrationRisk * 0.25 +
+      (geopoliticalScore || 70) * 0.10 +
+      (rateScore || 70) * 0.05 -
+      geoAdjustment - rateAdjustment
+    ))
   );
+  
   return {
     overallScore,
     diversificationScore: Math.round(diversificationScore),
@@ -197,6 +216,96 @@ export function useRiskAnalytics(assets: Asset[], market: MarketData) {
     };
   }, [mergedAssets]);
 
+  // v31.0: 지정학적 민감도 계산 (config 참조)
+  const geopoliticalSensitivity = useMemo(() => {
+    const totalValue = mergedAssets.reduce((sum, a) => sum + a.totalValue, 0);
+    if (totalValue === 0) return 0;
+
+    let weightedSensitivity = 0;
+    mergedAssets.forEach(asset => {
+      const weight = asset.totalValue / totalValue;
+      const sensitivity = SECTOR_SENSITIVITY.GEOPOLITICAL[asset.sector || 'Other'] || 0.4;
+      weightedSensitivity += weight * sensitivity;
+    });
+
+    return weightedSensitivity;
+  }, [mergedAssets]);
+
+  // v31.0: 금리 민감도 계산 (config 참조)
+  const rateSensitivity = useMemo(() => {
+    const totalValue = mergedAssets.reduce((sum, a) => sum + a.totalValue, 0);
+    if (totalValue === 0) return 0;
+
+    let weightedSensitivity = 0;
+    mergedAssets.forEach(asset => {
+      const weight = asset.totalValue / totalValue;
+      const sensitivity = SECTOR_SENSITIVITY.RATE[asset.sector || 'Other'] || 0.5;
+      weightedSensitivity += weight * sensitivity;
+    });
+
+    return weightedSensitivity;
+  }, [mergedAssets]);
+
+  // v31.0: VIX 기반 지정학적 리스크 레벨 (상수 사용)
+  const geopoliticalRiskLevel = useMemo((): GeopoliticalRiskLevel => {
+    const vix = market.vix || 15;
+    if (vix >= VIX_THRESHOLDS.EXTREME) return 'RED';
+    if (vix >= VIX_THRESHOLDS.HIGH) return 'ORANGE';
+    if (vix >= VIX_THRESHOLDS.ELEVATED) return 'YELLOW';
+    return 'GREEN';
+  }, [market.vix]);
+
+  // v31.0: 섹터별 리스크 분석 (config 참조)
+  const sectorRiskAnalysis = useMemo(() => {
+    return topSectors.map(([sector, weight]) => {
+      const geoSensitivity = SECTOR_SENSITIVITY.GEOPOLITICAL[sector] || 0.4;
+      const rateSens = SECTOR_SENSITIVITY.RATE[sector] || 0.5;
+      const vix = market.vix || 15;
+      const tnx = market.tnx || 4.0;
+
+      // 리스크 레벨 결정 (상수 사용)
+      let level: GeopoliticalRiskLevel = 'GREEN';
+      if (geoSensitivity > RISK_THRESHOLDS.SENSITIVITY_HIGH && vix > VIX_THRESHOLDS.HIGH) level = 'ORANGE';
+      else if (geoSensitivity > 0.8 && vix > 30) level = 'RED';
+      else if (geoSensitivity > RISK_THRESHOLDS.SENSITIVITY_MODERATE && vix > VIX_THRESHOLDS.ELEVATED) level = 'YELLOW';
+
+      // 금리 리스크
+      if (rateSens > RISK_THRESHOLDS.SENSITIVITY_HIGH && tnx > 4.5) {
+        level = level === 'GREEN' ? 'YELLOW' : level === 'YELLOW' ? 'ORANGE' : level;
+      }
+
+      return {
+        sector,
+        weight,
+        geopoliticalSensitivity: geoSensitivity,
+        rateSensitivity: rateSens,
+        riskLevel: level,
+      };
+    });
+  }, [topSectors, market.vix, market.tnx]);
+
+  // v31.0: 종합 리스크 요약 (상수 사용)
+  const riskSummary = useMemo(() => {
+    const vix = market.vix || 15;
+    const tnx = market.tnx || 4.0;
+
+    const factors: string[] = [];
+
+    if (vix > VIX_THRESHOLDS.HIGH) factors.push(`높은 변동성 (VIX: ${vix.toFixed(1)})`);
+    if (tnx > 4.5) factors.push(`높은 금리 환경 (10Y: ${tnx.toFixed(2)}%)`);
+    if (geopoliticalSensitivity > RISK_THRESHOLDS.SENSITIVITY_HIGH) factors.push('지정학적 민감 섹터 집중');
+    if (rateSensitivity > RISK_THRESHOLDS.SENSITIVITY_HIGH) factors.push('금리 민감 섹터 집중');
+    if (maxAssetWeight > RISK_THRESHOLDS.CONCENTRATION_WARNING) factors.push(`단일 종목 집중 (${(maxAssetWeight * 100).toFixed(0)}%)`);
+    if (topSectorWeight > RISK_THRESHOLDS.SECTOR_WARNING) factors.push(`섹터 집중 (${(topSectorWeight * 100).toFixed(0)}%)`);
+
+    return {
+      factors,
+      geopoliticalRiskLevel,
+      volatilityStatus: vix > 30 ? 'HIGH' : vix > VIX_THRESHOLDS.ELEVATED ? 'ELEVATED' : 'NORMAL',
+      rateEnvironment: tnx > 4.5 ? 'RESTRICTIVE' : tnx > 3.5 ? 'NEUTRAL' : 'ACCOMMODATIVE',
+    };
+  }, [market.vix, market.tnx, geopoliticalSensitivity, rateSensitivity, maxAssetWeight, topSectorWeight, geopoliticalRiskLevel]);
+
   return {
     riskMetrics,
     riskLevel,
@@ -206,5 +315,11 @@ export function useRiskAnalytics(assets: Asset[], market: MarketData) {
     topSectors,
     portfolioStats,
     maxAssetWeight,
+    // v31.0 추가
+    geopoliticalSensitivity,
+    rateSensitivity,
+    geopoliticalRiskLevel,
+    sectorRiskAnalysis,
+    riskSummary,
   };
 }

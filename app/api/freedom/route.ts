@@ -1,42 +1,22 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextRequest, NextResponse } from 'next/server';
+import { AnalysisMode } from '@/lib/types';
+import { FREEDOM_V31_SYSTEM_PROMPT, MODE_PROMPTS } from '@/lib/prompts';
+import { VIX_THRESHOLDS } from '@/lib/config';
 
-// 시스템 프롬프트를 4단계 분석에 맞춰 고도화
-const FREEDOM_SYSTEM_PROMPT = `당신은 NEXUS Freedom V2의 수석 포트폴리오 분석가입니다.
-사용자의 자산 데이터, 시장 상황, 투자 전략을 종합하여 전문가 수준의 진단 보고서를 작성해야 합니다.
+// ═══════════════════════════════════════════════════════════════
+// FREEDOM v31.0 AGENT MESH EDITION - AI Analysis API
+// 최적화: 프롬프트 분리, 에러 처리 강화, 상수 사용
+// ═══════════════════════════════════════════════════════════════
 
-다음 4가지 섹션으로 나누어 분석을 수행하십시오:
+// 에러 타입 정의
+interface FreedomError extends Error {
+  code?: string;
+  status?: number;
+}
 
-### 1. 📊 그룹별 추세 및 변동성 분석 (Sector & Type Analysis)
-- 제공된 'groups' 데이터를 기반으로 섹터별/타입별 비중과 수익률을 분석하세요.
-- 특정 섹터나 자산군(Type)에 편중되어 있는지 확인하고, 해당 그룹의 최근 시장 분위기(AI 지식 활용)를 덧붙여 설명하세요.
-- 수익률이 저조하거나 변동성이 큰 그룹에 대한 경고를 포함하세요.
-
-### 2. 💰 인컴 스트림 및 배당 안전성 평가 (Dividend Analytics)
-- 제공된 'income' 데이터와 배당주 목록을 분석하세요.
-- '안전 마진(Safety Margin)'을 평가하세요: 현재의 배당 흐름이 시장 하락기에도 유지될 수 있을지 자산 구성을 보고 판단하세요.
-- 월별 배당 흐름의 편차가 크다면 이를 지적하고 보완책(예: 분기 배당주 추가 등)을 제안하세요.
-
-### 3. 🎯 전략 일치도 및 의도 분석 (Strategy Alignment)
-- 사용자의 전략(Strategy: \${strategy})과 실제 포트폴리오 구성이 일치하는지 평가하세요.
-- 예: "배당 성장(Dividend Growth)" 전략인데 고성장 기술주(무배당) 비중이 너무 높다면 '불일치' 경고를 주세요.
-- 사용자의 숨겨진 의도를 파악하고, 현재 포지션이 그 목표를 달성하기에 적합한지 조언하세요.
-
-### 4. 🔍 보유 종목 리스크 점수 및 비중 관리 (Risk Scoring & Rebalancing)
-- 주요 보유 종목(상위 비중 5개 위주)에 대해 당신의 지식 베이스(검색)를 활용하여 잠재적 리스크 요인을 나열하세요.
-- 각 종목에 대해 1~10점 척도의 '리스크 점수'를 매기세요. (10점=매우 위험, 1점=매우 안전)
-- 리스크 점수가 높으면서 비중도 높은 '위험 종목'에 대해 구체적인 비중 축소 또는 헷지(Hedge) 방안을 제시하세요.
-
-## 톤 앤 매너
-- 전문가답되 격려하는 어조를 유지하세요.
-- 중요한 수치나 경고는 **굵게** 표시하세요.
-- 가독성을 위해 불렛 포인트와 이모지를 적절히 사용하세요.
-- 결론에는 반드시 "✨ 요약 및 3가지 실행 가이드"를 포함하여 사용자가 당장 무엇을 해야 할지 명확히 알려주세요.
-
-## 면책 조항
-보고서 하단에 다음 문구를 반드시 포함하세요:
-> "본 분석은 AI 기반의 정보 제공 목적이며 투자 권유가 아닙니다. 모든 투자의 책임은 투자자 본인에게 있습니다."
-`;
+// 반도체 관련 티커 목록
+const SEMICONDUCTOR_TICKERS = ['NVDA', 'AMD', 'INTC', 'TSM', 'ASML', 'AVGO', 'QCOM', 'MU'];
 
 export async function POST(request: NextRequest) {
   try {
@@ -44,43 +24,257 @@ export async function POST(request: NextRequest) {
 
     if (!apiKey) {
       return NextResponse.json(
-        { error: 'API 키가 설정되지 않았습니다.' },
+        { error: 'API 키가 설정되지 않았습니다.', code: 'API_KEY_MISSING' },
         { status: 500 }
       );
     }
 
-    const { portfolioData } = await request.json();
-
-    if (!portfolioData) {
+    let body;
+    try {
+      body = await request.json();
+    } catch {
       return NextResponse.json(
-        { error: '데이터가 없습니다.' },
+        { error: '잘못된 요청 형식입니다.', code: 'INVALID_JSON' },
         { status: 400 }
       );
     }
 
-    // 최신 모델 사용 (Gemini 2.5 Pro 권장)
+    const { portfolioData, mode = 'standard' } = body as {
+      portfolioData: Record<string, unknown>;
+      mode?: AnalysisMode;
+    };
+
+    if (!portfolioData) {
+      return NextResponse.json(
+        { error: '포트폴리오 데이터가 없습니다.', code: 'MISSING_DATA' },
+        { status: 400 }
+      );
+    }
+
+    // 유효한 모드인지 확인
+    if (!['quick', 'standard', 'deep'].includes(mode)) {
+      return NextResponse.json(
+        { error: '유효하지 않은 분석 모드입니다.', code: 'INVALID_MODE' },
+        { status: 400 }
+      );
+    }
+
+    // VIX 기반 동적 에이전트 활성화 체크 (상수 사용)
+    const vix = (portfolioData.market as Record<string, number>)?.vix || 15;
+    const isHighVix = vix > VIX_THRESHOLDS.HIGH;
+    const isExtremeVix = vix > VIX_THRESHOLDS.EXTREME;
+
+    // 에이전트 활성화 상태 결정
+    const activeAgents = determineActiveAgents(portfolioData, mode, vix);
+
+    // Gemini API 호출
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
 
-    // 프롬프트에 동적 데이터 주입
-    const prompt = `${FREEDOM_SYSTEM_PROMPT.replace('${strategy}', portfolioData.userProfile.strategy)}
+    // 프롬프트 구성 (분리된 파일에서 import)
+    const modePrompt = MODE_PROMPTS[mode];
+    const dynamicContext = buildDynamicContext(portfolioData, activeAgents, vix, isHighVix, isExtremeVix);
 
-다음은 현재 포트폴리오의 상세 데이터입니다:
+    const fullPrompt = `${FREEDOM_V31_SYSTEM_PROMPT}
+
+${modePrompt}
+
+${dynamicContext}
+
+---
+
+## 분석 대상 포트폴리오 데이터
 
 \`\`\`json
 ${JSON.stringify(portfolioData, null, 2)}
-\`\`\``;
+\`\`\`
 
-    const result = await model.generateContent(prompt);
+---
+
+위 데이터를 기반으로 Freedom v31.0 Agent Mesh Edition 형식에 맞춰 분석을 수행하세요.
+분석 모드: **${mode.toUpperCase()}**
+활성화된 에이전트: ${activeAgents.join(', ')}
+`;
+
+    const result = await model.generateContent(fullPrompt);
     const response = await result.response;
     const analysis = response.text();
 
-    return NextResponse.json({ analysis });
+    // 응답에 메타데이터 추가
+    return NextResponse.json({
+      analysis,
+      metadata: {
+        version: '31.0.0',
+        mode,
+        activeAgents,
+        vixLevel: vix,
+        isHighVix,
+        timestamp: new Date().toISOString(),
+      },
+    });
   } catch (error) {
-    console.error('AI Analysis Error:', error);
+    console.error('Freedom v31 Analysis Error:', error);
+    
+    // 에러 타입별 처리
+    const err = error as FreedomError;
+    
+    if (err.message?.includes('API key')) {
+      return NextResponse.json(
+        { error: 'AI 서비스 인증 오류입니다.', code: 'AUTH_ERROR' },
+        { status: 401 }
+      );
+    }
+    
+    if (err.message?.includes('quota') || err.message?.includes('rate limit')) {
+      return NextResponse.json(
+        { error: 'AI 서비스 사용량 한도에 도달했습니다. 잠시 후 다시 시도해주세요.', code: 'RATE_LIMIT' },
+        { status: 429 }
+      );
+    }
+    
+    if (err.message?.includes('timeout')) {
+      return NextResponse.json(
+        { error: '분석 시간이 초과되었습니다. 다시 시도해주세요.', code: 'TIMEOUT' },
+        { status: 504 }
+      );
+    }
+
     return NextResponse.json(
-      { error: '분석 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.' },
+      { error: '분석 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.', code: 'UNKNOWN_ERROR' },
       { status: 500 }
     );
   }
+}
+
+// 활성화할 에이전트 결정 (상수 사용)
+function determineActiveAgents(
+  portfolioData: Record<string, unknown>,
+  mode: AnalysisMode,
+  vix: number
+): string[] {
+  const agents: string[] = [];
+
+  // 항상 활성화 (모든 모드)
+  agents.push('QuantHead');
+
+  if (mode === 'quick') {
+    return agents;
+  }
+
+  // Standard 이상
+  agents.push(
+    'MacroHead',
+    'MacroIndicatorAgent.InflationAgent',
+    'MacroIndicatorAgent.LeadingIndicatorAgent',
+    'StockMarketAgent.MarketSentimentAgent',
+    'BondMarketAgent.USTreasuryAgent',
+    'ForexAgent.DollarAgent'
+  );
+
+  if (mode === 'standard') {
+    return agents;
+  }
+
+  // Deep 모드
+  agents.push(
+    'RiskHead',
+    'CentralBankAgent.FedAgent',
+    'CentralBankAgent.BOKAgent',
+    'BondMarketAgent.KoreaBondAgent'
+  );
+
+  // VIX 기반 동적 활성화 (상수 사용)
+  if (vix > VIX_THRESHOLDS.HIGH) {
+    agents.push('GeopoliticalRiskAgent');
+  }
+  if (vix > VIX_THRESHOLDS.EXTREME) {
+    agents.push('SectorAgent.*');
+  }
+
+  // 포트폴리오 기반 섹터 에이전트 활성화
+  const assets = portfolioData.assets as Array<{ sector?: string; ticker?: string }> || [];
+  const sectors = new Set(assets.map(a => a.sector).filter(Boolean));
+  
+  if (sectors.has('Technology') || assets.some(a => 
+    SEMICONDUCTOR_TICKERS.includes(a.ticker || '')
+  )) {
+    agents.push('SectorAgent.SemiconductorAgent');
+  }
+  if (sectors.has('Energy')) {
+    agents.push('SectorAgent.EnergyAgent');
+  }
+  if (sectors.has('RealEstate')) {
+    agents.push('SectorAgent.RealEstateAgent');
+  }
+  if (sectors.has('Crypto')) {
+    agents.push('SectorAgent.CryptoAgent');
+  }
+
+  return Array.from(new Set(agents)); // 중복 제거
+}
+
+// 동적 컨텍스트 생성 (상수 사용)
+function buildDynamicContext(
+  portfolioData: Record<string, unknown>,
+  activeAgents: string[],
+  vix: number,
+  isHighVix: boolean,
+  isExtremeVix: boolean
+): string {
+  const vixStatus = isExtremeVix 
+    ? '🔴 극단적 변동성' 
+    : isHighVix 
+      ? '🟠 높은 변동성' 
+      : vix > VIX_THRESHOLDS.ELEVATED 
+        ? '🟡 주의' 
+        : '🟢 정상';
+
+  let context = `## 동적 컨텍스트
+
+### 시장 상황
+- VIX: ${vix} (${vixStatus})
+`;
+
+  if (isHighVix) {
+    context += `
+### ⚠️ 높은 변동성 경고
+VIX가 ${vix}로 높은 수준입니다. GeopoliticalRiskAgent가 자동 활성화되었습니다.
+지정학적 리스크 분석을 포함하여 방어적 관점에서 분석을 수행하세요.
+`;
+  }
+
+  if (isExtremeVix) {
+    context += `
+### 🚨 극단적 변동성 경고
+VIX가 ${vix}로 극단적 수준입니다. 모든 에이전트가 활성화되었습니다.
+위기 상황 대응 관점에서 분석하고, 즉각적인 행동 권고를 포함하세요.
+`;
+  }
+
+  // 포트폴리오 특성 분석
+  const assets = portfolioData.assets as Array<{ type?: string; sector?: string }> || [];
+  const incomeAssets = assets.filter(a => a.type === 'INCOME');
+  const techAssets = assets.filter(a => a.sector === 'Technology' || a.sector === 'ETF');
+
+  if (incomeAssets.length > 0) {
+    context += `
+### 포트폴리오 특성: 인컴 자산 보유
+INCOME 타입 자산 ${incomeAssets.length}개 보유. 배당 안정성 및 인컴 스트림 분석을 강화하세요.
+`;
+  }
+
+  if (techAssets.length > assets.length * 0.4) {
+    context += `
+### 포트폴리오 특성: 기술주 집중
+기술 섹터 비중이 높습니다. SemiconductorAgent 분석을 포함하고, 
+금리 민감도 및 성장주 리스크를 상세히 분석하세요.
+`;
+  }
+
+  context += `
+### 활성화된 에이전트 목록
+${activeAgents.map(a => `- ${a}`).join('\n')}
+`;
+
+  return context;
 }
