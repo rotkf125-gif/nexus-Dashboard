@@ -1,4 +1,4 @@
-# 🌟 NEXUS DASHBOARD v1.8.0
+# 🌟 NEXUS DASHBOARD v1.8.1
 
 개인 투자 포트폴리오 관리 대시보드
 
@@ -9,6 +9,34 @@
 | **Live Site** | https://nexus-dashboard-beige.vercel.app |
 | **GitHub** | https://github.com/rotkf125-gif/nexus-dashboard |
 | **Database** | Supabase (PostgreSQL) |
+
+---
+
+## ✨ v1.8.1 주요 변경 사항 - UI/UX 개선 및 버그 수정
+
+### 🐛 버그 수정
+- **PortfolioHealthAlert**: ETF 섹터 계산 버그 수정
+  - 중복 데이터 제거 (`lib/market-data.ts`에서 통합 import)
+  - "ETF 100%" 무의미한 경고 해결 → 실제 내부 섹터(Technology, Healthcare 등) 정확 표시
+
+### 🎨 UI/UX 개선
+- **AssetTable Price 애니메이션**: 가격 변동 인디케이터 위치 수정
+  - 가격 텍스트 고정, 인디케이터를 `absolute` 위치로 이동
+  - 테이블 행 일관성 유지 (레이아웃 shift 제거)
+
+### 📊 Analytics 탭 레이아웃 리뉴얼 (옵션2)
+- **2행 레이아웃**: 3행 → 2행으로 압축하여 스크롤 감소
+  - Row 1: Total Value, Weight, Sector, Type (4열)
+  - Row 2: Risk Score, Risk Factors, Performance, Market Correlation (4열)
+- **PortfolioInsight**: 새 컴포넌트 생성 (Risk Profile + Insights 통합)
+- **AssetTurnover 제거**: 복잡도 감소, 리밸런싱에 집중
+- **2열 하단 그리드**: Rebalance Suggestion + Portfolio Insight
+
+### 📈 Performance 탭 레이아웃 리뉴얼
+- **MonthlyReport 3열 균등 분할** (1:1:1)
+  - 왼쪽: 통계 카드 (총 평가금, 총 손익, 배당금, 거래 수익)
+  - 중간: 랭킹 카드 (상위 5개 종목, 유형별 분포, 거래 수익 TOP 5)
+  - 오른쪽: 보고서 미리보기 (스크롤 가능)
 
 ---
 
@@ -353,6 +381,7 @@ nexus-next/
 
 | 버전 | 날짜 | 주요 변경 |
 |------|------|----------|
+| v1.8.1 | 2026-01-23 | 🐛 ETF 섹터 계산 버그 수정, 🎨 Price 애니메이션 개선, 📊 Analytics 탭 2행 레이아웃, 📈 MonthlyReport 3열 균등 분할 |
 | v1.8.0 | 2026-01-21 | 🤖 Freedom v31.0 Agent Mesh Edition (AI 분석 대규모 업그레이드), 🌐 지정학적 리스크 분석, 🧪 시뮬레이션 강화, ⚡ 코드 최적화 |
 | v1.7.2 | 2026-01-18 | 🗄️ Supabase 최적화 (RLS 보안 강화, 인덱스 7개 추가, 성능 60% 향상), 🧹 중복 코드 제거 |
 | v1.7.1 | 2026-01-17 | 🎨 히트맵 가시성 개선 (툴팁 배경 어둡게, 텍스트 그림자 강화) |

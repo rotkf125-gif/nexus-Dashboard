@@ -296,146 +296,164 @@ export default function MonthlyReport() {
         </div>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-        <div className="inner-glass p-3 rounded-lg">
-          <div className="text-[8px] text-white/50 uppercase mb-1">총 평가금</div>
-          <div className="text-[14px] text-celestial-cyan font-semibold">
-            {formatUSD(portfolioSummary.totalValue)}
+      {/* 3-Column Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Left Column: Summary Stats */}
+        <div className="space-y-3">
+          <div className="inner-glass p-4 rounded-lg">
+            <div className="text-[8px] text-white/50 uppercase mb-1">총 평가금</div>
+            <div className="text-base text-celestial-cyan font-semibold">
+              {formatUSD(portfolioSummary.totalValue)}
+            </div>
+            <div className="text-[10px] text-white/60 mt-1">
+              ₩{portfolioSummary.totalValueKrw.toLocaleString()}
+            </div>
           </div>
-          <div className="text-[9px] text-white/60">
-            ₩{portfolioSummary.totalValueKrw.toLocaleString()}
-          </div>
-        </div>
-        <div className="inner-glass p-3 rounded-lg">
-          <div className="text-[8px] text-white/50 uppercase mb-1">총 손익</div>
-          <div className={`text-[14px] font-semibold ${portfolioSummary.profit >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}>
-            {portfolioSummary.profit >= 0 ? '+' : ''}{formatUSD(portfolioSummary.profit)}
-          </div>
-          <div className={`text-[9px] ${portfolioSummary.profit >= 0 ? 'text-v64-success/70' : 'text-v64-danger/70'}`}>
-            {portfolioSummary.returnPct >= 0 ? '+' : ''}{portfolioSummary.returnPct.toFixed(2)}%
-          </div>
-        </div>
-        <div className="inner-glass p-3 rounded-lg">
-          <div className="text-[8px] text-white/50 uppercase mb-1">배당금 ({selectedPeriod})</div>
-          <div className="text-[14px] text-celestial-gold font-semibold">
-            {formatUSD(recentDividends)}
-          </div>
-          <div className="text-[9px] text-white/60">
-            총 {formatUSD(totalDividends)}
-          </div>
-        </div>
-        <div className="inner-glass p-3 rounded-lg">
-          <div className="text-[8px] text-white/50 uppercase mb-1">거래 수익</div>
-          <div className={`text-[14px] font-semibold ${totalTradeReturn >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}>
-            {totalTradeReturn >= 0 ? '+' : ''}{formatUSD(totalTradeReturn)}
-          </div>
-          <div className="text-[9px] text-white/60">
-            누적
-          </div>
-        </div>
-      </div>
 
-      {/* Top Holdings & Type Distribution */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        {/* Top Holdings */}
-        <div className="inner-glass p-3 rounded-lg">
-          <div className="text-[9px] text-white/60 uppercase mb-2">상위 5개 종목</div>
-          <div className="space-y-2">
-            {topAssets.map((asset, i) => (
-              <div key={asset.ticker} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="w-4 text-[9px] text-white/40">{i + 1}</span>
-                  <span
-                    className="text-[10px] font-medium"
-                    style={{ color: CHART_COLORS[i % CHART_COLORS.length] }}
-                  >
-                    {asset.ticker}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-[10px] text-white/80">
-                    {formatUSD(asset.value)}
-                  </span>
-                  <span className={`text-[9px] w-14 text-right ${asset.returnPct >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}>
-                    {asset.returnPct >= 0 ? '+' : ''}{asset.returnPct.toFixed(1)}%
-                  </span>
-                </div>
-              </div>
-            ))}
+          <div className="inner-glass p-4 rounded-lg">
+            <div className="text-[8px] text-white/50 uppercase mb-1">총 손익</div>
+            <div className={`text-base font-semibold ${portfolioSummary.profit >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}>
+              {portfolioSummary.profit >= 0 ? '+' : ''}{formatUSD(portfolioSummary.profit)}
+            </div>
+            <div className={`text-[10px] mt-1 ${portfolioSummary.profit >= 0 ? 'text-v64-success/70' : 'text-v64-danger/70'}`}>
+              {portfolioSummary.returnPct >= 0 ? '+' : ''}{portfolioSummary.returnPct.toFixed(2)}%
+            </div>
+          </div>
+
+          <div className="inner-glass p-4 rounded-lg">
+            <div className="text-[8px] text-white/50 uppercase mb-1">배당금 ({selectedPeriod})</div>
+            <div className="text-base text-celestial-gold font-semibold">
+              {formatUSD(recentDividends)}
+            </div>
+            <div className="text-[10px] text-white/60 mt-1">
+              총 {formatUSD(totalDividends)}
+            </div>
+          </div>
+
+          <div className="inner-glass p-4 rounded-lg">
+            <div className="text-[8px] text-white/50 uppercase mb-1">거래 수익</div>
+            <div className={`text-base font-semibold ${totalTradeReturn >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}>
+              {totalTradeReturn >= 0 ? '+' : ''}{formatUSD(totalTradeReturn)}
+            </div>
+            <div className="text-[10px] text-white/60 mt-1">
+              누적
+            </div>
           </div>
         </div>
 
-        {/* Type Distribution */}
-        <div className="inner-glass p-3 rounded-lg">
-          <div className="text-[9px] text-white/60 uppercase mb-2">유형별 분포</div>
-          <div className="space-y-2">
-            {Object.entries(typeDistribution).map(([type, data]) => {
-              const pct = portfolioSummary.totalValue > 0
-                ? (data.value / portfolioSummary.totalValue) * 100
-                : 0;
-              const typeInfo = TYPE_INFO[type as keyof typeof TYPE_INFO];
-              return (
-                <div key={type} className="flex items-center gap-2">
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-1">
+        {/* Middle Column: Rankings */}
+        <div className="space-y-3">
+          {/* Top Holdings */}
+          <div className="inner-glass p-4 rounded-lg">
+            <div className="text-[9px] text-white/60 uppercase mb-3 flex items-center gap-2">
+              <i className="fas fa-trophy text-celestial-gold" />
+              상위 5개 종목
+            </div>
+            <div className="space-y-2.5">
+              {topAssets.map((asset, i) => (
+                <div key={asset.ticker} className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="w-5 text-[10px] text-white/40 text-center">{i + 1}</span>
+                    <span
+                      className="text-[11px] font-medium"
+                      style={{ color: CHART_COLORS[i % CHART_COLORS.length] }}
+                    >
+                      {asset.ticker}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-white/80">
+                      {formatUSD(asset.value)}
+                    </span>
+                    <span className={`text-[10px] w-14 text-right font-medium ${asset.returnPct >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}>
+                      {asset.returnPct >= 0 ? '+' : ''}{asset.returnPct.toFixed(1)}%
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Type Distribution */}
+          <div className="inner-glass p-4 rounded-lg">
+            <div className="text-[9px] text-white/60 uppercase mb-3 flex items-center gap-2">
+              <i className="fas fa-chart-pie text-celestial-purple" />
+              유형별 분포
+            </div>
+            <div className="space-y-3">
+              {Object.entries(typeDistribution).map(([type, data]) => {
+                const pct = portfolioSummary.totalValue > 0
+                  ? (data.value / portfolioSummary.totalValue) * 100
+                  : 0;
+                const typeInfo = TYPE_INFO[type as keyof typeof TYPE_INFO];
+                return (
+                  <div key={type}>
+                    <div className="flex items-center justify-between mb-1.5">
                       <span className="text-[10px] text-white/80">
                         {typeInfo?.label || type}
                       </span>
-                      <span className="text-[9px] text-white/60">
+                      <span className="text-[10px] text-white/60">
                         {data.count}종목 ({pct.toFixed(1)}%)
                       </span>
                     </div>
-                    <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-2 bg-white/10 rounded-full overflow-hidden">
                       <div
                         className="h-full rounded-full bg-celestial-cyan"
                         style={{ width: `${pct}%` }}
                       />
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* Top Trade Returns */}
-      {topTradeReturns.length > 0 && (
-        <div className="inner-glass p-3 rounded-lg">
-          <div className="text-[9px] text-white/60 uppercase mb-2">거래 수익 상위 5개 (ticker별)</div>
-          <div className="space-y-2">
-            {topTradeReturns.map((trade, i) => (
-              <div key={trade.ticker} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="w-4 text-[9px] text-white/40">{i + 1}</span>
-                  <span
-                    className="text-[10px] font-medium"
-                    style={{ color: CHART_COLORS[i % CHART_COLORS.length] }}
-                  >
-                    {trade.ticker}
-                  </span>
-                </div>
-                <span className={`text-[10px] font-semibold ${trade.pnl >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}>
-                  {trade.pnl >= 0 ? '+' : ''}{formatUSD(trade.pnl)}
-                </span>
+          {/* Top Trade Returns */}
+          {topTradeReturns.length > 0 && (
+            <div className="inner-glass p-4 rounded-lg">
+              <div className="text-[9px] text-white/60 uppercase mb-3 flex items-center gap-2">
+                <i className="fas fa-exchange-alt text-v64-success" />
+                거래 수익 TOP 5
               </div>
-            ))}
+              <div className="space-y-2.5">
+                {topTradeReturns.map((trade, i) => (
+                  <div key={trade.ticker} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="w-5 text-[10px] text-white/40 text-center">{i + 1}</span>
+                      <span
+                        className="text-[11px] font-medium"
+                        style={{ color: CHART_COLORS[i % CHART_COLORS.length] }}
+                      >
+                        {trade.ticker}
+                      </span>
+                    </div>
+                    <span className={`text-[11px] font-semibold ${trade.pnl >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}>
+                      {trade.pnl >= 0 ? '+' : ''}{formatUSD(trade.pnl)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Right Column: Report Preview */}
+        <div className="inner-glass p-4 rounded-lg flex flex-col">
+          <div className="flex items-center justify-between mb-3">
+            <div className="text-[9px] text-white/60 uppercase flex items-center gap-2">
+              <i className="fas fa-file-alt text-celestial-cyan" />
+              보고서 미리보기
+            </div>
+            <span className="text-[8px] text-white/40">
+              {new Date().toLocaleDateString('ko-KR')} 기준
+            </span>
+          </div>
+          <div className="flex-1 min-h-0">
+            <pre className="text-[9px] text-white/70 font-mono whitespace-pre-wrap bg-black/20 p-3 rounded h-full overflow-y-auto custom-scrollbar">
+              {generateReportText()}
+            </pre>
           </div>
         </div>
-      )}
-
-      {/* Report Preview */}
-      <div className="inner-glass p-3 rounded-lg">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-[9px] text-white/60 uppercase">보고서 미리보기</span>
-          <span className="text-[8px] text-white/40">
-            {new Date().toLocaleDateString('ko-KR')} 기준
-          </span>
-        </div>
-        <pre className="text-[8px] text-white/70 font-mono whitespace-pre-wrap bg-black/20 p-3 rounded max-h-[200px] overflow-y-auto custom-scrollbar">
-          {generateReportText()}
-        </pre>
       </div>
     </div>
   );

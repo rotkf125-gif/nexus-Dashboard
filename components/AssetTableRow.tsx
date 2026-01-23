@@ -116,18 +116,18 @@ const AssetTableRow = memo(({
       )}
       {/* 5. Price + 가격 변화 인디케이터 */}
       {isColumnVisible('price') && (
-        <td className={`p-1.5 pr-4 text-right ${priceChange ? (priceChange.isUp ? 'price-flash-up' : 'price-flash-down') : ''}`}>
-          <div className="flex items-center justify-end gap-1.5">
+        <td className={`p-1.5 pr-4 text-right relative ${priceChange ? (priceChange.isUp ? 'price-flash-up' : 'price-flash-down') : ''}`}>
+          <div className="flex items-center justify-end">
             <span className={`text-[10px] text-white/90 font-medium ${priceChange ? 'price-count-animation' : ''}`}>
               ${a.price.toFixed(2)}
             </span>
-            {priceChange && (
-              <span className={`price-indicator ${priceChange.isUp ? 'price-indicator-up' : 'price-indicator-down'}`}>
-                <i className={`fas fa-caret-${priceChange.isUp ? 'up' : 'down'}`} />
-                <span>{Math.abs(priceChange.pct).toFixed(1)}%</span>
-              </span>
-            )}
           </div>
+          {priceChange && (
+            <span className={`price-indicator ${priceChange.isUp ? 'price-indicator-up' : 'price-indicator-down'}`}>
+              <i className={`fas fa-caret-${priceChange.isUp ? 'up' : 'down'}`} />
+              <span>{Math.abs(priceChange.pct).toFixed(1)}%</span>
+            </span>
+          )}
         </td>
       )}
       {/* 6. Val($) + P/L($) */}

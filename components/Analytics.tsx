@@ -272,8 +272,8 @@ export default function Analytics({ horizontal = false }: AnalyticsProps) {
           </div>
         </div>
 
-        {/* Row 2: Risk Score, Risk Factors, Performance */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-3 md:mb-4">
+        {/* Row 2: Risk Score, Risk Factors, Performance, Market Correlation */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           {/* Risk Score */}
           <div className="inner-glass p-4 rounded-xl">
             <div className="text-xs tracking-widest text-white/60 mb-2">리스크 점수</div>
@@ -291,22 +291,22 @@ export default function Analytics({ horizontal = false }: AnalyticsProps) {
           </div>
 
           {/* Risk Factors */}
-          <div className="inner-glass p-4 rounded-xl col-span-2">
+          <div className="inner-glass p-4 rounded-xl">
             <div className="text-xs tracking-widest text-white/60 mb-3">리스크 요인</div>
-            <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+            <div className="space-y-2">
               {[
                 { label: '분산도', eng: 'Diversification', score: riskMetrics.diversificationScore },
                 { label: '섹터 집중', eng: 'Sector Concentration', score: riskMetrics.sectorConcentration },
                 { label: '변동성', eng: 'Volatility', score: riskMetrics.volatilityScore },
                 { label: '종목 집중', eng: 'Stock Concentration', score: riskMetrics.concentrationRisk },
               ].map(factor => (
-                <div key={factor.label}>
-                  <div className="flex items-center gap-3 mb-1">
+                <div key={factor.label} className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
                     <div className="flex gap-0.5">
                       {[...Array(5)].map((_, i) => (
                         <div
                           key={i}
-                          className={`w-2 h-4 rounded-sm ${
+                          className={`w-1.5 h-3 rounded-sm ${
                             i < Math.ceil(factor.score / 20)
                               ? factor.score >= 70 ? 'bg-v64-success' : factor.score >= 40 ? 'bg-celestial-gold' : 'bg-v64-danger'
                               : 'bg-white/10'
@@ -314,15 +314,13 @@ export default function Analytics({ horizontal = false }: AnalyticsProps) {
                         />
                       ))}
                     </div>
-                    <span className={`text-sm font-mono ${
-                      factor.score >= 70 ? 'text-v64-success' : factor.score >= 40 ? 'text-celestial-gold' : 'text-v64-danger'
-                    }`}>
-                      {factor.score}
-                    </span>
+                    <span className="text-[10px] text-white/60">{factor.label}</span>
                   </div>
-                  <div className="text-xs text-white/60">
-                    {factor.label} <span className="text-white/40">({factor.eng})</span>
-                  </div>
+                  <span className={`text-xs font-mono ${
+                    factor.score >= 70 ? 'text-v64-success' : factor.score >= 40 ? 'text-celestial-gold' : 'text-v64-danger'
+                  }`}>
+                    {factor.score}
+                  </span>
                 </div>
               ))}
             </div>
@@ -354,62 +352,20 @@ export default function Analytics({ horizontal = false }: AnalyticsProps) {
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Row 3: Market Correlation, Risk Profile, Insight */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           {/* Market Correlation */}
           <div className="inner-glass p-4 rounded-xl">
             <div className="text-xs tracking-widest text-white/60 mb-3">시장 상관관계</div>
-            <div className="grid grid-cols-2 gap-4 text-center">
-              <div>
+            <div className="space-y-3">
+              <div className="text-center">
                 <div className="text-xs text-white/50 mb-1">VS S&P 500</div>
                 <div className="text-2xl font-display text-white/90">({marketCorrelations.spy.toFixed(2)})</div>
               </div>
-              <div>
+              <div className="text-center">
                 <div className="text-xs text-white/50 mb-1">VS NASDAQ</div>
                 <div className="text-2xl font-display text-white/90">({marketCorrelations.qqq.toFixed(2)})</div>
               </div>
             </div>
-          </div>
-
-          {/* Risk Profile */}
-          <div className="inner-glass p-4 rounded-xl">
-            <div className="text-xs tracking-widest text-white/60 mb-3">리스크 프로필</div>
-            <div className="text-xs text-white/60 mb-3">포트폴리오 구성 분석 기반:</div>
-            <div className="flex flex-wrap gap-2">
-              <span className="px-3 py-1.5 rounded-full bg-blue-500/20 border border-blue-500/50 text-blue-400 text-xs">
-                Tech (기술주)
-              </span>
-              <span className="px-3 py-1.5 rounded-full bg-green-500/20 border border-green-500/50 text-green-400 text-xs">
-                방어 (Defensive)
-              </span>
-              <span className="px-3 py-1.5 rounded-full bg-yellow-500/20 border border-yellow-500/50 text-yellow-400 text-xs">
-                경기 (Cyclical)
-              </span>
-            </div>
-          </div>
-
-          {/* Insight */}
-          <div className="inner-glass p-4 rounded-xl md:col-span-2">
-            <div className="text-xs tracking-widest text-white/60 mb-3">인사이트</div>
-            <ul className="text-xs text-white/80 space-y-2 list-disc list-inside">
-              {riskProfile.defensiveExposure < 0.2 && (
-                <li>변동성을 낮추기 위해 방어 자산 비중을 늘리는 것을 고려하세요.</li>
-              )}
-              {riskProfile.techExposure > 0.4 && (
-                <li>기술주 섹터 비중이 높습니다. 분산도를 재검토하세요.</li>
-              )}
-              {maxAssetWeight > 0.2 && portfolioStats.top3[0] && (
-                <li>{portfolioStats.top3[0].ticker}의 집중도를 모니터링하세요.</li>
-              )}
-              {riskMetrics.overallScore >= 70 && (
-                <li>포트폴리오가 잘 분산되어 있습니다. 현재 전략을 유지하세요.</li>
-              )}
-              {market.vix > 25 && (
-                <li>VIX가 상승({market.vix?.toFixed(1)})했습니다. 시장 변동성을 주시하세요.</li>
-              )}
-            </ul>
           </div>
         </div>
       </div>

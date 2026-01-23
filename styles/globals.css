@@ -701,6 +701,10 @@ body {
 
 /* Price change indicator pulse */
 .price-indicator {
+  position: absolute;
+  right: -60px;
+  top: 50%;
+  transform: translateY(-50%);
   display: inline-flex;
   align-items: center;
   gap: 2px;
@@ -708,7 +712,8 @@ body {
   border-radius: 4px;
   font-size: 8px;
   font-weight: 500;
-  animation: indicatorPulse 2s ease-in-out infinite;
+  animation: indicatorSlideIn 0.3s ease-out forwards, indicatorPulse 2s ease-in-out infinite 0.3s;
+  white-space: nowrap;
 }
 
 .price-indicator-up {
@@ -723,9 +728,20 @@ body {
   border: 1px solid rgba(248, 113, 113, 0.3);
 }
 
+@keyframes indicatorSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-50%) translateX(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+}
+
 @keyframes indicatorPulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.7; transform: scale(0.98); }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
 }
 
 /* Numeric value highlight */

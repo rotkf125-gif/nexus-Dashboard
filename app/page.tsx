@@ -18,7 +18,7 @@ import FreedomModal from '@/components/FreedomModal';
 import ExportModal from '@/components/ExportModal';
 import IncomeStream from '@/components/IncomeStream';
 import DividendOptimizer from '@/components/DividendOptimizer';
-import AssetTurnover from '@/components/AssetTurnover';
+import PortfolioInsight from '@/components/PortfolioInsight';
 import RebalanceSuggestion from '@/components/RebalanceSuggestion';
 import MonthlyReport from '@/components/MonthlyReport';
 import StressTest from '@/components/StressTest';
@@ -343,14 +343,14 @@ function DashboardContent() {
           {activeTab === 'analytics' && (
             <div className="min-h-[800px] space-y-6">
               <Analytics horizontal />
-              
-              {/* Rebalance & Asset Turnover Grid */}
+
+              {/* Rebalance & Insight Grid */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div className="inner-glass p-4 rounded-lg">
                   <RebalanceSuggestion />
                 </div>
                 <div className="inner-glass p-4 rounded-lg">
-                  <AssetTurnover />
+                  <PortfolioInsight />
                 </div>
               </div>
             </div>
