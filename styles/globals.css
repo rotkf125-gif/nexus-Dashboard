@@ -768,3 +768,758 @@ body {
   background: linear-gradient(90deg, transparent, rgba(248, 113, 113, 0.15), transparent);
   opacity: 1;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   ACCESSIBILITY (A11y) STYLES
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── SKIP LINK ─── */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 9999;
+  padding: 12px 24px;
+  background: var(--bg-color);
+  color: var(--primary);
+  border: 2px solid var(--primary);
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.skip-link:focus {
+  left: 16px;
+  top: 16px;
+  outline: none;
+  box-shadow: 0 0 20px rgba(224, 247, 250, 0.4);
+}
+
+/* ─── FOCUS VISIBLE STYLES ─── */
+.focus-visible-ring:focus-visible {
+  outline: 2px solid rgba(96, 165, 250, 0.8);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.25);
+}
+
+/* Remove default outline only when focus-visible is supported */
+.focus-visible-ring:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Button focus styles */
+.celestial-btn:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.8);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.15), 0 4px 25px rgba(255, 255, 255, 0.15);
+}
+
+.celestial-btn-gold:focus-visible {
+  outline-color: rgba(255, 215, 0, 0.8);
+  box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.2), 0 0 25px rgba(255, 215, 0, 0.2);
+}
+
+/* Input focus styles - override outline:none */
+.glass-input:focus-visible {
+  outline: 2px solid rgba(96, 165, 250, 0.6);
+  outline-offset: 1px;
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(0, 0, 0, 0.4);
+  box-shadow:
+    inset 0 2px 8px rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(255, 255, 255, 0.1),
+    0 0 0 4px rgba(96, 165, 250, 0.15);
+}
+
+/* Tab focus styles */
+.tab-button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -2px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ─── SCREEN READER ONLY ─── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ─── REDUCED MOTION ─── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ─── HIGH CONTRAST MODE ─── */
+@media (prefers-contrast: high) {
+  .glass-card,
+  .inner-glass {
+    border-width: 2px;
+  }
+
+  .text-white\/50,
+  .text-white\/60,
+  .text-white\/70 {
+    opacity: 1 !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE UX STYLES
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── TOUCH TARGET ─── */
+.touch-target {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* ─── BOTTOM NAVIGATION ─── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+  background: rgba(2, 5, 31, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 64px;
+  min-height: 48px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.bottom-nav-item.active {
+  color: var(--primary);
+  background: rgba(224, 247, 250, 0.1);
+}
+
+.bottom-nav-item:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* ─── RESPONSIVE MODAL ─── */
+@media (max-width: 640px) {
+  .modal-responsive {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100vh;
+    max-height: 100vh;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .modal-responsive-content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modal-responsive-body {
+    flex: 1;
+    overflow-y: auto;
+  }
+}
+
+/* ─── SAFE AREA PADDING ─── */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-area-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LOADING & ERROR STATES
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── SKELETON ─── */
+@keyframes skeletonShimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 0px,
+    rgba(255, 255, 255, 0.1) 50px,
+    rgba(255, 255, 255, 0.05) 100px
+  );
+  background-size: 200px 100%;
+  animation: skeletonShimmer 1.5s infinite linear;
+  border-radius: 4px;
+}
+
+.skeleton-text {
+  height: 14px;
+  margin-bottom: 8px;
+  border-radius: 2px;
+}
+
+.skeleton-text:last-child {
+  width: 60%;
+}
+
+.skeleton-circle {
+  border-radius: 50%;
+}
+
+.skeleton-card {
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+/* ─── ERROR STATE ─── */
+.error-state {
+  background: rgba(248, 113, 113, 0.08);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  border-radius: 8px;
+  padding: 24px;
+  text-align: center;
+}
+
+.error-state-icon {
+  font-size: 48px;
+  color: var(--danger);
+  opacity: 0.6;
+  margin-bottom: 16px;
+}
+
+.error-state-message {
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 16px;
+}
+
+/* ─── RETRY BUTTON ─── */
+.retry-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: rgba(248, 113, 113, 0.15);
+  border: 1px solid rgba(248, 113, 113, 0.4);
+  border-radius: 4px;
+  color: var(--danger);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.retry-btn:hover {
+  background: rgba(248, 113, 113, 0.25);
+  border-color: rgba(248, 113, 113, 0.6);
+}
+
+.retry-btn:focus-visible {
+  outline: 2px solid var(--danger);
+  outline-offset: 2px;
+}
+
+.retry-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   INTERACTION & ANIMATION
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── TAB PANEL ANIMATION ─── */
+.tab-panel-enter {
+  animation: tabPanelFadeIn 0.3s ease-out;
+}
+
+@keyframes tabPanelFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─── TAB INDICATOR ─── */
+.tab-indicator {
+  position: absolute;
+  background: currentColor;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tab-indicator-horizontal {
+  bottom: 0;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+}
+
+.tab-indicator-vertical {
+  left: 0;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+}
+
+/* ─── BUTTON INTERACTIVE ─── */
+.btn-interactive {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-interactive:active {
+  transform: scale(0.98);
+}
+
+/* ─── EMPTY STATE ─── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.empty-state-icon {
+  font-size: 48px;
+  opacity: 0.3;
+  margin-bottom: 16px;
+}
+
+/* ─── SEARCH INPUT ─── */
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-input-icon {
+  position: absolute;
+  left: 12px;
+  color: rgba(255, 255, 255, 0.4);
+  pointer-events: none;
+}
+
+.search-input {
+  padding-left: 36px;
+  width: 100%;
+}
+
+.search-input-clear {
+  position: absolute;
+  right: 8px;
+  padding: 4px;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.search-input-clear:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* ─── FILTER CHIP ─── */
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-chip:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.filter-chip.active {
+  background: rgba(96, 165, 250, 0.2);
+  border-color: rgba(96, 165, 250, 0.4);
+  color: rgb(96, 165, 250);
+}
+
+.filter-chip:focus-visible {
+  outline: 2px solid rgba(96, 165, 250, 0.8);
+  outline-offset: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ANALYTICS RENEWAL - Health Score, Bubble Chart, Insight Chips
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── HEALTH SCORE ─── */
+.health-score-container {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.health-progress-track {
+  height: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.health-progress-fill {
+  height: 100%;
+  border-radius: 5px;
+  background: linear-gradient(90deg,
+    #E57373 0%,
+    #FFB74D 35%,
+    #FFD700 50%,
+    #81C784 100%
+  );
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.health-score-value {
+  font-size: 3.5rem;
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  line-height: 1;
+  background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.8) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.health-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.health-trend.positive {
+  color: #81C784;
+  background: rgba(129, 199, 132, 0.15);
+}
+
+.health-trend.negative {
+  color: #E57373;
+  background: rgba(229, 115, 115, 0.15);
+}
+
+.health-trend.stable {
+  color: #90A4AE;
+  background: rgba(144, 164, 174, 0.15);
+}
+
+.risk-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.risk-badge.low {
+  background: rgba(129, 199, 132, 0.2);
+  border: 1px solid rgba(129, 199, 132, 0.4);
+  color: #81C784;
+}
+
+.risk-badge.moderate {
+  background: rgba(255, 215, 0, 0.2);
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  color: #FFD700;
+}
+
+.risk-badge.high {
+  background: rgba(255, 183, 77, 0.2);
+  border: 1px solid rgba(255, 183, 77, 0.4);
+  color: #FFB74D;
+}
+
+.risk-badge.extreme {
+  background: rgba(229, 115, 115, 0.2);
+  border: 1px solid rgba(229, 115, 115, 0.4);
+  color: #E57373;
+}
+
+/* ─── BUBBLE CHART ─── */
+.bubble-chart-container {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+}
+
+.bubble-chart-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+}
+
+.bubble-chart-tab {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.bubble-chart-tab:hover {
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.bubble-chart-tab.active {
+  color: #E0F7FA;
+  background: rgba(224, 247, 250, 0.12);
+  border-color: rgba(224, 247, 250, 0.3);
+}
+
+/* ─── RISK FACTORS PANEL ─── */
+.risk-factors-panel {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.risk-factor-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.risk-factor-row:last-child {
+  border-bottom: none;
+}
+
+.risk-factor-label {
+  width: 70px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  flex-shrink: 0;
+}
+
+.risk-factor-bar {
+  flex: 1;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.risk-factor-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.risk-factor-fill.good {
+  background: linear-gradient(90deg, #81C784, #4CAF50);
+}
+
+.risk-factor-fill.warning {
+  background: linear-gradient(90deg, #FFD700, #FFC107);
+}
+
+.risk-factor-fill.danger {
+  background: linear-gradient(90deg, #E57373, #EF5350);
+}
+
+.risk-factor-value {
+  width: 36px;
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.risk-factor-trend {
+  width: 20px;
+  font-size: 14px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.risk-factor-trend.up { color: #81C784; }
+.risk-factor-trend.down { color: #E57373; }
+.risk-factor-trend.stable { color: #90A4AE; }
+
+/* ─── INSIGHT CHIPS ─── */
+.insight-chips-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+}
+
+.insight-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: default;
+  transition: all 0.2s ease;
+}
+
+.insight-chip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.insight-chip-warning {
+  background: rgba(255, 183, 77, 0.15);
+  border: 1px solid rgba(255, 183, 77, 0.4);
+  color: #FFB74D;
+}
+
+.insight-chip-danger {
+  background: rgba(229, 115, 115, 0.15);
+  border: 1px solid rgba(229, 115, 115, 0.4);
+  color: #E57373;
+}
+
+.insight-chip-success {
+  background: rgba(129, 199, 132, 0.15);
+  border: 1px solid rgba(129, 199, 132, 0.4);
+  color: #81C784;
+}
+
+.insight-chip-info {
+  background: rgba(96, 165, 250, 0.15);
+  border: 1px solid rgba(96, 165, 250, 0.4);
+  color: #60A5FA;
+}
+
+/* ─── COLLAPSIBLE SECTION ─── */
+.collapsible-section {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.collapsible-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.collapsible-header:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.collapsible-content {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.collapsible-content.expanded {
+  max-height: 600px;
+  opacity: 1;
+}
+
+.collapsible-chevron {
+  transition: transform 0.3s ease;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.collapsible-chevron.expanded {
+  transform: rotate(180deg);
+}
+
+/* ─── ADDITIONAL METRICS ─── */
+.metrics-row {
+  display: flex;
+  gap: 16px;
+  padding-top: 12px;
+  margin-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.metric-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.metric-label {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.metric-value {
+  font-size: 14px;
+  font-family: 'JetBrains Mono', monospace;
+  color: rgba(255, 255, 255, 0.9);
+}

@@ -24,9 +24,22 @@ import MonthlyReport from '@/components/MonthlyReport';
 import StressTest from '@/components/StressTest';
 import PerformanceArena from '@/components/PerformanceArena';
 import HistoricPerformance from '@/components/HistoricPerformance';
+import PortfolioTimeline from '@/components/charts/PortfolioTimeline';
+import { BottomNavigation, DEFAULT_NAV_ITEMS } from '@/components/ui/BottomNavigation';
+import { useTabNavigation } from '@/lib/hooks/useKeyboardNavigation';
 
 type TabType = 'stellar' | 'income' | 'analytics' | 'performance' | 'simulation';
 type ViewMode = 'table' | 'heatmap';
+
+const TAB_IDS: TabType[] = ['stellar', 'income', 'analytics', 'performance', 'simulation'];
+
+const TAB_CONFIG = {
+  stellar: { label: 'Stellar', icon: 'fas fa-star', color: '#22d3ee' },
+  income: { label: 'Income', icon: 'fas fa-coins', color: '#ffd700' },
+  analytics: { label: 'Analytics', icon: 'fas fa-shield-alt', color: '#a855f7' },
+  performance: { label: 'Performance', icon: 'fas fa-chart-line', color: '#4ade80' },
+  simulation: { label: 'Simulation', icon: 'fas fa-flask', color: '#f97316' },
+} as const;
 
 function DashboardContent() {
   const {
@@ -52,6 +65,14 @@ function DashboardContent() {
   const [activeTab, setActiveTab] = useState<TabType>('stellar');
   const [viewMode, setViewMode] = useState<ViewMode>('table');
   const [isColSettingsOpen, setIsColSettingsOpen] = useState(false);
+
+  // Keyboard navigation for tabs
+  const { handleKeyDown: handleTabKeyDown } = useTabNavigation(
+    TAB_IDS,
+    activeTab,
+    (tab) => setActiveTab(tab as TabType),
+    'vertical'
+  );
 
   // INCOME 자산 메모이제이션
   const incomeAssets = useMemo(
@@ -110,81 +131,46 @@ function DashboardContent() {
       <StrategyBar />
 
       {/* Main Content with Left Sidebar Tabs - Seamless Connection */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 glass-card overflow-hidden relative">
-        {/* Left Sidebar Tabs - 모바일: 가로 스크롤, 데스크톱: 세로 */}
-        <div className="lg:col-span-2 p-2 md:p-4 flex flex-col h-full relative z-10">
-          <div className="hidden lg:block text-[10px] tracking-[0.15em] text-white/50 mb-3 uppercase font-medium text-center">Navigation</div>
-          <div className="flex lg:flex-col flex-1 gap-0 relative overflow-x-auto lg:overflow-x-visible custom-scrollbar">
-            {/* Stellar Assets - Cyan (핵심 자산) */}
-            <button
-              onClick={() => setActiveTab('stellar')}
-              className={`flex-1 lg:w-full whitespace-nowrap px-3 md:px-4 py-2 md:py-3 transition-all duration-300 flex items-center justify-center relative ${
-                activeTab === 'stellar'
-                  ? 'text-celestial-cyan border-b-[3px] lg:border-b-0 lg:border-l-[3px] border-celestial-cyan bg-celestial-cyan/10'
-                  : 'text-white/70 hover:bg-celestial-cyan/10 hover:text-celestial-cyan'
-              }`}
-            >
-              <div className="flex items-center gap-1.5 md:gap-2.5">
-                <i className="fas fa-star text-[10px] md:text-xs" />
-                <span className="text-[11px] md:text-[13px] font-medium tracking-wide">Stellar</span>
-              </div>
-            </button>
-            {/* Income Stream - Gold (배당/수익) */}
-            <button
-              onClick={() => setActiveTab('income')}
-              className={`flex-1 lg:w-full whitespace-nowrap px-3 md:px-4 py-2 md:py-3 transition-all duration-300 flex items-center justify-center relative ${
-                activeTab === 'income'
-                  ? 'text-celestial-gold border-b-[3px] lg:border-b-0 lg:border-l-[3px] border-celestial-gold bg-celestial-gold/10'
-                  : 'text-white/70 hover:bg-celestial-gold/10 hover:text-celestial-gold'
-              }`}
-            >
-              <div className="flex items-center gap-1.5 md:gap-2.5">
-                <i className="fas fa-coins text-[10px] md:text-xs" />
-                <span className="text-[11px] md:text-[13px] font-medium tracking-wide">Income</span>
-              </div>
-            </button>
-            {/* Analytics - Purple (분석/리스크) */}
-            <button
-              onClick={() => setActiveTab('analytics')}
-              className={`flex-1 lg:w-full whitespace-nowrap px-3 md:px-4 py-2 md:py-3 transition-all duration-300 flex items-center justify-center relative ${
-                activeTab === 'analytics'
-                  ? 'text-celestial-purple border-b-[3px] lg:border-b-0 lg:border-l-[3px] border-celestial-purple bg-celestial-purple/10'
-                  : 'text-white/70 hover:bg-celestial-purple/10 hover:text-celestial-purple'
-              }`}
-            >
-              <div className="flex items-center gap-1.5 md:gap-2.5">
-                <i className="fas fa-shield-alt text-[10px] md:text-xs" />
-                <span className="text-[11px] md:text-[13px] font-medium tracking-wide">Analytics</span>
-              </div>
-            </button>
-            {/* Performance - Green (성과/수익률) */}
-            <button
-              onClick={() => setActiveTab('performance')}
-              className={`flex-1 lg:w-full whitespace-nowrap px-3 md:px-4 py-2 md:py-3 transition-all duration-300 flex items-center justify-center relative ${
-                activeTab === 'performance'
-                  ? 'text-v64-success border-b-[3px] lg:border-b-0 lg:border-l-[3px] border-v64-success bg-v64-success/10'
-                  : 'text-white/70 hover:bg-v64-success/10 hover:text-v64-success'
-              }`}
-            >
-              <div className="flex items-center gap-1.5 md:gap-2.5">
-                <i className="fas fa-chart-line text-[10px] md:text-xs" />
-                <span className="text-[11px] md:text-[13px] font-medium tracking-wide">Performance</span>
-              </div>
-            </button>
-            {/* Simulation - Orange (시뮬레이션/실험) */}
-            <button
-              onClick={() => setActiveTab('simulation')}
-              className={`flex-1 lg:w-full whitespace-nowrap px-3 md:px-4 py-2 md:py-3 transition-all duration-300 flex items-center justify-center relative ${
-                activeTab === 'simulation'
-                  ? 'text-orange-400 border-b-[3px] lg:border-b-0 lg:border-l-[3px] border-orange-500 bg-orange-500/10'
-                  : 'text-white/70 hover:bg-orange-500/10 hover:text-orange-400'
-              }`}
-            >
-              <div className="flex items-center gap-1.5 md:gap-2.5">
-                <i className="fas fa-flask text-[10px] md:text-xs" />
-                <span className="text-[11px] md:text-[13px] font-medium tracking-wide">Simulation</span>
-              </div>
-            </button>
+      <div className="grid grid-cols-1 lg:grid-cols-12 glass-card overflow-hidden relative pb-16 lg:pb-0">
+        {/* Left Sidebar Tabs - 데스크톱 전용 (모바일은 하단 네비게이션 사용) */}
+        <div className="hidden lg:flex lg:col-span-2 p-2 md:p-4 flex-col h-full relative z-10">
+          <div className="text-[10px] tracking-[0.15em] text-white/50 mb-3 uppercase font-medium text-center">Navigation</div>
+          <div
+            role="tablist"
+            aria-label="대시보드 탭 네비게이션"
+            aria-orientation="vertical"
+            className="flex flex-col flex-1 gap-0 relative"
+            onKeyDown={handleTabKeyDown}
+          >
+            {TAB_IDS.map((tabId) => {
+              const config = TAB_CONFIG[tabId];
+              const isActive = activeTab === tabId;
+              return (
+                <button
+                  key={tabId}
+                  role="tab"
+                  id={`tab-${tabId}`}
+                  aria-selected={isActive}
+                  aria-controls={`panel-${tabId}`}
+                  tabIndex={isActive ? 0 : -1}
+                  onClick={() => setActiveTab(tabId)}
+                  className={`w-full whitespace-nowrap px-4 py-3 transition-all duration-300 flex items-center justify-center relative focus-visible-ring ${
+                    isActive
+                      ? 'border-l-[3px] bg-current/10'
+                      : 'text-white/70 hover:bg-white/5 border-l-[3px] border-transparent'
+                  }`}
+                  style={{
+                    color: isActive ? config.color : undefined,
+                    borderColor: isActive ? config.color : undefined
+                  }}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <i className={`${config.icon} text-xs`} aria-hidden="true" />
+                    <span className="text-[13px] font-medium tracking-wide">{config.label}</span>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -205,7 +191,12 @@ function DashboardContent() {
         >
           {/* Stellar Assets Tab */}
           {activeTab === 'stellar' && (
-            <div className="h-full min-h-[500px] md:min-h-[800px]">
+            <div
+              role="tabpanel"
+              id="panel-stellar"
+              aria-labelledby="tab-stellar"
+              tabIndex={0}
+              className="h-full min-h-[500px] md:min-h-[800px] tab-panel-enter">
               <div className="flex justify-between items-end mb-4 pb-2 border-b border-white/10">
                 <h2 className="text-lg font-display tracking-widest flex items-center gap-3 text-white">
                   <i className="fas fa-star text-celestial-gold text-xs" /> STELLAR ASSETS
@@ -307,7 +298,12 @@ function DashboardContent() {
 
           {/* Income Stream Tab */}
           {activeTab === 'income' && (
-            <div className="min-h-[800px] space-y-6">
+            <div
+              role="tabpanel"
+              id="panel-income"
+              aria-labelledby="tab-income"
+              tabIndex={0}
+              className="min-h-[800px] space-y-6 tab-panel-enter">
               <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
                 <h2 className="text-lg font-display tracking-widest flex items-center gap-3 text-white">
                   <i className="fas fa-coins text-celestial-gold text-xs" /> INCOME STREAM
@@ -341,7 +337,12 @@ function DashboardContent() {
 
           {/* Analytics Tab */}
           {activeTab === 'analytics' && (
-            <div className="min-h-[800px] space-y-6">
+            <div
+              role="tabpanel"
+              id="panel-analytics"
+              aria-labelledby="tab-analytics"
+              tabIndex={0}
+              className="min-h-[800px] space-y-6 tab-panel-enter">
               <Analytics horizontal />
 
               {/* Rebalance & Insight Grid */}
@@ -358,7 +359,12 @@ function DashboardContent() {
 
           {/* Performance Tab */}
           {activeTab === 'performance' && (
-            <div className="space-y-5 min-h-[800px]">
+            <div
+              role="tabpanel"
+              id="panel-performance"
+              aria-labelledby="tab-performance"
+              tabIndex={0}
+              className="space-y-5 min-h-[800px] tab-panel-enter">
               <div className="grid grid-cols-1 xl:grid-cols-4 gap-5">
                 <div className="xl:col-span-1">
                   <PerformanceArena compact />
@@ -367,6 +373,8 @@ function DashboardContent() {
                   <HistoricPerformance />
                 </div>
               </div>
+              {/* Portfolio Timeline */}
+              <PortfolioTimeline />
               {/* Monthly Report */}
               <div className="inner-glass p-4 rounded-lg">
                 <MonthlyReport />
@@ -376,7 +384,12 @@ function DashboardContent() {
 
           {/* Simulation Tab */}
           {activeTab === 'simulation' && (
-            <div className="flex flex-col min-h-[800px]">
+            <div
+              role="tabpanel"
+              id="panel-simulation"
+              aria-labelledby="tab-simulation"
+              tabIndex={0}
+              className="flex flex-col min-h-[800px] tab-panel-enter">
               <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3 flex-shrink-0">
                 <h2 className="text-base font-semibold text-white font-display tracking-widest flex items-center gap-2">
                   <i className="fas fa-flask text-v64-success" /> SIMULATION
@@ -394,10 +407,18 @@ function DashboardContent() {
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="text-center text-[10px] opacity-30 py-4 tracking-[0.3em]">
+      {/* Footer - Desktop */}
+      <footer className="hidden lg:block text-center text-[10px] opacity-30 py-4 tracking-[0.3em]">
         NEXUS DASHBOARD v1.0 // NEXT.JS EDITION
       </footer>
+
+      {/* Bottom Navigation - Mobile Only */}
+      <BottomNavigation
+        items={DEFAULT_NAV_ITEMS}
+        activeItem={activeTab}
+        onItemChange={(id) => setActiveTab(id as TabType)}
+        className="lg:hidden"
+      />
     </div>
   );
 }

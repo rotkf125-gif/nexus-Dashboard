@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useId } from 'react';
 import { Asset } from '@/lib/types';
 import { SECTORS } from '@/lib/config';
+import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
 
 interface AssetModalProps {
   isOpen: boolean;
@@ -44,6 +45,34 @@ export default function AssetModal({
   const [assetName, setAssetName] = useState('');
 
   const isEditMode = editingAsset !== null && editingAsset !== undefined;
+
+  // Accessibility: Focus trap and escape key
+  const containerRef = useFocusTrap<HTMLDivElement>({
+    isActive: isOpen,
+    onEscape: onClose,
+  });
+
+  // Generate unique IDs for form labels
+  const formId = useId();
+  const titleId = `${formId}-title`;
+  const tickerId = `${formId}-ticker`;
+  const qtyId = `${formId}-qty`;
+  const avgId = `${formId}-avg`;
+  const buyRateId = `${formId}-buyRate`;
+  const typeId = `${formId}-type`;
+  const sectorId = `${formId}-sector`;
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   // 티커로 섹터 정보 자동 조회
   const fetchSectorInfo = useCallback(async (tickerSymbol: string) => {
@@ -139,22 +168,41 @@ export default function AssetModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="glass-card w-[420px] p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center" role="presentation">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+
+      {/* Modal Dialog */}
+      <div
+        ref={containerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        className="relative glass-card w-[90vw] max-w-[420px] sm:w-[420px] p-4 sm:p-6 max-h-[90vh] overflow-y-auto custom-scrollbar"
+        tabIndex={-1}
+      >
         {/* Header */}
         <div className={`flex justify-between items-center mb-5 border-b pb-3 ${
           isEditMode ? 'border-celestial-purple/20' : 'border-white/10'
         }`}>
-          <h3 className={`font-semibold text-base tracking-widest font-display ${
-            isEditMode ? 'text-celestial-purple' : 'text-white'
-          }`}>
+          <h3
+            id={titleId}
+            className={`font-semibold text-base tracking-widest font-display ${
+              isEditMode ? 'text-celestial-purple' : 'text-white'
+            }`}
+          >
             {isEditMode ? `EDIT ${editingAsset?.ticker}` : 'ADD ASSET'}
           </h3>
           <button
             onClick={onClose}
-            className="text-white/40 hover:text-white transition-colors"
+            className="w-10 h-10 flex items-center justify-center rounded text-white/40 hover:text-white hover:bg-white/10 transition-colors focus-visible-ring touch-target"
+            aria-label="닫기"
           >
-            <i className="fas fa-times" />
+            <i className="fas fa-times" aria-hidden="true" />
           </button>
         </div>
 
@@ -162,67 +210,84 @@ export default function AssetModal({
         <div className="space-y-3">
           {/* Ticker - 수정 모드에서는 비활성화 */}
           <div>
-            <label className="text-[10px] text-white/50 block mb-1 tracking-widest font-medium">
+            <label
+              htmlFor={tickerId}
+              className="text-[10px] text-white/50 block mb-1 tracking-widest font-medium"
+            >
               TICKER
               {isFetchingSector && (
-                <span className="ml-2 text-celestial-cyan animate-pulse">
-                  <i className="fas fa-spinner fa-spin mr-1" />
+                <span className="ml-2 text-celestial-cyan animate-pulse" aria-live="polite">
+                  <i className="fas fa-spinner fa-spin mr-1" aria-hidden="true" />
                   조회 중...
                 </span>
               )}
             </label>
             <input
+              id={tickerId}
               type="text"
               value={ticker}
               onChange={(e) => setTicker(e.target.value.toUpperCase())}
               onBlur={handleTickerBlur}
               disabled={isEditMode}
-              className={`glass-input py-2.5 w-full uppercase font-semibold rounded-lg ${
+              className={`glass-input py-2.5 w-full uppercase font-semibold rounded-lg focus-visible-ring ${
                 isEditMode ? 'opacity-50 cursor-not-allowed' : ''
               }`}
               placeholder="e.g. AAPL"
+              aria-describedby={assetName && !isEditMode ? `${tickerId}-name` : undefined}
             />
             {assetName && !isEditMode && (
-              <div className="text-[10px] text-celestial-cyan/80 mt-1 truncate">
+              <div id={`${tickerId}-name`} className="text-[10px] text-celestial-cyan/80 mt-1 truncate">
                 {assetName}
               </div>
             )}
           </div>
 
           {/* Qty, Avg, BuyRate */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
             <div>
-              <label className="text-[10px] text-white/50 block mb-1 tracking-widest font-medium">
+              <label
+                htmlFor={qtyId}
+                className="text-[10px] text-white/50 block mb-1 tracking-widest font-medium"
+              >
                 QTY
               </label>
               <input
+                id={qtyId}
                 type="number"
                 value={qty || ''}
                 onChange={(e) => setQty(Number(e.target.value))}
-                className="glass-input py-2.5 w-full rounded-lg"
+                className="glass-input py-2.5 w-full rounded-lg focus-visible-ring"
               />
             </div>
             <div>
-              <label className="text-[10px] text-white/50 block mb-1 tracking-widest font-medium">
+              <label
+                htmlFor={avgId}
+                className="text-[10px] text-white/50 block mb-1 tracking-widest font-medium"
+              >
                 AVG COST
               </label>
               <input
+                id={avgId}
                 type="number"
                 step="0.01"
                 value={avg || ''}
                 onChange={(e) => setAvg(Number(e.target.value))}
-                className="glass-input py-2.5 w-full rounded-lg"
+                className="glass-input py-2.5 w-full rounded-lg focus-visible-ring"
               />
             </div>
             <div>
-              <label className="text-[10px] text-white/50 block mb-1 tracking-widest font-medium">
+              <label
+                htmlFor={buyRateId}
+                className="text-[10px] text-white/50 block mb-1 tracking-widest font-medium"
+              >
                 매입환율
               </label>
               <input
+                id={buyRateId}
                 type="number"
                 value={buyRate || ''}
                 onChange={(e) => setBuyRate(Number(e.target.value))}
-                className="glass-input py-2.5 w-full rounded-lg"
+                className="glass-input py-2.5 w-full rounded-lg focus-visible-ring"
                 placeholder="1450"
               />
             </div>
@@ -230,13 +295,17 @@ export default function AssetModal({
 
           {/* Type */}
           <div>
-            <label className="text-[10px] text-white/50 block mb-1 tracking-widest font-medium">
+            <label
+              htmlFor={typeId}
+              className="text-[10px] text-white/50 block mb-1 tracking-widest font-medium"
+            >
               TYPE
             </label>
             <select
+              id={typeId}
               value={type}
               onChange={(e) => setType(e.target.value as Asset['type'])}
-              className="glass-input py-2.5 w-full bg-transparent font-medium rounded-lg"
+              className="glass-input py-2.5 w-full bg-transparent font-medium rounded-lg focus-visible-ring"
             >
               {TYPE_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value} className="bg-[#0a0f29]">
@@ -248,13 +317,17 @@ export default function AssetModal({
 
           {/* Sector */}
           <div>
-            <label className="text-[10px] text-white/50 block mb-1 tracking-widest font-medium">
+            <label
+              htmlFor={sectorId}
+              className="text-[10px] text-white/50 block mb-1 tracking-widest font-medium"
+            >
               SECTOR
             </label>
             <select
+              id={sectorId}
               value={sector}
               onChange={(e) => setSector(e.target.value)}
-              className="glass-input py-2.5 w-full bg-transparent font-medium rounded-lg"
+              className="glass-input py-2.5 w-full bg-transparent font-medium rounded-lg focus-visible-ring"
             >
               {SECTOR_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value} className="bg-[#0a0f29]">
@@ -268,14 +341,16 @@ export default function AssetModal({
         {/* Buttons */}
         <div className="grid grid-cols-2 gap-3 mt-5">
           <button
+            type="button"
             onClick={onClose}
-            className="celestial-btn border-white/20 text-white/50"
+            className="celestial-btn border-white/20 text-white/50 focus-visible-ring py-3"
           >
             CANCEL
           </button>
           <button
+            type="button"
             onClick={handleSave}
-            className={`celestial-btn ${
+            className={`celestial-btn focus-visible-ring py-3 ${
               isEditMode
                 ? 'border-celestial-purple/40 text-celestial-purple'
                 : ''

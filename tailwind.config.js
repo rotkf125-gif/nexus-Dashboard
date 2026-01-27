@@ -19,6 +19,7 @@ module.exports = {
           success: '#81C784',
           danger: '#E57373',
           bg: '#02051F',
+          cyan: '#22d3ee',
         },
         v64: {
           success: '#4ADE80',
@@ -31,6 +32,37 @@ module.exports = {
         sans: ['Montserrat', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
         display: ['Cinzel', 'serif'],
+      },
+      spacing: {
+        'touch': '44px',
+        'touch-sm': '36px',
+        'safe-bottom': 'env(safe-area-inset-bottom)',
+        'safe-top': 'env(safe-area-inset-top)',
+      },
+      minWidth: {
+        'touch': '44px',
+      },
+      minHeight: {
+        'touch': '44px',
+      },
+      animation: {
+        'fade-in': 'fadeIn 0.3s ease-out',
+        'slide-up': 'slideUp 0.3s ease-out',
+        'slide-down': 'slideDown 0.3s ease-out',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        slideUp: {
+          '0%': { opacity: '0', transform: 'translateY(10px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        slideDown: {
+          '0%': { opacity: '0', transform: 'translateY(-10px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
       },
     },
   },

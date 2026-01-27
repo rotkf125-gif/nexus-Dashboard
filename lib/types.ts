@@ -229,6 +229,33 @@ export interface RiskMetrics {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// BUBBLE CHART TYPES
+// ═══════════════════════════════════════════════════════════════
+
+export type BubbleColorMode = 'sector' | 'type' | 'performance';
+
+export interface BubbleDataPoint {
+  x: number;           // 비중 %
+  y: number;           // 수익률 %
+  r: number;           // 버블 반지름
+  ticker: string;
+  sector: string;
+  type: AssetType;
+  value: number;       // 평가금액
+  cost: number;        // 원금
+  returnPct: number;   // 수익률 %
+  color: string;       // 색상
+}
+
+export type InsightChipType = 'warning' | 'danger' | 'success' | 'info';
+
+export interface InsightChip {
+  type: InsightChipType;
+  icon: string;
+  message: string;
+}
+
+// ═══════════════════════════════════════════════════════════════
 // WIDGET API TYPES
 // ═══════════════════════════════════════════════════════════════
 

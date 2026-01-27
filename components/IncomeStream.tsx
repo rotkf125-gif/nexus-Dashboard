@@ -10,6 +10,7 @@ import { TAX_CONFIG } from '@/lib/config';
 import { useIncomeAnalytics } from '@/lib/hooks/useIncomeAnalytics';
 import PredictedDividend from './PredictedDividend';
 import DividendCalendar from './DividendCalendar';
+import InteractiveDividendCalendar from './charts/InteractiveDividendCalendar';
 import { IncomeCard, WeeklySummary, RecentLogs, DPSTrendChart, LearningChart } from './income';
 
 // Removed unused constant import since it's used inside the hook now
@@ -92,7 +93,10 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
 
       {/* Conditional Rendering based on View Mode */}
       {viewMode === 'calendar' && showAnalytics ? (
-        <DividendCalendar />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <DividendCalendar />
+          <InteractiveDividendCalendar />
+        </div>
       ) : showAnalytics ? (
         <>
           {/* Row 1: Income Cards | EST. WEEKLY | RECENT LOGS */}
