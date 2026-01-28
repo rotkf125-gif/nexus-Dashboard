@@ -90,7 +90,7 @@ export default function UndoRedoIndicator() {
 
       {/* History Counter */}
       {(undoCount > 0 || redoCount > 0) && (
-        <span className="text-[9px] text-white/40 ml-1 hidden sm:inline">
+        <span className="text-[9px] text-white/60 ml-1 hidden sm:inline">
           {undoCount}/{10}
         </span>
       )}

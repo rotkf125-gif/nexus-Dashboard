@@ -141,7 +141,7 @@ export default function InteractiveDividendCalendar() {
             className={`px-3 py-1.5 text-[10px] rounded transition-all focus-visible-ring ${
               viewMode === 'month'
                 ? 'bg-celestial-gold/20 text-celestial-gold border border-celestial-gold/30'
-                : 'text-white/50 hover:text-white/80 hover:bg-white/5'
+                : 'text-white/70 hover:text-white/80 hover:bg-white/5'
             }`}
           >
             월간
@@ -153,7 +153,7 @@ export default function InteractiveDividendCalendar() {
             className={`px-3 py-1.5 text-[10px] rounded transition-all focus-visible-ring ${
               viewMode === 'year'
                 ? 'bg-celestial-gold/20 text-celestial-gold border border-celestial-gold/30'
-                : 'text-white/50 hover:text-white/80 hover:bg-white/5'
+                : 'text-white/70 hover:text-white/80 hover:bg-white/5'
             }`}
           >
             연간
@@ -196,7 +196,7 @@ export default function InteractiveDividendCalendar() {
               <div
                 key={day}
                 className={`text-center text-[10px] py-1 ${
-                  i === 0 ? 'text-v64-danger/70' : i === 6 ? 'text-v64-info/70' : 'text-white/50'
+                  i === 0 ? 'text-v64-danger/70' : i === 6 ? 'text-v64-info/70' : 'text-white/70'
                 }`}
               >
                 {day}
@@ -223,7 +223,7 @@ export default function InteractiveDividendCalendar() {
                       ? isSelected
                         ? 'bg-celestial-gold/30 border border-celestial-gold'
                         : 'bg-celestial-gold/10 border border-celestial-gold/20 hover:bg-celestial-gold/20 cursor-pointer'
-                      : 'text-white/40 cursor-default'
+                      : 'text-white/60 cursor-default'
                   }`}
                 >
                   <span className="absolute top-1 left-1.5 text-[10px]">{day}</span>
@@ -260,7 +260,7 @@ export default function InteractiveDividendCalendar() {
                 ))}
               </div>
               <div className="mt-2 pt-2 border-t border-celestial-gold/20 flex justify-between text-xs">
-                <span className="text-white/50">세후 총액</span>
+                <span className="text-white/70">세후 총액</span>
                 <span className="text-celestial-gold font-semibold">
                   ${selectedDay.total.toFixed(2)}
                 </span>
@@ -303,7 +303,7 @@ export default function InteractiveDividendCalendar() {
 
               return (
                 <div key={monthName} className="flex items-center gap-2">
-                  <div className="w-8 text-[10px] text-white/50 text-right">{monthName}</div>
+                  <div className="w-8 text-[10px] text-white/70 text-right">{monthName}</div>
                   <div className="flex-1 h-5 bg-white/5 rounded overflow-hidden">
                     <div
                       className="h-full bg-celestial-gold/60 rounded transition-all duration-500"
@@ -321,19 +321,19 @@ export default function InteractiveDividendCalendar() {
           {/* Summary */}
           <div className="mt-4 pt-3 border-t border-white/10 grid grid-cols-3 gap-4 text-center">
             <div>
-              <div className="text-[10px] text-white/50">월 평균</div>
+              <div className="text-[10px] text-white/70">월 평균</div>
               <div className="text-sm font-mono text-celestial-gold">
                 ${(totalYearDividend / 12).toFixed(0)}
               </div>
             </div>
             <div>
-              <div className="text-[10px] text-white/50">최고 월</div>
+              <div className="text-[10px] text-white/70">최고 월</div>
               <div className="text-sm font-mono text-v64-success">
                 ${Math.max(...yearlySummary).toFixed(0)}
               </div>
             </div>
             <div>
-              <div className="text-[10px] text-white/50">연간 총액</div>
+              <div className="text-[10px] text-white/70">연간 총액</div>
               <div className="text-sm font-mono text-white">
                 ${totalYearDividend.toFixed(0)}
               </div>

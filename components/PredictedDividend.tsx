@@ -107,7 +107,7 @@ export default function PredictedDividend() {
               <span className={`text-[9px] ${
                 pred.trend === 'up' ? 'text-v64-success' : 
                 pred.trend === 'down' ? 'text-v64-danger' : 
-                'text-white/40'
+                'text-white/60'
               }`}>
                 {pred.trend === 'up' && <i className="fas fa-arrow-trend-up" />}
                 {pred.trend === 'down' && <i className="fas fa-arrow-trend-down" />}
@@ -134,9 +134,9 @@ export default function PredictedDividend() {
             <div className="text-right">
               <div className="text-[11px] font-mono text-white">
                 ${pred.predictedDps.toFixed(2)}
-                <span className="text-[8px] opacity-40 ml-1">±{(pred.predictedDps * 0.05).toFixed(2)}</span>
+                <span className="text-[8px] opacity-60 ml-1">±{(pred.predictedDps * 0.05).toFixed(2)}</span>
               </div>
-              <div className="text-[8px] opacity-40">
+              <div className="text-[8px] opacity-60">
                 신뢰도 {pred.confidence.toFixed(0)}%
               </div>
             </div>
@@ -146,7 +146,7 @@ export default function PredictedDividend() {
 
       {/* Next Payment Date */}
       <div className="mt-3 pt-2 border-t border-white/10 text-center">
-        <span className="text-[9px] opacity-40">예상 지급일: </span>
+        <span className="text-[9px] opacity-60">예상 지급일: </span>
         <span className="text-[10px] text-celestial-gold">{predictions[0]?.nextDate || '-'}</span>
       </div>
     </div>

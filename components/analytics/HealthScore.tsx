@@ -59,7 +59,7 @@ export default function HealthScore({
           >
             {score}
           </span>
-          <span className="text-lg text-white/40">점</span>
+          <span className="text-lg text-white/60">점</span>
         </div>
 
         {/* Trend */}
@@ -101,7 +101,7 @@ export default function HealthScore({
       </div>
 
       {/* Scale Labels */}
-      <div className="flex justify-between mt-2 text-[9px] text-white/40">
+      <div className="flex justify-between mt-2 text-[9px] text-white/60">
         <span>위험</span>
         <span>주의</span>
         <span>보통</span>

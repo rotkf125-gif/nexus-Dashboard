@@ -51,37 +51,37 @@ export default function IncomeCard({ stat, index, compact = false, onEditTradeRe
         <div className="space-y-1.5 mb-3">
           <div className="grid grid-cols-2 gap-4">
             <div className="flex items-baseline gap-1.5">
-              <span className="text-[10px] text-white/50 tracking-wider uppercase">QTY</span>
+              <span className="text-[10px] text-white/70 tracking-wider uppercase">QTY</span>
               <span className="text-celestial-cyan font-semibold text-[13px]">{stat.qty}주</span>
             </div>
             <div className="flex items-baseline gap-1.5">
-              <span className="text-[10px] text-white/50 tracking-wider uppercase">DIVIDEND</span>
+              <span className="text-[10px] text-white/70 tracking-wider uppercase">DIVIDEND</span>
               <span className="text-v64-success font-semibold text-[13px]">${stat.totalDividend.toFixed(2)}</span>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="flex items-baseline gap-1.5">
-              <span className="text-[10px] text-white/50 tracking-wider uppercase">PRINCIPAL</span>
+              <span className="text-[10px] text-white/70 tracking-wider uppercase">PRINCIPAL</span>
               <span className="text-white/90 font-medium text-[12px]">
                 ${stat.principal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
             </div>
             <div className="flex items-baseline gap-1.5">
-              <span className="text-[10px] text-white/50 tracking-wider uppercase">VALUATION</span>
+              <span className="text-[10px] text-white/70 tracking-wider uppercase">VALUATION</span>
               <span className="text-white/90 font-medium text-[12px]">
                 ${stat.valuation.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
             </div>
           </div>
           <div className="flex items-baseline gap-1.5">
-            <span className="text-[10px] text-white/50 tracking-wider uppercase">TRADE R.</span>
+            <span className="text-[10px] text-white/70 tracking-wider uppercase">TRADE R.</span>
             <span
               className={`cursor-pointer hover:opacity-80 font-semibold text-[13px] ${stat.tradeReturn >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}
               onClick={() => onEditTradeReturn(stat.ticker, stat.tradeReturn)}
               title="클릭하여 수정"
             >
               {stat.tradeReturn >= 0 ? '+' : ''}${stat.tradeReturn.toFixed(2)}
-              <i className="fas fa-pen text-[8px] ml-1 text-white/40" />
+              <i className="fas fa-pen text-[8px] ml-1 text-white/60" />
             </span>
           </div>
         </div>
@@ -89,7 +89,7 @@ export default function IncomeCard({ stat, index, compact = false, onEditTradeRe
         {/* Recovery Progress */}
         <div className={`border-t pt-2.5 ${isGold ? 'border-celestial-gold/20' : 'border-white/10'}`}>
           <div className="flex justify-between mb-1.5 text-[10px] tracking-widest">
-            <span className={isGold ? 'text-celestial-gold/70' : 'text-white/50'}>RECOVERY</span>
+            <span className={isGold ? 'text-celestial-gold/70' : 'text-white/70'}>RECOVERY</span>
             <span className={`font-semibold text-[11px] ${stat.recoveryPct >= 100 ? 'text-v64-success' : (isGold ? 'text-celestial-gold' : 'text-white')}`}>
               {stat.recoveryPct.toFixed(1)}%
             </span>
@@ -124,34 +124,34 @@ export default function IncomeCard({ stat, index, compact = false, onEditTradeRe
       {/* Stats Grid - 1열 */}
       <div className="space-y-2.5 mb-3 flex-1">
         <div className="flex items-baseline justify-between">
-          <span className="text-[10px] text-white/50 tracking-wider uppercase font-medium">QTY</span>
+          <span className="text-[10px] text-white/70 tracking-wider uppercase font-medium">QTY</span>
           <span className="text-celestial-cyan font-semibold text-[13px]">{stat.qty}주</span>
         </div>
         <div className="flex items-baseline justify-between">
-          <span className="text-[10px] text-white/50 tracking-wider uppercase font-medium">DIVIDEND</span>
+          <span className="text-[10px] text-white/70 tracking-wider uppercase font-medium">DIVIDEND</span>
           <span className="text-v64-success font-semibold text-[13px]">${stat.totalDividend.toFixed(2)}</span>
         </div>
         <div className="flex items-baseline justify-between">
-          <span className="text-[10px] text-white/50 tracking-wider uppercase font-medium">PRINCIPAL</span>
+          <span className="text-[10px] text-white/70 tracking-wider uppercase font-medium">PRINCIPAL</span>
           <span className="text-white/90 font-medium text-[12px]">
             ${stat.principal.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
           </span>
         </div>
         <div className="flex items-baseline justify-between">
-          <span className="text-[10px] text-white/50 tracking-wider uppercase font-medium">VALUATION</span>
+          <span className="text-[10px] text-white/70 tracking-wider uppercase font-medium">VALUATION</span>
           <span className="text-white/90 font-medium text-[12px]">
             ${stat.valuation.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
           </span>
         </div>
         <div className="flex items-baseline justify-between">
-          <span className="text-[10px] text-white/50 tracking-wider uppercase font-medium">TRADE R.</span>
+          <span className="text-[10px] text-white/70 tracking-wider uppercase font-medium">TRADE R.</span>
           <span
             className={`cursor-pointer hover:opacity-80 font-semibold text-[13px] ${stat.tradeReturn >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}
             onClick={() => onEditTradeReturn(stat.ticker, stat.tradeReturn)}
             title="클릭하여 수정"
           >
             {stat.tradeReturn >= 0 ? '+' : ''}${stat.tradeReturn.toFixed(2)}
-            <i className="fas fa-pen text-[8px] ml-1 text-white/40" />
+            <i className="fas fa-pen text-[8px] ml-1 text-white/60" />
           </span>
         </div>
       </div>
@@ -159,7 +159,7 @@ export default function IncomeCard({ stat, index, compact = false, onEditTradeRe
       {/* Recovery Progress */}
       <div className={`border-t pt-2.5 ${isGold ? 'border-celestial-gold/20' : 'border-white/10'}`}>
         <div className="flex justify-between mb-2 text-[10px] tracking-widest">
-          <span className={`font-medium ${isGold ? 'text-celestial-gold/70' : 'text-white/50'}`}>RECOVERY</span>
+          <span className={`font-medium ${isGold ? 'text-celestial-gold/70' : 'text-white/70'}`}>RECOVERY</span>
           <span className={`font-semibold text-[11px] ${stat.recoveryPct >= 100 ? 'text-v64-success' : (isGold ? 'text-celestial-gold' : 'text-white')}`}>
             {stat.recoveryPct.toFixed(1)}%
           </span>

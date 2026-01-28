@@ -21,7 +21,6 @@ import DividendOptimizer from '@/components/DividendOptimizer';
 import PortfolioInsight from '@/components/PortfolioInsight';
 import RebalanceSuggestion from '@/components/RebalanceSuggestion';
 import MonthlyReport from '@/components/MonthlyReport';
-import StressTest from '@/components/StressTest';
 import PerformanceArena from '@/components/PerformanceArena';
 import HistoricPerformance from '@/components/HistoricPerformance';
 import PortfolioTimeline from '@/components/charts/PortfolioTimeline';
@@ -134,7 +133,7 @@ function DashboardContent() {
       <div className="grid grid-cols-1 lg:grid-cols-12 glass-card overflow-hidden relative pb-16 lg:pb-0">
         {/* Left Sidebar Tabs - 데스크톱 전용 (모바일은 하단 네비게이션 사용) */}
         <div className="hidden lg:flex lg:col-span-2 p-2 md:p-4 flex-col h-full relative z-10">
-          <div className="text-[10px] tracking-[0.15em] text-white/50 mb-3 uppercase font-medium text-center">Navigation</div>
+          <div className="text-[10px] tracking-[0.15em] text-white/70 mb-3 uppercase font-medium text-center">Navigation</div>
           <div
             role="tablist"
             aria-label="대시보드 탭 네비게이션"
@@ -343,6 +342,11 @@ function DashboardContent() {
               aria-labelledby="tab-analytics"
               tabIndex={0}
               className="min-h-[800px] space-y-6 tab-panel-enter">
+              <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
+                <h2 className="text-lg font-display tracking-widest flex items-center gap-3 text-white">
+                  <i className="fas fa-shield-alt text-purple-400 text-xs" /> RISK ANALYTICS
+                </h2>
+              </div>
               <Analytics horizontal />
 
               {/* Rebalance & Insight Grid */}
@@ -365,6 +369,11 @@ function DashboardContent() {
               aria-labelledby="tab-performance"
               tabIndex={0}
               className="space-y-5 min-h-[800px] tab-panel-enter">
+              <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
+                <h2 className="text-lg font-display tracking-widest flex items-center gap-3 text-white">
+                  <i className="fas fa-chart-line text-green-400 text-xs" /> PERFORMANCE ARENA
+                </h2>
+              </div>
               <div className="grid grid-cols-1 xl:grid-cols-4 gap-5">
                 <div className="xl:col-span-1">
                   <PerformanceArena compact />
@@ -391,16 +400,12 @@ function DashboardContent() {
               tabIndex={0}
               className="flex flex-col min-h-[800px] tab-panel-enter">
               <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3 flex-shrink-0">
-                <h2 className="text-base font-semibold text-white font-display tracking-widest flex items-center gap-2">
-                  <i className="fas fa-flask text-v64-success" /> SIMULATION
+                <h2 className="text-lg font-display tracking-widest flex items-center gap-3 text-white">
+                  <i className="fas fa-flask text-orange-400 text-xs" /> SIMULATION LAB
                 </h2>
               </div>
-              <div className="flex-1 overflow-y-auto custom-scrollbar min-h-0 space-y-5">
+              <div className="flex-1 overflow-y-auto custom-scrollbar min-h-0">
                 <SimulationHub />
-                {/* Stress Test */}
-                <div className="inner-glass p-4 rounded-lg">
-                  <StressTest />
-                </div>
               </div>
             </div>
           )}

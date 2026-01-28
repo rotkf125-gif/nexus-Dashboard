@@ -1,4 +1,4 @@
-# NEXUS DASHBOARD v1.8.2
+# NEXUS DASHBOARD v1.8.3
 
 개인 투자 포트폴리오 관리 대시보드
 
@@ -9,6 +9,31 @@
 | **Live Site** | https://nexus-dashboard-beige.vercel.app |
 | **GitHub** | https://github.com/rotkf125-gif/nexus-dashboard |
 | **Database** | Supabase (PostgreSQL) |
+
+---
+
+## v1.8.3 - Simulation 탭 리뉴얼 & 접근성 개선
+
+### Simulation Lab - Mission Control 레이아웃
+- **Scenario Control**: 5개 지정학적 프리셋 + 4개 슬라이더 (금리/NASDAQ/환율/VIX)
+- **Impact Visualization**: 실시간 포트폴리오 영향도 차트, 섹터별 영향 시각화
+- **Rebalance Optimizer**: 컴팩트 리밸런싱 (목표 비중 설정, 거래 제안)
+- **Stress Test Compact**: 6개 역사적 시나리오 빠른 테스트, 방어력 점수
+
+### 티커 병합 처리 개선
+- 분석/퍼포먼스 탭에서 동일 티커 통합 표시
+- BubbleChart, usePortfolioStats, useRiskAnalytics 병합 로직 적용
+- Asset 탭은 개별 표시 유지 (계좌별 관리)
+
+### 네비게이션 탭 제목 추가
+- Analytics → **RISK ANALYTICS**
+- Performance → **PERFORMANCE ARENA**
+- Simulation → **SIMULATION LAB**
+
+### 접근성(A11y) 대비율 개선
+- `text-white/40` → `text-white/60` (4.0:1 → 7.2:1)
+- `text-white/50` → `text-white/70` (5.5:1 → 9.5:1)
+- 모든 텍스트 WCAG AAA 기준(7:1) 충족
 
 ---
 
@@ -106,6 +131,7 @@ CREATE INDEX IF NOT EXISTS idx_snapshots_user_timestamp ON portfolio_snapshots(u
 
 | 버전 | 주요 변경 |
 |------|----------|
+| v1.8.3 | Simulation 탭 Mission Control 리뉴얼, 티커 병합 처리, WCAG AAA 접근성 |
 | v1.8.2 | Analytics 탭 리뉴얼 (버블차트, 건강점수, 인사이트칩) |
 | v1.8.1 | ETF 섹터 버그 수정, Price 애니메이션 개선 |
 | v1.8.0 | Freedom v31.0 Agent Mesh, 지정학적 리스크 분석 |

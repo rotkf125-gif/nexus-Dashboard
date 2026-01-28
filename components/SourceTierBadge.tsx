@@ -64,7 +64,7 @@ export function SourceReferencePanel({ sources, compact = false }: SourceReferen
             <i className="fas fa-database mr-2" />
             DATA SOURCES
           </div>
-          <span className="text-[9px] text-white/50">
+          <span className="text-[9px] text-white/70">
             {sources.length} sources
           </span>
         </div>
@@ -75,13 +75,13 @@ export function SourceReferencePanel({ sources, compact = false }: SourceReferen
             return (
               <div key={tier} className="flex items-center gap-1">
                 <SourceTierBadge tier={tier} size="sm" />
-                <span className="text-[8px] text-white/50">×{count}</span>
+                <span className="text-[8px] text-white/70">×{count}</span>
               </div>
             );
           })}
         </div>
         <div className="mt-2 flex items-center gap-2">
-          <span className="text-[8px] text-white/50">Avg Confidence:</span>
+          <span className="text-[8px] text-white/70">Avg Confidence:</span>
           <span className={`text-[10px] font-medium ${
             avgConfidence >= 0.9 ? 'text-v64-success' :
             avgConfidence >= 0.7 ? 'text-celestial-gold' : 'text-v64-danger'
@@ -97,7 +97,7 @@ export function SourceReferencePanel({ sources, compact = false }: SourceReferen
     <div className="glass-card p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-[11px] text-white/50 tracking-widest font-medium flex items-center">
+        <h3 className="text-[11px] text-white/70 tracking-widest font-medium flex items-center">
           <i className="fas fa-database mr-2 text-celestial-cyan" />
           DATA SOURCES & CONFIDENCE
           <span className="ml-2 text-[9px] px-2 py-0.5 rounded bg-celestial-purple/20 text-celestial-purple">
@@ -105,7 +105,7 @@ export function SourceReferencePanel({ sources, compact = false }: SourceReferen
           </span>
         </h3>
         <div className="flex items-center gap-2">
-          <span className="text-[9px] text-white/50">{sources.length} sources</span>
+          <span className="text-[9px] text-white/70">{sources.length} sources</span>
           <span className={`text-[11px] font-medium ${
             avgConfidence >= 0.9 ? 'text-v64-success' :
             avgConfidence >= 0.7 ? 'text-celestial-gold' : 'text-v64-danger'
@@ -117,7 +117,7 @@ export function SourceReferencePanel({ sources, compact = false }: SourceReferen
 
       {/* Tier Legend */}
       <div className="inner-glass p-3 rounded-lg mb-4">
-        <div className="text-[9px] text-white/50 tracking-widest mb-2">SOURCE TIER SYSTEM</div>
+        <div className="text-[9px] text-white/70 tracking-widest mb-2">SOURCE TIER SYSTEM</div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
           {(['S', 'A', 'B', 'C'] as SourceTier[]).map(tier => {
             const tierInfo = getSourceTierInfo(tier);
@@ -130,7 +130,7 @@ export function SourceReferencePanel({ sources, compact = false }: SourceReferen
                 <SourceTierBadge tier={tier} size="sm" />
                 <div className="text-[8px]">
                   <div className="text-white/70">{tierInfo.name}</div>
-                  <div className="text-white/40">{(tierInfo.confidence * 100).toFixed(0)}%</div>
+                  <div className="text-white/60">{(tierInfo.confidence * 100).toFixed(0)}%</div>
                 </div>
               </div>
             );
@@ -151,14 +151,14 @@ export function SourceReferencePanel({ sources, compact = false }: SourceReferen
               <div className="flex items-center gap-2 mb-2">
                 <SourceTierBadge tier={tier} />
                 <span className="text-[10px] text-white/70">{tierInfo.name}</span>
-                <span className="text-[9px] text-white/40">({tierSources.length})</span>
+                <span className="text-[9px] text-white/60">({tierSources.length})</span>
               </div>
               <div className="space-y-1.5">
                 {tierSources.map((source, idx) => (
                   <div key={idx} className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] text-white/80">{source.name}</span>
-                      <span className="text-[8px] text-white/40">{source.dataType}</span>
+                      <span className="text-[8px] text-white/60">{source.dataType}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="w-12 h-1 bg-white/10 rounded-full overflow-hidden">
@@ -170,7 +170,7 @@ export function SourceReferencePanel({ sources, compact = false }: SourceReferen
                           }}
                         />
                       </div>
-                      <span className="text-[9px] text-white/50 w-8 text-right">
+                      <span className="text-[9px] text-white/70 w-8 text-right">
                         {(source.confidence * 100).toFixed(0)}%
                       </span>
                     </div>
@@ -244,7 +244,7 @@ export function ConfidenceGauge({ confidence, label, size = 'md' }: ConfidenceGa
 
   return (
     <div className="flex items-center gap-2">
-      {label && <span className={`${config.text} text-white/50`}>{label}</span>}
+      {label && <span className={`${config.text} text-white/70`}>{label}</span>}
       <div className={`flex-1 ${config.height} bg-white/10 rounded-full overflow-hidden`}>
         <div 
           className="h-full rounded-full transition-all duration-300"

@@ -69,7 +69,7 @@ export default function AssetTable({ isColSettingsOpen = false, setIsColSettings
                     className="w-3.5 h-3.5 rounded border-white/30 bg-white/10 checked:bg-celestial-cyan checked:border-celestial-cyan"
                   />
                   <span className="text-[11px] text-white/80">{col.label}</span>
-                  <span className="text-[9px] text-white/40 ml-auto">{col.labelEng}</span>
+                  <span className="text-[9px] text-white/60 ml-auto">{col.labelEng}</span>
                 </label>
               ))}
             </div>
@@ -180,25 +180,25 @@ export default function AssetTable({ isColSettingsOpen = false, setIsColSettings
                             </span>
                           </div>
                           <div className="flex items-center gap-1">
-                            <button className="w-7 h-7 flex items-center justify-center text-[10px] text-white/50 hover:text-celestial-cyan rounded-lg hover:bg-white/10" onClick={() => openEditAssetModal(i)}>
+                            <button className="w-7 h-7 flex items-center justify-center text-[10px] text-white/70 hover:text-celestial-cyan rounded-lg hover:bg-white/10" onClick={() => openEditAssetModal(i)}>
                               <i className="fas fa-pen" />
                             </button>
-                            <button className="w-7 h-7 flex items-center justify-center text-[10px] text-white/50 hover:text-v64-danger rounded-lg hover:bg-white/10" onClick={() => { if (confirm('Delete?')) removeAsset(i); }}>
+                            <button className="w-7 h-7 flex items-center justify-center text-[10px] text-white/70 hover:text-v64-danger rounded-lg hover:bg-white/10" onClick={() => { if (confirm('Delete?')) removeAsset(i); }}>
                               <i className="fas fa-trash" />
                             </button>
                           </div>
                         </div>
                         <div className="grid grid-cols-3 gap-2 mb-2">
                           <div className="text-center">
-                            <div className="text-[9px] text-white/50 uppercase">수량</div>
+                            <div className="text-[9px] text-white/70 uppercase">수량</div>
                             <div className="text-[11px] text-white font-medium">{a.qty}</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-[9px] text-white/50 uppercase">평균가</div>
+                            <div className="text-[9px] text-white/70 uppercase">평균가</div>
                             <div className="text-[11px] text-white/80">${a.avg.toFixed(2)}</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-[9px] text-white/50 uppercase">현재가</div>
+                            <div className="text-[9px] text-white/70 uppercase">현재가</div>
                             <div className={`text-[11px] text-white font-medium flex items-center justify-center gap-1 ${priceChange ? (priceChange.isUp ? 'price-flash-up' : 'price-flash-down') : ''}`}>
                               ${a.price.toFixed(2)}
                               {priceChange && (
@@ -211,12 +211,12 @@ export default function AssetTable({ isColSettingsOpen = false, setIsColSettings
                         </div>
                         <div className="grid grid-cols-2 gap-3 pt-2 border-t border-white/10">
                           <div>
-                            <div className="text-[9px] text-white/50 uppercase mb-1">평가금액</div>
+                            <div className="text-[9px] text-white/70 uppercase mb-1">평가금액</div>
                             <div className="text-[12px] text-white font-semibold">{formatUSD(value)}</div>
                             <div className="text-[10px] text-white/60">₩{valueKrw.toLocaleString()}</div>
                           </div>
                           <div className="text-right">
-                            <div className="text-[9px] text-white/50 uppercase mb-1">손익</div>
+                            <div className="text-[9px] text-white/70 uppercase mb-1">손익</div>
                             <div className={`text-[12px] font-bold ${plClass}`}>
                               {profit >= 0 ? '+' : ''}{formatUSD(profit)}
                               <span className="text-[10px] opacity-80 ml-1">({pl >= 0 ? '+' : ''}{pl.toFixed(1)}%)</span>

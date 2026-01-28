@@ -149,7 +149,7 @@ export default function DPSTrend() {
 
   if (incomeAssets.length === 0) {
     return (
-      <div className="text-center py-8 opacity-50">
+      <div className="text-center py-8 opacity-70">
         <i className="fas fa-chart-line text-3xl mb-3 opacity-30" />
         <div className="text-sm">INCOME 타입 자산이 없습니다</div>
       </div>
@@ -185,7 +185,7 @@ export default function DPSTrend() {
               key={item.ticker}
               className={`inner-glass p-3 rounded text-center ${isGold ? 'border border-celestial-gold/20' : ''}`}
             >
-              <div className={`text-[9px] tracking-widest mb-1 font-light ${isGold ? 'text-celestial-gold/50' : 'opacity-50'}`}>
+              <div className={`text-[9px] tracking-widest mb-1 font-light ${isGold ? 'text-celestial-gold/50' : 'opacity-70'}`}>
                 {item.ticker} AVG DPS
               </div>
               <div className={`text-base font-display font-light ${isGold ? 'text-celestial-gold' : 'text-white'}`}>

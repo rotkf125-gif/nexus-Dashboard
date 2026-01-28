@@ -145,7 +145,7 @@ export default function Header({ onOpenSettings, onOpenAuth, onOpenFreedom, onOp
           </div>
           <div>
             <h1 className="text-lg md:text-xl lg:text-2xl font-bold tracking-[0.2em] font-display text-white text-glow">CELESTIAL</h1>
-            <div className="text-[8px] md:text-[10px] tracking-[0.3em] opacity-90 mt-0.5 md:mt-1">NEXUS INTELLIGENCE V1.7</div>
+            <div className="text-[8px] md:text-[10px] tracking-[0.3em] opacity-90 mt-0.5 md:mt-1">NEXUS INTELLIGENCE V1.8</div>
           </div>
         </div>
 

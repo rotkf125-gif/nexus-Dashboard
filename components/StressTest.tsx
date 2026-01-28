@@ -301,7 +301,7 @@ export default function StressTest() {
           <i className="fas fa-bolt" />
           STRESS TEST
         </h3>
-        <span className="text-[9px] text-white/50">
+        <span className="text-[9px] text-white/70">
           역사적 시나리오 분석
         </span>
       </div>
@@ -343,7 +343,7 @@ export default function StressTest() {
               {FREEDOM_CONFIG.GEOPOLITICAL_RISK_LEVELS[scenario.geopoliticalLevel].emoji} {scenario.geopoliticalLevel}
             </span>
           </div>
-          <span className="text-[9px] text-white/50">{scenario.date}</span>
+          <span className="text-[9px] text-white/70">{scenario.date}</span>
         </div>
         <p className="text-[10px] text-white/70 mb-2">{scenario.description}</p>
         <div className="flex flex-wrap gap-3 text-[9px]">
@@ -368,25 +368,25 @@ export default function StressTest() {
       {/* Impact Summary */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         <div className="inner-glass p-3 rounded-lg">
-          <div className="text-[8px] text-white/50 uppercase mb-1">현재 평가금</div>
+          <div className="text-[8px] text-white/70 uppercase mb-1">현재 평가금</div>
           <div className="text-[13px] text-white font-semibold">
             {formatUSD(portfolioAnalysis.totalValue)}
           </div>
         </div>
         <div className="inner-glass p-3 rounded-lg">
-          <div className="text-[8px] text-white/50 uppercase mb-1">예상 평가금</div>
+          <div className="text-[8px] text-white/70 uppercase mb-1">예상 평가금</div>
           <div className={`text-[13px] font-semibold ${stressResult.stressedValue < portfolioAnalysis.totalValue ? 'text-v64-danger' : 'text-v64-success'}`}>
             {formatUSD(stressResult.stressedValue)}
           </div>
         </div>
         <div className="inner-glass p-3 rounded-lg">
-          <div className="text-[8px] text-white/50 uppercase mb-1">예상 손실</div>
+          <div className="text-[8px] text-white/70 uppercase mb-1">예상 손실</div>
           <div className="text-[13px] text-v64-danger font-semibold">
             {formatUSD(stressResult.totalLoss)}
           </div>
         </div>
         <div className="inner-glass p-3 rounded-lg">
-          <div className="text-[8px] text-white/50 uppercase mb-1">하락률</div>
+          <div className="text-[8px] text-white/70 uppercase mb-1">하락률</div>
           <div className="text-[13px] text-v64-danger font-semibold">
             {stressResult.totalLossPct.toFixed(1)}%
           </div>
@@ -488,7 +488,7 @@ export default function StressTest() {
         </div>
         <div className="grid grid-cols-3 gap-2">
           <div className="text-center">
-            <div className="text-[8px] text-white/50 mb-1">방어력</div>
+            <div className="text-[8px] text-white/70 mb-1">방어력</div>
             <div className={`text-[14px] font-bold ${
               Math.abs(stressResult.totalLossPct) < 20 ? 'text-v64-success' :
               Math.abs(stressResult.totalLossPct) < 35 ? 'text-celestial-gold' : 'text-v64-danger'
@@ -498,7 +498,7 @@ export default function StressTest() {
             </div>
           </div>
           <div className="text-center">
-            <div className="text-[8px] text-white/50 mb-1">시장 대비</div>
+            <div className="text-[8px] text-white/70 mb-1">시장 대비</div>
             <div className={`text-[14px] font-bold ${
               stressResult.totalLossPct > scenario.spReturn ? 'text-v64-success' : 'text-v64-danger'
             }`}>
@@ -506,7 +506,7 @@ export default function StressTest() {
             </div>
           </div>
           <div className="text-center">
-            <div className="text-[8px] text-white/50 mb-1">분산 효과</div>
+            <div className="text-[8px] text-white/70 mb-1">분산 효과</div>
             <div className="text-[14px] font-bold text-celestial-cyan">
               {((scenario.spReturn - stressResult.totalLossPct) / Math.abs(scenario.spReturn) * 100).toFixed(0)}%
             </div>

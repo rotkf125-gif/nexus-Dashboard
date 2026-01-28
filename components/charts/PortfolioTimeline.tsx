@@ -177,7 +177,7 @@ export default function PortfolioTimeline() {
               className={`px-3 py-1.5 text-[10px] rounded transition-all focus-visible-ring ${
                 period === opt.value
                   ? 'bg-celestial-cyan/20 text-celestial-cyan border border-celestial-cyan/30'
-                  : 'text-white/50 hover:text-white/80 hover:bg-white/5'
+                  : 'text-white/70 hover:text-white/80 hover:bg-white/5'
               }`}
             >
               {opt.label}
@@ -190,19 +190,19 @@ export default function PortfolioTimeline() {
       {dataPoints.length > 0 && (
         <div className="grid grid-cols-4 gap-3 mb-4">
           <div className="text-center">
-            <div className="text-[10px] text-white/50 mb-1">시작 가치</div>
+            <div className="text-[10px] text-white/70 mb-1">시작 가치</div>
             <div className="text-sm font-mono text-white">
               ${stats.startValue.toLocaleString()}
             </div>
           </div>
           <div className="text-center">
-            <div className="text-[10px] text-white/50 mb-1">현재 가치</div>
+            <div className="text-[10px] text-white/70 mb-1">현재 가치</div>
             <div className="text-sm font-mono text-white">
               ${stats.endValue.toLocaleString()}
             </div>
           </div>
           <div className="text-center">
-            <div className="text-[10px] text-white/50 mb-1">총 수익률</div>
+            <div className="text-[10px] text-white/70 mb-1">총 수익률</div>
             <div
               className={`text-sm font-mono ${
                 stats.totalReturn >= 0 ? 'text-v64-success' : 'text-v64-danger'
@@ -213,7 +213,7 @@ export default function PortfolioTimeline() {
             </div>
           </div>
           <div className="text-center">
-            <div className="text-[10px] text-white/50 mb-1">최고 가치</div>
+            <div className="text-[10px] text-white/70 mb-1">최고 가치</div>
             <div className="text-sm font-mono text-celestial-gold">
               ${stats.maxValue.toLocaleString()}
             </div>
@@ -224,7 +224,7 @@ export default function PortfolioTimeline() {
       {/* Chart */}
       <div className="h-64 relative">
         {dataPoints.length === 0 ? (
-          <div className="absolute inset-0 flex items-center justify-center text-white/50 text-sm">
+          <div className="absolute inset-0 flex items-center justify-center text-white/70 text-sm">
             <div className="text-center">
               <i className="fas fa-chart-line text-3xl mb-2 opacity-30" aria-hidden="true" />
               <div>데이터가 충분하지 않습니다</div>
@@ -238,7 +238,7 @@ export default function PortfolioTimeline() {
       {/* Milestones */}
       {milestones.length > 0 && (
         <div className="mt-4 pt-4 border-t border-white/10">
-          <div className="text-[10px] text-white/50 mb-2 tracking-wider">최근 이벤트</div>
+          <div className="text-[10px] text-white/70 mb-2 tracking-wider">최근 이벤트</div>
           <div className="space-y-2 max-h-32 overflow-y-auto custom-scrollbar">
             {milestones.slice(-5).reverse().map((milestone, i) => (
               <div
@@ -266,7 +266,7 @@ export default function PortfolioTimeline() {
                   />
                 </span>
                 <span className="text-white/70 flex-1">{milestone.description}</span>
-                <span className="text-white/40">{milestone.date}</span>
+                <span className="text-white/60">{milestone.date}</span>
               </div>
             ))}
           </div>

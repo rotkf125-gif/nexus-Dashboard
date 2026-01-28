@@ -167,7 +167,7 @@ export default function TradeJournal() {
           <div className="grid grid-cols-3 gap-3">
             {/* Date */}
             <div>
-              <label className="text-[10px] text-white/50 block mb-1 tracking-widest font-medium">
+              <label className="text-[10px] text-white/70 block mb-1 tracking-widest font-medium">
                 DATE
               </label>
               <input
@@ -180,7 +180,7 @@ export default function TradeJournal() {
 
             {/* Ticker */}
             <div>
-              <label className="text-[10px] text-white/50 block mb-1 tracking-widest font-medium">
+              <label className="text-[10px] text-white/70 block mb-1 tracking-widest font-medium">
                 TICKER
               </label>
               <input
@@ -194,7 +194,7 @@ export default function TradeJournal() {
 
             {/* Amount */}
             <div>
-              <label className="text-[10px] text-white/50 block mb-1 tracking-widest font-medium">
+              <label className="text-[10px] text-white/70 block mb-1 tracking-widest font-medium">
                 AMOUNT (+/-)
               </label>
               <input
@@ -212,7 +212,7 @@ export default function TradeJournal() {
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={handleCancelAdd}
-              className="celestial-btn border-white/20 text-white/50 text-[9px]"
+              className="celestial-btn border-white/20 text-white/70 text-[9px]"
             >
               CANCEL
             </button>
@@ -229,11 +229,11 @@ export default function TradeJournal() {
       {/* Summary Statistics */}
       <div className="grid grid-cols-2 gap-3">
         <div className="glass-card p-3 text-center">
-          <div className="text-[10px] text-white/50 mb-1 tracking-widest">TOTAL TICKERS</div>
+          <div className="text-[10px] text-white/70 mb-1 tracking-widest">TOTAL TICKERS</div>
           <div className="text-lg font-bold text-white">{stats.totalTickers}</div>
         </div>
         <div className="glass-card p-3 text-center">
-          <div className="text-[10px] text-white/50 mb-1 tracking-widest">TOTAL REALIZED P&L</div>
+          <div className="text-[10px] text-white/70 mb-1 tracking-widest">TOTAL REALIZED P&L</div>
           <div className={`text-lg font-bold ${stats.totalRealized >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}>
             {stats.totalRealized >= 0 ? '+' : ''}{formatUSD(stats.totalRealized)}
           </div>
@@ -322,14 +322,14 @@ export default function TradeJournal() {
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => handleEditTradeReturn(ticker)}
-                        className="w-7 h-7 flex items-center justify-center text-[10px] text-white/50 hover:text-celestial-cyan rounded-lg hover:bg-white/10"
+                        className="w-7 h-7 flex items-center justify-center text-[10px] text-white/70 hover:text-celestial-cyan rounded-lg hover:bg-white/10"
                         title="Edit"
                       >
                         <i className="fas fa-pen" />
                       </button>
                       <button
                         onClick={() => handleDelete(ticker)}
-                        className="w-7 h-7 flex items-center justify-center text-[10px] text-white/50 hover:text-v64-danger rounded-lg hover:bg-white/10"
+                        className="w-7 h-7 flex items-center justify-center text-[10px] text-white/70 hover:text-v64-danger rounded-lg hover:bg-white/10"
                         title="Delete"
                       >
                         <i className="fas fa-trash" />

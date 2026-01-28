@@ -73,7 +73,7 @@ export default function DividendCalendar() {
           </div>
         </div>
         <div className="text-right">
-          <div className="text-[9px] text-white/50 uppercase">MONTHLY TOTAL</div>
+          <div className="text-[9px] text-white/70 uppercase">MONTHLY TOTAL</div>
           <div className="text-sm font-bold text-celestial-gold">{formatUSD(monthTotal)}</div>
         </div>
       </div>
@@ -83,7 +83,7 @@ export default function DividendCalendar() {
         {/* Weekday Headers */}
         <div className="grid grid-cols-7 border-b border-white/10 bg-white/5">
           {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map((day, i) => (
-            <div key={day} className={`text-center py-2 text-[9px] font-medium ${i === 0 ? 'text-rose-400' : i === 6 ? 'text-blue-400' : 'text-white/50'}`}>
+            <div key={day} className={`text-center py-2 text-[9px] font-medium ${i === 0 ? 'text-rose-400' : i === 6 ? 'text-blue-400' : 'text-white/70'}`}>
               {day}
             </div>
           ))}
@@ -102,7 +102,7 @@ export default function DividendCalendar() {
                 key={i} 
                 className={`border-b border-r border-white/10 p-1.5 relative transition-colors hover:bg-white/5 ${isToday ? 'bg-celestial-purple/10' : ''}`}
               >
-                <div className={`text-[10px] font-medium mb-1 ${isToday ? 'text-celestial-purple' : 'text-white/40'}`}>
+                <div className={`text-[10px] font-medium mb-1 ${isToday ? 'text-celestial-purple' : 'text-white/60'}`}>
                   {day}
                 </div>
                 

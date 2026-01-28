@@ -189,8 +189,10 @@ export function useRiskAnalytics(assets: Asset[], market: MarketData) {
       }))
       .sort((a, b) => b.weight - a.weight);
 
-    const coreValue = mergedAssets.filter(a => a.type !== 'INCOME').reduce((s, a) => s + a.totalValue, 0);
-    const incomeValue = mergedAssets.filter(a => a.type === 'INCOME').reduce((s, a) => s + a.totalValue, 0);
+    const incomeAssets = mergedAssets.filter(a => a.type === 'INCOME');
+    const coreAssets = mergedAssets.filter(a => a.type !== 'INCOME');
+    const coreValue = coreAssets.reduce((s, a) => s + a.totalValue, 0);
+    const incomeValue = incomeAssets.reduce((s, a) => s + a.totalValue, 0);
 
     const sorted = mergedAssets
       .map(a => {
@@ -206,6 +208,8 @@ export function useRiskAnalytics(assets: Asset[], market: MarketData) {
 
     return {
       totalValue,
+      assetCount: mergedAssets.length,  // 병합된 종목 수
+      incomeAssetCount: incomeAssets.length,  // 병합된 배당주 수
       assetWeights,
       coreValue,
       incomeValue,

@@ -26,8 +26,8 @@ export default function Analytics({ horizontal = false }: AnalyticsProps) {
     maxAssetWeight
   } = useRiskAnalytics(assets, market);
 
-  // 배당주 개수 계산
-  const incomeAssetCount = assets.filter(a => a.type === 'INCOME').length;
+  // 배당주 개수 (병합된 종목 기준)
+  const incomeAssetCount = portfolioStats.incomeAssetCount;
 
   // 최대 비중 자산 티커
   const topAssetTicker = portfolioStats.assetWeights[0]?.ticker;
@@ -35,7 +35,7 @@ export default function Analytics({ horizontal = false }: AnalyticsProps) {
   if (assets.length === 0) {
     return (
       <div className="glass-card p-6">
-        <div className="text-center py-12 opacity-50">
+        <div className="text-center py-12 opacity-70">
           <i className="fas fa-chart-pie text-4xl mb-4 opacity-30" aria-hidden="true" />
           <div className="text-sm">자산을 추가하세요</div>
         </div>

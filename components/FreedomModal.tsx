@@ -188,7 +188,7 @@ export default function FreedomModal({ isOpen, onClose }: FreedomModalProps) {
           </div>
           <button
             onClick={onClose}
-            className="text-white/40 hover:text-white transition-colors"
+            className="text-white/60 hover:text-white transition-colors"
           >
             <i className="fas fa-times" />
           </button>
@@ -198,7 +198,7 @@ export default function FreedomModal({ isOpen, onClose }: FreedomModalProps) {
         <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
           {/* Mode Selector */}
           <div className="inner-glass p-4 rounded-xl mb-4">
-            <div className="text-[10px] text-white/50 tracking-widest font-medium mb-3">
+            <div className="text-[10px] text-white/70 tracking-widest font-medium mb-3">
               ANALYSIS MODE
             </div>
             <div className="grid grid-cols-3 gap-2">
@@ -218,7 +218,7 @@ export default function FreedomModal({ isOpen, onClose }: FreedomModalProps) {
                   >
                     <div className="text-[11px] font-medium mb-1">{config.label}</div>
                     <div className="text-[9px] opacity-70">{config.description}</div>
-                    <div className="text-[8px] opacity-50 mt-1">
+                    <div className="text-[8px] opacity-70 mt-1">
                       {config.estimatedTime} | {config.confidenceRange}
                     </div>
                   </button>
@@ -246,20 +246,20 @@ export default function FreedomModal({ isOpen, onClose }: FreedomModalProps) {
           <div className="inner-glass p-4 rounded-xl mb-4">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-[10px] text-white/50 tracking-widest font-medium mb-1">
+                <div className="text-[10px] text-white/70 tracking-widest font-medium mb-1">
                   {modeConfig.label.toUpperCase()} MODE ANALYSIS
                 </div>
                 <div className="text-[11px] text-white/70">
                   {modeConfig.description} - 예상 시간: {modeConfig.estimatedTime}
                 </div>
-                <div className="text-[9px] text-white/50 mt-1">
+                <div className="text-[9px] text-white/70 mt-1">
                   활성화 헤드: {modeConfig.heads.map(h => h.charAt(0).toUpperCase() + h.slice(1) + 'Head').join(', ')}
                 </div>
               </div>
               <button
                 onClick={handleAnalyze}
                 disabled={isLoading || state.assets.length === 0}
-                className="celestial-btn text-[10px] px-6 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="celestial-btn text-[10px] px-6 disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
                   <>
@@ -295,27 +295,27 @@ export default function FreedomModal({ isOpen, onClose }: FreedomModalProps) {
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-[9px]">
                 <div>
-                  <span className="text-white/50">Version</span>
+                  <span className="text-white/70">Version</span>
                   <div className="text-white">{metadata.version}</div>
                 </div>
                 <div>
-                  <span className="text-white/50">Mode</span>
+                  <span className="text-white/70">Mode</span>
                   <div className="text-white uppercase">{metadata.mode}</div>
                 </div>
                 <div>
-                  <span className="text-white/50">VIX Level</span>
+                  <span className="text-white/70">VIX Level</span>
                   <div className={metadata.isHighVix ? 'text-orange-400' : 'text-v64-success'}>
                     {metadata.vixLevel.toFixed(1)}
                   </div>
                 </div>
                 <div>
-                  <span className="text-white/50">Agents</span>
+                  <span className="text-white/70">Agents</span>
                   <div className="text-white">{metadata.activeAgents.length}개 활성화</div>
                 </div>
               </div>
               {/* Active Agents List */}
               <div className="mt-3 pt-3 border-t border-white/10">
-                <div className="text-[9px] text-white/50 mb-1">활성화된 에이전트:</div>
+                <div className="text-[9px] text-white/70 mb-1">활성화된 에이전트:</div>
                 <div className="flex flex-wrap gap-1">
                   {metadata.activeAgents.map((agent, i) => (
                     <span
@@ -434,7 +434,7 @@ export default function FreedomModal({ isOpen, onClose }: FreedomModalProps) {
         {/* Footer */}
         <div className="p-4 border-t border-white/10 bg-black/20">
           <div className="flex items-center justify-between">
-            <div className="text-[9px] text-white/40">
+            <div className="text-[9px] text-white/60">
               Freedom v31.0 | Hydra-Lite v2 | Truth Guardian | 32 Hardlock Rules
             </div>
             <button onClick={onClose} className="celestial-btn">

@@ -35,7 +35,7 @@ export default function CorrelationHeatmap({
   const renderHeatmapContent = () => {
     if (labels.length === 0) {
       return (
-        <div className="h-32 flex items-center justify-center text-white/50 text-sm">
+        <div className="h-32 flex items-center justify-center text-white/70 text-sm">
           <div className="text-center">
             <i className="fas fa-th text-2xl mb-2 opacity-30" aria-hidden="true" />
             <div>자산을 추가하세요</div>
@@ -55,7 +55,7 @@ export default function CorrelationHeatmap({
             className={`px-3 py-1.5 text-[10px] rounded transition-all focus-visible-ring ${
               viewMode === 'sector'
                 ? 'bg-celestial-purple/20 text-celestial-purple border border-celestial-purple/30'
-                : 'text-white/50 hover:text-white/80 hover:bg-white/5'
+                : 'text-white/70 hover:text-white/80 hover:bg-white/5'
             }`}
           >
             섹터
@@ -67,7 +67,7 @@ export default function CorrelationHeatmap({
             className={`px-3 py-1.5 text-[10px] rounded transition-all focus-visible-ring ${
               viewMode === 'asset'
                 ? 'bg-celestial-purple/20 text-celestial-purple border border-celestial-purple/30'
-                : 'text-white/50 hover:text-white/80 hover:bg-white/5'
+                : 'text-white/70 hover:text-white/80 hover:bg-white/5'
             }`}
           >
             자산
@@ -141,9 +141,9 @@ export default function CorrelationHeatmap({
             aria-live="polite"
           >
             <span className="text-white/70">{hoveredValue.row}</span>
-            <span className="text-white/40 mx-2">↔</span>
+            <span className="text-white/60 mx-2">↔</span>
             <span className="text-white/70">{hoveredValue.col}</span>
-            <span className="text-white/40 mx-2">:</span>
+            <span className="text-white/60 mx-2">:</span>
             <span
               className="font-mono font-semibold"
               style={{ color: getCorrelationColor(hoveredValue.value) }}
@@ -156,7 +156,7 @@ export default function CorrelationHeatmap({
         {/* Legend */}
         <div className="mt-4 pt-3 border-t border-white/10">
           <div className="flex items-center justify-center gap-1">
-            <span className="text-[9px] text-white/50 mr-2">낮음</span>
+            <span className="text-[9px] text-white/70 mr-2">낮음</span>
             {[-0.8, -0.4, 0, 0.4, 0.8].map((v, i) => (
               <div
                 key={i}
@@ -165,7 +165,7 @@ export default function CorrelationHeatmap({
                 title={v.toString()}
               />
             ))}
-            <span className="text-[9px] text-white/50 ml-2">높음</span>
+            <span className="text-[9px] text-white/70 ml-2">높음</span>
           </div>
         </div>
       </>

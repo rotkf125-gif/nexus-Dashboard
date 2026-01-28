@@ -157,7 +157,7 @@ export default function DashboardCustomizer() {
               </span>
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-white/50 hover:text-white"
+                className="text-white/70 hover:text-white"
               >
                 <i className="fas fa-times text-xs" />
               </button>
@@ -199,7 +199,7 @@ export default function DashboardCustomizer() {
                   </button>
                   <button
                     onClick={selectNone}
-                    className="text-[8px] text-white/50 hover:underline"
+                    className="text-[8px] text-white/70 hover:underline"
                   >
                     모두 해제
                   </button>
@@ -227,10 +227,10 @@ export default function DashboardCustomizer() {
             {/* Current Preset Info */}
             <div className="pt-3 border-t border-white/10">
               <div className="flex items-center justify-between text-[9px]">
-                <span className="text-white/50">
+                <span className="text-white/70">
                   현재: {PRESETS[config.preset]?.name || '커스텀'}
                 </span>
-                <span className="text-white/50">
+                <span className="text-white/70">
                   {config.visibleSections.length}/{ALL_SECTIONS.length} 섹션
                 </span>
               </div>

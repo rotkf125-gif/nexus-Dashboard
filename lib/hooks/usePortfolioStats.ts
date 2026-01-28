@@ -36,51 +36,7 @@ export function usePortfolioStats(): PortfolioStats {
   const { assets, exchangeRate } = state;
 
   return useMemo(() => {
-    // 기본 계산
-    const totalValue = assets.reduce((sum, a) => sum + a.qty * a.price, 0);
-    const totalCost = assets.reduce((sum, a) => sum + a.qty * a.avg, 0);
-    const profit = totalValue - totalCost;
-    const returnPct = totalCost > 0 ? (profit / totalCost) * 100 : 0;
-
-    // KRW 변환
-    const totalValueKRW = totalValue * exchangeRate;
-    const totalCostKRW = totalCost * exchangeRate;
-    const profitKRW = profit * exchangeRate;
-
-    // 유형별 분포
-    const typeDistribution: Record<string, { count: number; value: number; weight: number }> = {};
-    assets.forEach(a => {
-      const value = a.qty * a.price;
-      if (!typeDistribution[a.type]) {
-        typeDistribution[a.type] = { count: 0, value: 0, weight: 0 };
-      }
-      typeDistribution[a.type].count += 1;
-      typeDistribution[a.type].value += value;
-    });
-    // 가중치 계산
-    Object.keys(typeDistribution).forEach(type => {
-      typeDistribution[type].weight = totalValue > 0 
-        ? (typeDistribution[type].value / totalValue) * 100 
-        : 0;
-    });
-
-    // 섹터별 분포
-    const sectorDistribution: Record<string, { count: number; value: number; weight: number }> = {};
-    assets.forEach(a => {
-      const value = a.qty * a.price;
-      if (!sectorDistribution[a.sector]) {
-        sectorDistribution[a.sector] = { count: 0, value: 0, weight: 0 };
-      }
-      sectorDistribution[a.sector].count += 1;
-      sectorDistribution[a.sector].value += value;
-    });
-    Object.keys(sectorDistribution).forEach(sector => {
-      sectorDistribution[sector].weight = totalValue > 0 
-        ? (sectorDistribution[sector].value / totalValue) * 100 
-        : 0;
-    });
-
-    // 상위 종목 (동일 티커 병합)
+    // 동일 티커 병합
     const tickerMap: Record<string, Asset & { totalQty: number; totalCost: number; totalValue: number }> = {};
     assets.forEach(a => {
       const value = a.qty * a.price;
@@ -93,9 +49,54 @@ export function usePortfolioStats(): PortfolioStats {
       tickerMap[a.ticker].totalValue += value;
     });
 
-    const topHoldings = Object.entries(tickerMap)
-      .map(([ticker, data]) => ({
-        ticker,
+    const mergedAssets = Object.values(tickerMap);
+
+    // 기본 계산 (병합된 자산 기준)
+    const totalValue = mergedAssets.reduce((sum, a) => sum + a.totalValue, 0);
+    const totalCost = mergedAssets.reduce((sum, a) => sum + a.totalCost, 0);
+    const profit = totalValue - totalCost;
+    const returnPct = totalCost > 0 ? (profit / totalCost) * 100 : 0;
+
+    // KRW 변환
+    const totalValueKRW = totalValue * exchangeRate;
+    const totalCostKRW = totalCost * exchangeRate;
+    const profitKRW = profit * exchangeRate;
+
+    // 유형별 분포 (병합된 자산 기준)
+    const typeDistribution: Record<string, { count: number; value: number; weight: number }> = {};
+    mergedAssets.forEach(a => {
+      if (!typeDistribution[a.type]) {
+        typeDistribution[a.type] = { count: 0, value: 0, weight: 0 };
+      }
+      typeDistribution[a.type].count += 1;
+      typeDistribution[a.type].value += a.totalValue;
+    });
+    // 가중치 계산
+    Object.keys(typeDistribution).forEach(type => {
+      typeDistribution[type].weight = totalValue > 0
+        ? (typeDistribution[type].value / totalValue) * 100
+        : 0;
+    });
+
+    // 섹터별 분포 (병합된 자산 기준)
+    const sectorDistribution: Record<string, { count: number; value: number; weight: number }> = {};
+    mergedAssets.forEach(a => {
+      if (!sectorDistribution[a.sector]) {
+        sectorDistribution[a.sector] = { count: 0, value: 0, weight: 0 };
+      }
+      sectorDistribution[a.sector].count += 1;
+      sectorDistribution[a.sector].value += a.totalValue;
+    });
+    Object.keys(sectorDistribution).forEach(sector => {
+      sectorDistribution[sector].weight = totalValue > 0
+        ? (sectorDistribution[sector].value / totalValue) * 100
+        : 0;
+    });
+
+    // 상위 종목
+    const topHoldings = mergedAssets
+      .map(data => ({
+        ticker: data.ticker,
         value: data.totalValue,
         weight: totalValue > 0 ? (data.totalValue / totalValue) * 100 : 0,
         profit: data.totalValue - data.totalCost,
@@ -112,7 +113,7 @@ export function usePortfolioStats(): PortfolioStats {
       totalValueKRW,
       totalCostKRW,
       profitKRW,
-      assetCount: assets.length,
+      assetCount: mergedAssets.length,  // 병합된 종목 수
       typeDistribution,
       sectorDistribution,
       topHoldings,

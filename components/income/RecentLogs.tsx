@@ -20,7 +20,7 @@ export default function RecentLogs({ logs, firstTicker, compact = false }: Recen
       <div className="inner-glass p-3 rounded flex flex-col">
         <div className="flex justify-between items-center mb-2 text-[10px] text-white/80 tracking-widest font-medium uppercase">
           <span>RECENT LOGS</span>
-          <i className="fas fa-history text-[9px] text-white/50" />
+          <i className="fas fa-history text-[9px] text-white/70" />
         </div>
         <div className="overflow-y-auto custom-scrollbar flex-grow max-h-[80px] space-y-1">
           {logs.length > 0 ? logs.map((d, i) => (
@@ -43,7 +43,7 @@ export default function RecentLogs({ logs, firstTicker, compact = false }: Recen
     <div className="inner-glass p-4 rounded flex flex-col" style={{ minHeight: '280px' }}>
       <div className="flex justify-between items-center mb-3 text-[10px] text-white/80 tracking-widest font-semibold uppercase">
         <span>RECENT LOGS</span>
-        <i className="fas fa-history text-[9px] text-white/50" />
+        <i className="fas fa-history text-[9px] text-white/70" />
       </div>
       <div className="overflow-y-auto custom-scrollbar flex-grow space-y-2">
         {logs.length > 0 ? logs.map((d, i) => (

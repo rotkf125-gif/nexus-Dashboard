@@ -75,7 +75,7 @@ const AssetTableRow = memo(({
     >
       {/* Drag Handle */}
       <td className="p-1 text-center w-6">
-        <span className="drag-handle cursor-grab active:cursor-grabbing opacity-40 hover:opacity-80">
+        <span className="drag-handle cursor-grab active:cursor-grabbing opacity-60 hover:opacity-80">
           <i className="fas fa-grip-vertical text-[9px]" />
         </span>
       </td>
@@ -162,21 +162,21 @@ const AssetTableRow = memo(({
       <td className="p-1 text-center">
         <div className="flex items-center justify-center gap-1">
           <button
-            className="w-5 h-5 flex items-center justify-center text-[9px] text-white/50 hover:text-celestial-cyan transition-colors"
+            className="w-5 h-5 flex items-center justify-center text-[9px] text-white/70 hover:text-celestial-cyan transition-colors"
             title="편집"
             onClick={() => onEdit(i)}
           >
             <i className="fas fa-pen" />
           </button>
           <button
-            className="w-5 h-5 flex items-center justify-center text-[9px] text-white/50 hover:text-celestial-gold transition-colors"
+            className="w-5 h-5 flex items-center justify-center text-[9px] text-white/70 hover:text-celestial-gold transition-colors"
             title="차트"
             onClick={() => window.open(`https://finance.yahoo.com/quote/${a.ticker}/chart`, '_blank')}
           >
             <i className="fas fa-chart-line" />
           </button>
           <button
-            className="w-5 h-5 flex items-center justify-center text-[9px] text-white/50 hover:text-v64-danger transition-colors"
+            className="w-5 h-5 flex items-center justify-center text-[9px] text-white/70 hover:text-v64-danger transition-colors"
             title="삭제"
             onClick={() => {
               if (confirm('Delete?')) onRemove(i);

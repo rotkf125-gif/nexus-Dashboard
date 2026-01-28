@@ -267,7 +267,7 @@ export default function RebalanceSuggestion() {
                   >
                     {asset.ticker}
                   </span>
-                  <span className="text-[9px] text-white/50 w-16">
+                  <span className="text-[9px] text-white/70 w-16">
                     현재: {current?.currentPct.toFixed(1)}%
                   </span>
                   <input
@@ -294,7 +294,7 @@ export default function RebalanceSuggestion() {
                     }))}
                     className="w-16 px-2 py-1 text-[10px] text-center bg-white/5 border border-white/20 rounded"
                   />
-                  <span className="text-[10px] text-white/40">%</span>
+                  <span className="text-[10px] text-white/60">%</span>
                 </div>
               );
             })}
@@ -352,7 +352,7 @@ export default function RebalanceSuggestion() {
                 </div>
               ))}
             </div>
-            <div className="flex items-center gap-4 mt-3 text-[8px] text-white/50">
+            <div className="flex items-center gap-4 mt-3 text-[8px] text-white/70">
               <span className="flex items-center gap-1">
                 <span className="w-3 h-2 bg-white/30 rounded" /> 현재
               </span>
@@ -377,7 +377,7 @@ export default function RebalanceSuggestion() {
                       <div key={item.ticker} className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <span className="text-[10px] text-white font-medium">{item.ticker}</span>
-                          <span className="text-[9px] text-white/50">
+                          <span className="text-[9px] text-white/70">
                             +{item.shares}주
                           </span>
                         </div>
@@ -402,7 +402,7 @@ export default function RebalanceSuggestion() {
                       <div key={item.ticker} className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <span className="text-[10px] text-white font-medium">{item.ticker}</span>
-                          <span className="text-[9px] text-white/50">
+                          <span className="text-[9px] text-white/70">
                             -{item.shares}주
                           </span>
                         </div>

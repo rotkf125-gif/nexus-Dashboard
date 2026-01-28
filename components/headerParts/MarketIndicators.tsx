@@ -65,7 +65,7 @@ export default function MarketIndicators({ market, exchangeRate }: MarketIndicat
     blue: 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
     purple: 'bg-purple-500/20 text-purple-400 border border-purple-500/30',
     orange: 'bg-orange-500/20 text-orange-400 border border-orange-500/30',
-    gray: 'bg-white/10 text-white/50 border border-white/20',
+    gray: 'bg-white/10 text-white/70 border border-white/20',
   };
 
   return (

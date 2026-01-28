@@ -15,16 +15,42 @@ export function useBubbleChartData(
   return useMemo(() => {
     if (!assets || assets.length === 0) return [];
 
-    const totalValue = assets.reduce((sum, a) => sum + a.qty * a.price, 0);
+    // 같은 티커를 하나로 병합
+    const merged: Record<string, {
+      asset: Asset;
+      totalValue: number;
+      totalCost: number;
+      totalQty: number;
+    }> = {};
+
+    assets.forEach(asset => {
+      const value = asset.qty * asset.price;
+      const cost = asset.qty * asset.avg;
+
+      if (!merged[asset.ticker]) {
+        merged[asset.ticker] = {
+          asset: { ...asset },
+          totalValue: value,
+          totalCost: cost,
+          totalQty: asset.qty,
+        };
+      } else {
+        merged[asset.ticker].totalValue += value;
+        merged[asset.ticker].totalCost += cost;
+        merged[asset.ticker].totalQty += asset.qty;
+      }
+    });
+
+    const mergedAssets = Object.values(merged);
+    const totalValue = mergedAssets.reduce((sum, m) => sum + m.totalValue, 0);
     if (totalValue === 0) return [];
 
-    const maxValue = Math.max(...assets.map(a => a.qty * a.price));
+    const maxValue = Math.max(...mergedAssets.map(m => m.totalValue));
     const minRadius = 8;
     const maxRadius = 30;
 
-    return assets.map((asset) => {
-      const value = asset.qty * asset.price;
-      const cost = asset.qty * asset.avg;
+    return mergedAssets.map((m) => {
+      const { asset, totalValue: value, totalCost: cost } = m;
       const weight = (value / totalValue) * 100;
       const returnPct = cost > 0 ? ((value - cost) / cost) * 100 : 0;
 

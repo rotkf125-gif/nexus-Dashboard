@@ -99,7 +99,7 @@ export default function DividendModal({ isOpen, onClose }: DividendModalProps) {
           </h3>
           <button
             onClick={onClose}
-            className="text-white/40 hover:text-white transition-colors"
+            className="text-white/60 hover:text-white transition-colors"
           >
             <i className="fas fa-times" />
           </button>
@@ -194,14 +194,14 @@ export default function DividendModal({ isOpen, onClose }: DividendModalProps) {
         <div className="grid grid-cols-2 gap-3 mt-5">
           <button
             onClick={onClose}
-            className="celestial-btn border-white/20 text-white/50"
+            className="celestial-btn border-white/20 text-white/70"
           >
             CANCEL
           </button>
           <button
             onClick={handleSave}
             disabled={incomeAssets.length === 0}
-            className="celestial-btn celestial-btn-gold disabled:opacity-50"
+            className="celestial-btn celestial-btn-gold disabled:opacity-70"
           >
             CONFIRM
           </button>

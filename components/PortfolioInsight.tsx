@@ -91,13 +91,13 @@ export default function PortfolioInsight() {
       {/* Summary Stats */}
       <div className="grid grid-cols-2 gap-3">
         <div className="inner-glass p-3 rounded-lg text-center">
-          <div className="text-[9px] text-white/50 uppercase mb-1">총 자산</div>
+          <div className="text-[9px] text-white/70 uppercase mb-1">총 자산</div>
           <div className="text-base text-celestial-cyan font-semibold">
             {assets.length}
           </div>
         </div>
         <div className="inner-glass p-3 rounded-lg text-center">
-          <div className="text-[9px] text-white/50 uppercase mb-1">리스크</div>
+          <div className="text-[9px] text-white/70 uppercase mb-1">리스크</div>
           <div className={`text-base font-semibold ${
             riskMetrics.overallScore >= 70 ? 'text-v64-success' :
             riskMetrics.overallScore >= 40 ? 'text-celestial-gold' : 'text-v64-danger'

@@ -149,7 +149,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           </h3>
           <button
             onClick={onClose}
-            className="text-white/40 hover:text-white transition-colors"
+            className="text-white/60 hover:text-white transition-colors"
           >
             <i className="fas fa-times" />
           </button>
@@ -158,7 +158,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         <div className="space-y-4">
           {/* Exchange Rate Override */}
           <div className="inner-glass p-4 rounded-xl">
-            <label className="text-[10px] text-white/50 block mb-2 tracking-widest font-medium">
+            <label className="text-[10px] text-white/70 block mb-2 tracking-widest font-medium">
               환율 수동 설정 (USD/KRW)
             </label>
             <div className="flex gap-2">
@@ -173,14 +173,14 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 APPLY
               </button>
             </div>
-            <div className="text-[10px] text-white/40 mt-1 font-medium">
+            <div className="text-[10px] text-white/60 mt-1 font-medium">
               현재: ₩{state.exchangeRate.toLocaleString()}
             </div>
           </div>
 
           {/* API Refresh Interval */}
           <div className="inner-glass p-4 rounded-xl">
-            <label className="text-[10px] text-white/50 block mb-2 tracking-widest font-medium">
+            <label className="text-[10px] text-white/70 block mb-2 tracking-widest font-medium">
               API 자동 갱신 주기
             </label>
             <div className="flex gap-2 items-center">
@@ -203,7 +203,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
           {/* Google Sheet URL */}
           <div className="inner-glass p-4 rounded-xl">
-            <label className="text-[10px] text-white/50 block mb-2 tracking-widest font-medium">
+            <label className="text-[10px] text-white/70 block mb-2 tracking-widest font-medium">
               Google Apps Script URL
             </label>
             <input
@@ -220,7 +220,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
           {/* Data Export/Import */}
           <div className="inner-glass p-4 rounded-xl">
-            <label className="text-[10px] text-white/50 block mb-2 tracking-widest font-medium">
+            <label className="text-[10px] text-white/70 block mb-2 tracking-widest font-medium">
               데이터 백업/복원
             </label>
             <div className="grid grid-cols-2 gap-2">
@@ -251,7 +251,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             </label>
             <div className="space-y-2">
               <div>
-                <div className="text-[9px] text-white/40 mb-1">User ID</div>
+                <div className="text-[9px] text-white/60 mb-1">User ID</div>
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -273,7 +273,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 </div>
               </div>
               <div>
-                <div className="text-[9px] text-white/40 mb-1">API Endpoint</div>
+                <div className="text-[9px] text-white/60 mb-1">API Endpoint</div>
                 <div className="flex gap-2">
                   <input
                     type="text"

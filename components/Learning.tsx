@@ -121,7 +121,7 @@ export default function Learning() {
 
   if (incomeAssets.length === 0) {
     return (
-      <div className="text-center py-8 opacity-50">
+      <div className="text-center py-8 opacity-70">
         <i className="fas fa-brain text-3xl mb-3 opacity-30" />
         <div className="text-sm">INCOME 자산이 없습니다</div>
       </div>
@@ -132,7 +132,7 @@ export default function Learning() {
     <div className="space-y-3">
       {/* Accuracy */}
       <div className="inner-glass p-3 rounded">
-        <div className="text-[9px] opacity-50 tracking-widest mb-2 font-light">ACCURACY</div>
+        <div className="text-[9px] opacity-70 tracking-widest mb-2 font-light">ACCURACY</div>
         <div className="space-y-2">
           {learningStats.map((stat, i) => {
             const isGold = i % 2 === 1;
@@ -142,7 +142,7 @@ export default function Learning() {
                   <span className={isGold ? 'text-celestial-gold/70 font-light' : 'opacity-70 font-light'}>
                     {stat.ticker}
                   </span>
-                  <span className={isGold ? 'text-celestial-gold font-light' : 'opacity-50 font-light'}>
+                  <span className={isGold ? 'text-celestial-gold font-light' : 'opacity-70 font-light'}>
                     {stat.accuracy > 0 ? `${stat.accuracy.toFixed(0)}%` : '--'}
                   </span>
                 </div>
@@ -156,14 +156,14 @@ export default function Learning() {
             );
           })}
           {learningStats.length === 0 && (
-            <div className="text-[9px] opacity-40 text-center py-2">데이터 없음</div>
+            <div className="text-[9px] opacity-60 text-center py-2">데이터 없음</div>
           )}
         </div>
       </div>
 
       {/* 95% CI */}
       <div className="inner-glass p-3 rounded">
-        <div className="text-[9px] opacity-50 tracking-widest mb-2 font-light">95% CI</div>
+        <div className="text-[9px] opacity-70 tracking-widest mb-2 font-light">95% CI</div>
         <div className="space-y-2 text-[9px] font-light">
           {learningStats.map((stat, i) => {
             const isGold = i % 2 === 1;
@@ -172,7 +172,7 @@ export default function Learning() {
                 key={stat.ticker}
                 className={`p-2 rounded border ${isGold ? 'bg-celestial-gold/5 border-celestial-gold/20' : 'bg-white/5 border-white/10'}`}
               >
-                <div className={isGold ? 'text-celestial-gold/50 mb-0.5' : 'opacity-50 mb-0.5'}>
+                <div className={isGold ? 'text-celestial-gold/50 mb-0.5' : 'opacity-70 mb-0.5'}>
                   {stat.ticker}
                 </div>
                 <div className="text-white">
@@ -185,14 +185,14 @@ export default function Learning() {
             );
           })}
           {learningStats.length === 0 && (
-            <div className="text-[9px] opacity-40 text-center py-2">데이터 없음</div>
+            <div className="text-[9px] opacity-60 text-center py-2">데이터 없음</div>
           )}
         </div>
       </div>
 
       {/* Stats */}
       <div className="inner-glass p-3 rounded">
-        <div className="text-[9px] opacity-50 tracking-widest mb-2 font-light">STATS</div>
+        <div className="text-[9px] opacity-70 tracking-widest mb-2 font-light">STATS</div>
         <div className="space-y-1 text-[9px] font-light">
           <div className="flex justify-between">
             <span className="opacity-60">Data Points</span>
@@ -204,7 +204,7 @@ export default function Learning() {
           </div>
           <div className="flex justify-between">
             <span className="opacity-60">MAE</span>
-            <span className="opacity-50">{totalStats.avgMae}</span>
+            <span className="opacity-70">{totalStats.avgMae}</span>
           </div>
           <div className="flex justify-between">
             <span className="opacity-60">Trend</span>

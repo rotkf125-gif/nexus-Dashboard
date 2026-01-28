@@ -156,7 +156,7 @@ export default function AuthModal({ isOpen, onClose, onAuthChange }: AuthModalPr
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-white/50 hover:text-white"
+          className="absolute top-4 right-4 text-white/70 hover:text-white"
         >
           <i className="fas fa-times" />
         </button>
@@ -171,7 +171,7 @@ export default function AuthModal({ isOpen, onClose, onAuthChange }: AuthModalPr
         {/* Current User ID Info */}
         {currentUserId && mode !== 'link' && (
           <div className="mb-4 p-3 bg-white/5 rounded text-[10px] font-mono">
-            <span className="opacity-50">Current ID: </span>
+            <span className="opacity-70">Current ID: </span>
             <span className="text-celestial-gold break-all">{currentUserId}</span>
           </div>
         )}
@@ -181,7 +181,7 @@ export default function AuthModal({ isOpen, onClose, onAuthChange }: AuthModalPr
           <button
             onClick={() => setMode('login')}
             className={`flex-1 py-2 text-xs tracking-widest rounded transition ${
-              mode === 'login' ? 'bg-celestial-cyan/20 text-celestial-cyan' : 'bg-white/5 text-white/50'
+              mode === 'login' ? 'bg-celestial-cyan/20 text-celestial-cyan' : 'bg-white/5 text-white/70'
             }`}
           >
             LOGIN
@@ -189,7 +189,7 @@ export default function AuthModal({ isOpen, onClose, onAuthChange }: AuthModalPr
           <button
             onClick={() => setMode('signup')}
             className={`flex-1 py-2 text-xs tracking-widest rounded transition ${
-              mode === 'signup' ? 'bg-celestial-cyan/20 text-celestial-cyan' : 'bg-white/5 text-white/50'
+              mode === 'signup' ? 'bg-celestial-cyan/20 text-celestial-cyan' : 'bg-white/5 text-white/70'
             }`}
           >
             SIGN UP
@@ -197,7 +197,7 @@ export default function AuthModal({ isOpen, onClose, onAuthChange }: AuthModalPr
           <button
             onClick={() => setMode('link')}
             className={`flex-1 py-2 text-xs tracking-widest rounded transition ${
-              mode === 'link' ? 'bg-celestial-gold/20 text-celestial-gold' : 'bg-white/5 text-white/50'
+              mode === 'link' ? 'bg-celestial-gold/20 text-celestial-gold' : 'bg-white/5 text-white/70'
             }`}
           >
             LINK
@@ -221,7 +221,7 @@ export default function AuthModal({ isOpen, onClose, onAuthChange }: AuthModalPr
           <form onSubmit={mode === 'login' ? handleLogin : handleSignup}>
             <div className="space-y-4">
               <div>
-                <label className="text-[10px] uppercase tracking-widest opacity-50 mb-1 block">
+                <label className="text-[10px] uppercase tracking-widest opacity-70 mb-1 block">
                   Email
                 </label>
                 <input
@@ -234,7 +234,7 @@ export default function AuthModal({ isOpen, onClose, onAuthChange }: AuthModalPr
                 />
               </div>
               <div>
-                <label className="text-[10px] uppercase tracking-widest opacity-50 mb-1 block">
+                <label className="text-[10px] uppercase tracking-widest opacity-70 mb-1 block">
                   Password
                 </label>
                 <input
@@ -250,7 +250,7 @@ export default function AuthModal({ isOpen, onClose, onAuthChange }: AuthModalPr
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full btn-primary py-2.5 text-sm tracking-widest disabled:opacity-50"
+                className="w-full btn-primary py-2.5 text-sm tracking-widest disabled:opacity-70"
               >
                 {loading ? <i className="fas fa-spinner spinner" /> : mode === 'login' ? 'LOGIN' : 'SIGN UP'}
               </button>
@@ -265,13 +265,13 @@ export default function AuthModal({ isOpen, onClose, onAuthChange }: AuthModalPr
               로그인 후 기존 데이터를 계정에 연결합니다.
             </p>
             <div className="p-3 bg-white/5 rounded text-[10px]">
-              <span className="opacity-50">연결할 데이터 ID: </span>
+              <span className="opacity-70">연결할 데이터 ID: </span>
               <span className="text-celestial-gold font-mono break-all">{currentUserId || '없음'}</span>
             </div>
             <button
               onClick={handleLinkData}
               disabled={loading || !currentUserId}
-              className="w-full btn-secondary py-2.5 text-sm tracking-widest disabled:opacity-50"
+              className="w-full btn-secondary py-2.5 text-sm tracking-widest disabled:opacity-70"
             >
               {loading ? <i className="fas fa-spinner spinner" /> : 'LINK TO MY ACCOUNT'}
             </button>
@@ -283,7 +283,7 @@ export default function AuthModal({ isOpen, onClose, onAuthChange }: AuthModalPr
           <>
             <div className="flex items-center gap-4 my-6">
               <div className="flex-1 h-px bg-white/10" />
-              <span className="text-[10px] opacity-50">OR</span>
+              <span className="text-[10px] opacity-70">OR</span>
               <div className="flex-1 h-px bg-white/10" />
             </div>
 
@@ -291,7 +291,7 @@ export default function AuthModal({ isOpen, onClose, onAuthChange }: AuthModalPr
             <button
               onClick={handleGoogleLogin}
               disabled={loading}
-              className="w-full bg-white/10 hover:bg-white/15 border border-white/10 rounded py-2.5 text-sm flex items-center justify-center gap-2 transition disabled:opacity-50"
+              className="w-full bg-white/10 hover:bg-white/15 border border-white/10 rounded py-2.5 text-sm flex items-center justify-center gap-2 transition disabled:opacity-70"
             >
               <i className="fab fa-google" />
               Continue with Google
@@ -301,7 +301,7 @@ export default function AuthModal({ isOpen, onClose, onAuthChange }: AuthModalPr
 
         {/* Share Link */}
         <div className="mt-6 pt-4 border-t border-white/10">
-          <p className="text-[10px] opacity-50 mb-2 text-center">모바일 공유 링크:</p>
+          <p className="text-[10px] opacity-70 mb-2 text-center">모바일 공유 링크:</p>
           <div className="flex gap-2">
             <input
               type="text"

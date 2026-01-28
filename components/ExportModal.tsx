@@ -57,7 +57,7 @@ export default function ExportModal({ isOpen, onClose }: ExportModalProps) {
           </h3>
           <button
             onClick={onClose}
-            className="text-white/40 hover:text-white transition-colors"
+            className="text-white/60 hover:text-white transition-colors"
           >
             <i className="fas fa-times" />
           </button>
@@ -67,7 +67,7 @@ export default function ExportModal({ isOpen, onClose }: ExportModalProps) {
         <div className="flex-1 overflow-y-auto p-5 custom-scrollbar">
           {/* Format Selection */}
           <div className="space-y-2 mb-5">
-            <div className="text-[10px] text-white/50 tracking-widest font-medium mb-3">
+            <div className="text-[10px] text-white/70 tracking-widest font-medium mb-3">
               EXPORT FORMAT
             </div>
             {EXPORT_OPTIONS.map((option) => (
@@ -119,7 +119,7 @@ export default function ExportModal({ isOpen, onClose }: ExportModalProps) {
                 </div>
                 <div className="flex-1">
                   <div className="font-medium text-white text-sm">{option.name}</div>
-                  <div className="text-[11px] text-white/50">{option.description}</div>
+                  <div className="text-[11px] text-white/70">{option.description}</div>
                 </div>
                 {selectedFormat === option.id && (
                   <i className="fas fa-check text-celestial-cyan" />
@@ -131,10 +131,10 @@ export default function ExportModal({ isOpen, onClose }: ExportModalProps) {
           {/* Selected Format Info */}
           <div className="inner-glass p-4 rounded-lg mb-4">
             <div className="flex items-center justify-between mb-2">
-              <div className="text-[10px] text-white/50 tracking-widest font-medium">
+              <div className="text-[10px] text-white/70 tracking-widest font-medium">
                 SELECTED: {selectedOption?.name.toUpperCase()}
               </div>
-              <div className="text-[10px] text-white/40">
+              <div className="text-[10px] text-white/60">
                 ~{(exportLength / 1000).toFixed(1)}K chars
               </div>
             </div>
@@ -160,7 +160,7 @@ export default function ExportModal({ isOpen, onClose }: ExportModalProps) {
           {/* Preview Toggle */}
           <button
             onClick={() => setShowPreview(!showPreview)}
-            className="w-full text-left text-[10px] text-white/50 hover:text-white/70 transition-colors mb-2 flex items-center gap-2"
+            className="w-full text-left text-[10px] text-white/70 hover:text-white/70 transition-colors mb-2 flex items-center gap-2"
           >
             <i className={`fas fa-chevron-${showPreview ? 'down' : 'right'} text-[8px]`} />
             {showPreview ? '미리보기 숨기기' : '미리보기 보기'}
@@ -191,7 +191,7 @@ export default function ExportModal({ isOpen, onClose }: ExportModalProps) {
           <div className="flex gap-3">
             <button
               onClick={onClose}
-              className="celestial-btn flex-1 border-white/20 text-white/50"
+              className="celestial-btn flex-1 border-white/20 text-white/70"
             >
               취소
             </button>

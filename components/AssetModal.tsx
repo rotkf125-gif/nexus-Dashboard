@@ -199,7 +199,7 @@ export default function AssetModal({
           </h3>
           <button
             onClick={onClose}
-            className="w-10 h-10 flex items-center justify-center rounded text-white/40 hover:text-white hover:bg-white/10 transition-colors focus-visible-ring touch-target"
+            className="w-10 h-10 flex items-center justify-center rounded text-white/60 hover:text-white hover:bg-white/10 transition-colors focus-visible-ring touch-target"
             aria-label="닫기"
           >
             <i className="fas fa-times" aria-hidden="true" />
@@ -212,7 +212,7 @@ export default function AssetModal({
           <div>
             <label
               htmlFor={tickerId}
-              className="text-[10px] text-white/50 block mb-1 tracking-widest font-medium"
+              className="text-[10px] text-white/70 block mb-1 tracking-widest font-medium"
             >
               TICKER
               {isFetchingSector && (
@@ -230,7 +230,7 @@ export default function AssetModal({
               onBlur={handleTickerBlur}
               disabled={isEditMode}
               className={`glass-input py-2.5 w-full uppercase font-semibold rounded-lg focus-visible-ring ${
-                isEditMode ? 'opacity-50 cursor-not-allowed' : ''
+                isEditMode ? 'opacity-70 cursor-not-allowed' : ''
               }`}
               placeholder="e.g. AAPL"
               aria-describedby={assetName && !isEditMode ? `${tickerId}-name` : undefined}
@@ -247,7 +247,7 @@ export default function AssetModal({
             <div>
               <label
                 htmlFor={qtyId}
-                className="text-[10px] text-white/50 block mb-1 tracking-widest font-medium"
+                className="text-[10px] text-white/70 block mb-1 tracking-widest font-medium"
               >
                 QTY
               </label>
@@ -262,7 +262,7 @@ export default function AssetModal({
             <div>
               <label
                 htmlFor={avgId}
-                className="text-[10px] text-white/50 block mb-1 tracking-widest font-medium"
+                className="text-[10px] text-white/70 block mb-1 tracking-widest font-medium"
               >
                 AVG COST
               </label>
@@ -278,7 +278,7 @@ export default function AssetModal({
             <div>
               <label
                 htmlFor={buyRateId}
-                className="text-[10px] text-white/50 block mb-1 tracking-widest font-medium"
+                className="text-[10px] text-white/70 block mb-1 tracking-widest font-medium"
               >
                 매입환율
               </label>
@@ -297,7 +297,7 @@ export default function AssetModal({
           <div>
             <label
               htmlFor={typeId}
-              className="text-[10px] text-white/50 block mb-1 tracking-widest font-medium"
+              className="text-[10px] text-white/70 block mb-1 tracking-widest font-medium"
             >
               TYPE
             </label>
@@ -319,7 +319,7 @@ export default function AssetModal({
           <div>
             <label
               htmlFor={sectorId}
-              className="text-[10px] text-white/50 block mb-1 tracking-widest font-medium"
+              className="text-[10px] text-white/70 block mb-1 tracking-widest font-medium"
             >
               SECTOR
             </label>
@@ -343,7 +343,7 @@ export default function AssetModal({
           <button
             type="button"
             onClick={onClose}
-            className="celestial-btn border-white/20 text-white/50 focus-visible-ring py-3"
+            className="celestial-btn border-white/20 text-white/70 focus-visible-ring py-3"
           >
             CANCEL
           </button>

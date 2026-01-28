@@ -216,7 +216,7 @@ export default function DividendOptimizer() {
           <i className="fas fa-magic" />
           DIVIDEND OPTIMIZER
         </h3>
-        <span className="text-[9px] text-white/50">
+        <span className="text-[9px] text-white/70">
           {suggestions.length}개 제안
         </span>
       </div>
@@ -224,19 +224,19 @@ export default function DividendOptimizer() {
       {/* Portfolio Summary */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         <div className="inner-glass p-2.5 rounded text-center">
-          <div className="text-[8px] text-white/50 uppercase mb-1">총 배당금</div>
+          <div className="text-[8px] text-white/70 uppercase mb-1">총 배당금</div>
           <div className="text-[13px] text-celestial-gold font-semibold">
             ${portfolioSummary.totalDividend.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </div>
         </div>
         <div className="inner-glass p-2.5 rounded text-center">
-          <div className="text-[8px] text-white/50 uppercase mb-1">평균 YOC</div>
+          <div className="text-[8px] text-white/70 uppercase mb-1">평균 YOC</div>
           <div className="text-[13px] text-v64-success font-semibold">
             {portfolioSummary.avgYieldOnCost.toFixed(1)}%
           </div>
         </div>
         <div className="inner-glass p-2.5 rounded text-center">
-          <div className="text-[8px] text-white/50 uppercase mb-1">원금 회수율</div>
+          <div className="text-[8px] text-white/70 uppercase mb-1">원금 회수율</div>
           <div className="text-[13px] text-celestial-cyan font-semibold">
             {portfolioSummary.totalCost > 0
               ? ((portfolioSummary.totalDividend / portfolioSummary.totalCost) * 100).toFixed(1)
@@ -244,7 +244,7 @@ export default function DividendOptimizer() {
           </div>
         </div>
         <div className="inner-glass p-2.5 rounded text-center">
-          <div className="text-[8px] text-white/50 uppercase mb-1">INCOME 자산</div>
+          <div className="text-[8px] text-white/70 uppercase mb-1">INCOME 자산</div>
           <div className="text-[13px] text-white font-semibold">
             {portfolioSummary.assetCount}종목
           </div>
@@ -277,7 +277,7 @@ export default function DividendOptimizer() {
                   </p>
                   {suggestion.action && (
                     <div className="mt-2">
-                      <span className="text-[9px] px-2 py-1 rounded bg-white/5 text-white/50 border border-white/10">
+                      <span className="text-[9px] px-2 py-1 rounded bg-white/5 text-white/70 border border-white/10">
                         <i className="fas fa-arrow-right mr-1.5 text-[8px]" />
                         {suggestion.action}
                       </span>

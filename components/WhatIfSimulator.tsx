@@ -186,7 +186,7 @@ export default function WhatIfSimulator() {
           })}
         </div>
         {selectedPreset && (
-          <div className="mt-2 text-[9px] text-white/50">
+          <div className="mt-2 text-[9px] text-white/70">
             {GEOPOLITICAL_PRESETS[selectedPreset].description}
           </div>
         )}
@@ -200,14 +200,14 @@ export default function WhatIfSimulator() {
         <div className="flex items-center gap-2">
           <span className="text-lg">{riskLevelInfo.emoji}</span>
           <div>
-            <div className="text-[9px] text-white/50">RISK LEVEL</div>
+            <div className="text-[9px] text-white/70">RISK LEVEL</div>
             <div className="text-[11px] font-medium" style={{ color: riskLevelInfo.color }}>
               {riskLevelInfo.label}
             </div>
           </div>
         </div>
         <div className="text-right">
-          <div className="text-[9px] text-white/50">ACTION</div>
+          <div className="text-[9px] text-white/70">ACTION</div>
           <div className="text-[10px] text-white/70">{riskLevelInfo.action}</div>
         </div>
       </div>
@@ -215,7 +215,7 @@ export default function WhatIfSimulator() {
       {/* Interest Rate */}
       <div className="inner-glass p-3 rounded-xl">
         <div className="flex justify-between items-center mb-1">
-          <span className="text-[10px] text-white/50 font-medium">금리 변동</span>
+          <span className="text-[10px] text-white/70 font-medium">금리 변동</span>
           <span className="text-[11px] text-white font-mono font-medium">
             {rateChange > 0 ? '+' : ''}{rateChange}bp
           </span>
@@ -238,7 +238,7 @@ export default function WhatIfSimulator() {
       {/* NASDAQ */}
       <div className="inner-glass p-3 rounded-xl">
         <div className="flex justify-between items-center mb-1">
-          <span className="text-[10px] text-white/50 font-medium">NASDAQ 변동</span>
+          <span className="text-[10px] text-white/70 font-medium">NASDAQ 변동</span>
           <span className="text-[11px] text-white font-mono font-medium">
             {nasdaqChange > 0 ? '+' : ''}{nasdaqChange}%
           </span>
@@ -261,7 +261,7 @@ export default function WhatIfSimulator() {
       {/* USD/KRW */}
       <div className="inner-glass p-3 rounded-xl">
         <div className="flex justify-between items-center mb-1">
-          <span className="text-[10px] text-white/50 font-medium">USD/KRW</span>
+          <span className="text-[10px] text-white/70 font-medium">USD/KRW</span>
           <span className="text-[11px] text-white font-mono font-medium">
             ₩{krwRate.toLocaleString()}
           </span>
@@ -284,7 +284,7 @@ export default function WhatIfSimulator() {
       {/* VIX Spike */}
       <div className="inner-glass p-3 rounded-xl">
         <div className="flex justify-between items-center mb-1">
-          <span className="text-[10px] text-white/50 font-medium">VIX 급등</span>
+          <span className="text-[10px] text-white/70 font-medium">VIX 급등</span>
           <span className="text-[11px] text-white font-mono font-medium">{vixLevel}</span>
         </div>
         <input
@@ -306,7 +306,7 @@ export default function WhatIfSimulator() {
           SCENARIO RESULT
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-[11px] text-white/50 font-medium">예상 포트폴리오 변동</span>
+          <span className="text-[11px] text-white/70 font-medium">예상 포트폴리오 변동</span>
           <span className={`text-lg font-semibold font-display ${
             parseFloat(impacts.totalImpact) >= 0 ? 'text-v64-success' : 'text-v64-danger'
           }`}>
@@ -345,7 +345,7 @@ export default function WhatIfSimulator() {
       {/* Reset Button */}
       <button
         onClick={handleReset}
-        className="text-[10px] text-white/40 hover:text-white transition-colors w-full text-center py-2"
+        className="text-[10px] text-white/60 hover:text-white transition-colors w-full text-center py-2"
       >
         RESET ALL
       </button>

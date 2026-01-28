@@ -73,7 +73,7 @@ export default function AgentStatusPanel({
             <i className="fas fa-robot mr-2" />
             AGENT MESH
           </div>
-          <span className="text-[9px] text-white/50">
+          <span className="text-[9px] text-white/70">
             {stats.active}/{stats.total} active
           </span>
         </div>
@@ -92,7 +92,7 @@ export default function AgentStatusPanel({
             );
           })}
           {agents.length > 6 && (
-            <span className="px-2 py-0.5 text-[8px] rounded bg-white/10 text-white/50">
+            <span className="px-2 py-0.5 text-[8px] rounded bg-white/10 text-white/70">
               +{agents.length - 6} more
             </span>
           )}
@@ -105,7 +105,7 @@ export default function AgentStatusPanel({
     <div className="glass-card p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-[11px] text-white/50 tracking-widest font-medium flex items-center">
+        <h3 className="text-[11px] text-white/70 tracking-widest font-medium flex items-center">
           <i className="fas fa-robot mr-2 text-celestial-purple" />
           AGENT MESH STATUS
           <span className="ml-2 text-[9px] px-2 py-0.5 rounded bg-celestial-purple/20 text-celestial-purple">
@@ -117,7 +117,7 @@ export default function AgentStatusPanel({
             <i className="fas fa-check-circle mr-1" />
             {stats.active} Active
           </span>
-          <span className="text-white/50">
+          <span className="text-white/70">
             {stats.total} Total
           </span>
         </div>
@@ -126,20 +126,20 @@ export default function AgentStatusPanel({
       {/* Overall Stats */}
       <div className="grid grid-cols-3 gap-3 mb-4">
         <div className="inner-glass p-3 rounded-lg text-center">
-          <div className="text-[8px] text-white/50 uppercase mb-1">Avg Contribution</div>
+          <div className="text-[8px] text-white/70 uppercase mb-1">Avg Contribution</div>
           <div className="text-lg font-bold text-celestial-purple">
             {(stats.avgContribution * 100).toFixed(0)}%
           </div>
         </div>
         <div className="inner-glass p-3 rounded-lg text-center">
-          <div className="text-[8px] text-white/50 uppercase mb-1">Data Quality</div>
+          <div className="text-[8px] text-white/70 uppercase mb-1">Data Quality</div>
           <div className="text-lg font-bold text-celestial-cyan">
             {(stats.avgDataQuality * 100).toFixed(0)}%
           </div>
         </div>
         {crossValidation && (
           <div className="inner-glass p-3 rounded-lg text-center">
-            <div className="text-[8px] text-white/50 uppercase mb-1">Consistency</div>
+            <div className="text-[8px] text-white/70 uppercase mb-1">Consistency</div>
             <div className="text-lg font-bold text-v64-success">
               {crossValidation.consistencyScore}%
             </div>
@@ -185,7 +185,7 @@ export default function AgentStatusPanel({
                             }}
                           />
                         </div>
-                        <span className="text-[9px] text-white/50 w-8 text-right">
+                        <span className="text-[9px] text-white/70 w-8 text-right">
                           {(agent.contribution * 100).toFixed(0)}%
                         </span>
                       </div>
@@ -218,7 +218,7 @@ export default function AgentStatusPanel({
                     {item.agreementLevel === 'full' ? '완전 합의' :
                      item.agreementLevel === 'partial' ? '부분 합의' : '의견 불일치'}
                   </span>
-                  <span className="text-[8px] text-white/40">
+                  <span className="text-[8px] text-white/60">
                     {item.agentCount}/{item.totalAgents}
                   </span>
                 </div>
@@ -237,15 +237,15 @@ export default function AgentStatusPanel({
           </div>
           <div className="grid grid-cols-3 gap-2 text-[9px]">
             <div>
-              <span className="text-white/50">일관성</span>
+              <span className="text-white/70">일관성</span>
               <div className="text-white font-medium">{crossValidation.consistencyScore}%</div>
             </div>
             <div>
-              <span className="text-white/50">충돌 해결</span>
+              <span className="text-white/70">충돌 해결</span>
               <div className="text-white font-medium">{crossValidation.conflictsResolved}건</div>
             </div>
             <div>
-              <span className="text-white/50">해결 방식</span>
+              <span className="text-white/70">해결 방식</span>
               <div className="text-white font-medium">{crossValidation.resolutionMethod}</div>
             </div>
           </div>

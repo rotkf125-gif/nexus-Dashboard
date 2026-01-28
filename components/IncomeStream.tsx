@@ -40,7 +40,7 @@ export default function IncomeStream({ showAnalytics = false }: IncomeStreamProp
   // Empty state
   if (incomeAssets.length === 0) {
     return (
-      <div className="text-center py-8 opacity-50">
+      <div className="text-center py-8 opacity-70">
         <i className="fas fa-coins text-3xl mb-3 opacity-30" />
         <div className="text-sm">INCOME 타입 자산이 없습니다</div>
       </div>

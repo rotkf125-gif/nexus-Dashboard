@@ -77,7 +77,7 @@ export default function RebalanceSimulator() {
 
   if (assets.length === 0) {
     return (
-      <div className="text-center py-8 opacity-50">
+      <div className="text-center py-8 opacity-70">
         <i className="fas fa-balance-scale text-2xl mb-3 opacity-30" />
         <div className="text-[10px]">자산을 추가하세요</div>
       </div>
@@ -119,7 +119,7 @@ export default function RebalanceSimulator() {
             <div className="flex justify-between items-center mb-2">
               <span className="text-[11px] font-display tracking-wider">{p.ticker}</span>
               <span className={`text-[10px] font-mono ${
-                p.diff > 0 ? 'text-v64-success' : p.diff < 0 ? 'text-v64-danger' : 'text-white/50'
+                p.diff > 0 ? 'text-v64-success' : p.diff < 0 ? 'text-v64-danger' : 'text-white/70'
               }`}>
                 {p.diff > 0 ? '+' : ''}{p.diff.toFixed(1)}%
               </span>
@@ -129,7 +129,7 @@ export default function RebalanceSimulator() {
             <div className="space-y-1 mb-2">
               {/* Current */}
               <div className="flex items-center gap-2">
-                <span className="text-[8px] opacity-40 w-8">현재</span>
+                <span className="text-[8px] opacity-60 w-8">현재</span>
                 <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
                   <div 
                     className="h-full bg-white/40 transition-all"
@@ -179,11 +179,11 @@ export default function RebalanceSimulator() {
         <div className="text-[9px] text-celestial-purple tracking-widest mb-2">REBALANCE SUMMARY</div>
         <div className="grid grid-cols-2 gap-2 text-[10px]">
           <div>
-            <span className="opacity-40">총 평가금</span>
+            <span className="opacity-60">총 평가금</span>
             <div className="text-white">${totalValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
           </div>
           <div>
-            <span className="opacity-40">필요 거래</span>
+            <span className="opacity-60">필요 거래</span>
             <div className="text-white">
               {portfolio.filter(p => p.adjustQty !== 0).length}건
             </div>

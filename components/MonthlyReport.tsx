@@ -301,7 +301,7 @@ export default function MonthlyReport() {
         {/* Left Column: Summary Stats */}
         <div className="space-y-3">
           <div className="inner-glass p-4 rounded-lg">
-            <div className="text-[8px] text-white/50 uppercase mb-1">총 평가금</div>
+            <div className="text-[8px] text-white/70 uppercase mb-1">총 평가금</div>
             <div className="text-base text-celestial-cyan font-semibold">
               {formatUSD(portfolioSummary.totalValue)}
             </div>
@@ -311,7 +311,7 @@ export default function MonthlyReport() {
           </div>
 
           <div className="inner-glass p-4 rounded-lg">
-            <div className="text-[8px] text-white/50 uppercase mb-1">총 손익</div>
+            <div className="text-[8px] text-white/70 uppercase mb-1">총 손익</div>
             <div className={`text-base font-semibold ${portfolioSummary.profit >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}>
               {portfolioSummary.profit >= 0 ? '+' : ''}{formatUSD(portfolioSummary.profit)}
             </div>
@@ -321,7 +321,7 @@ export default function MonthlyReport() {
           </div>
 
           <div className="inner-glass p-4 rounded-lg">
-            <div className="text-[8px] text-white/50 uppercase mb-1">배당금 ({selectedPeriod})</div>
+            <div className="text-[8px] text-white/70 uppercase mb-1">배당금 ({selectedPeriod})</div>
             <div className="text-base text-celestial-gold font-semibold">
               {formatUSD(recentDividends)}
             </div>
@@ -331,7 +331,7 @@ export default function MonthlyReport() {
           </div>
 
           <div className="inner-glass p-4 rounded-lg">
-            <div className="text-[8px] text-white/50 uppercase mb-1">거래 수익</div>
+            <div className="text-[8px] text-white/70 uppercase mb-1">거래 수익</div>
             <div className={`text-base font-semibold ${totalTradeReturn >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}>
               {totalTradeReturn >= 0 ? '+' : ''}{formatUSD(totalTradeReturn)}
             </div>
@@ -353,7 +353,7 @@ export default function MonthlyReport() {
               {topAssets.map((asset, i) => (
                 <div key={asset.ticker} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="w-5 text-[10px] text-white/40 text-center">{i + 1}</span>
+                    <span className="w-5 text-[10px] text-white/60 text-center">{i + 1}</span>
                     <span
                       className="text-[11px] font-medium"
                       style={{ color: CHART_COLORS[i % CHART_COLORS.length] }}
@@ -419,7 +419,7 @@ export default function MonthlyReport() {
                 {topTradeReturns.map((trade, i) => (
                   <div key={trade.ticker} className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="w-5 text-[10px] text-white/40 text-center">{i + 1}</span>
+                      <span className="w-5 text-[10px] text-white/60 text-center">{i + 1}</span>
                       <span
                         className="text-[11px] font-medium"
                         style={{ color: CHART_COLORS[i % CHART_COLORS.length] }}
@@ -444,7 +444,7 @@ export default function MonthlyReport() {
               <i className="fas fa-file-alt text-celestial-cyan" />
               보고서 미리보기
             </div>
-            <span className="text-[8px] text-white/40">
+            <span className="text-[8px] text-white/60">
               {new Date().toLocaleDateString('ko-KR')} 기준
             </span>
           </div>

@@ -130,7 +130,7 @@ export default function AssetTurnover() {
           <i className="fas fa-exchange-alt" />
           ASSET TURNOVER
         </h3>
-        <span className="text-[9px] text-white/50">
+        <span className="text-[9px] text-white/70">
           {assets.length}종목 분석
         </span>
       </div>
@@ -138,7 +138,7 @@ export default function AssetTurnover() {
       {/* Portfolio Summary */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         <div className="inner-glass p-2.5 rounded text-center">
-          <div className="text-[8px] text-white/50 uppercase mb-1">평균 보유기간</div>
+          <div className="text-[8px] text-white/70 uppercase mb-1">평균 보유기간</div>
           <div className="text-[13px] text-celestial-cyan font-semibold">
             {portfolioStats.avgHoldingDays >= 365
               ? `${Math.floor(portfolioStats.avgHoldingDays / 365)}년 ${Math.floor((portfolioStats.avgHoldingDays % 365) / 30)}개월`
@@ -146,19 +146,19 @@ export default function AssetTurnover() {
           </div>
         </div>
         <div className="inner-glass p-2.5 rounded text-center">
-          <div className="text-[8px] text-white/50 uppercase mb-1">평균 회전율</div>
+          <div className="text-[8px] text-white/70 uppercase mb-1">평균 회전율</div>
           <div className="text-[13px] text-celestial-gold font-semibold">
             {portfolioStats.avgTurnoverRate.toFixed(1)}%
           </div>
         </div>
         <div className="inner-glass p-2.5 rounded text-center">
-          <div className="text-[8px] text-white/50 uppercase mb-1">장기 보유 비율</div>
+          <div className="text-[8px] text-white/70 uppercase mb-1">장기 보유 비율</div>
           <div className="text-[13px] text-v64-success font-semibold">
             {portfolioStats.longTermPct.toFixed(0)}%
           </div>
         </div>
         <div className="inner-glass p-2.5 rounded text-center">
-          <div className="text-[8px] text-white/50 uppercase mb-1">거래 수익</div>
+          <div className="text-[8px] text-white/70 uppercase mb-1">거래 수익</div>
           <div className={`text-[13px] font-semibold ${portfolioStats.totalTradeReturn >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}>
             {portfolioStats.totalTradeReturn >= 0 ? '+' : ''}${Math.abs(portfolioStats.totalTradeReturn).toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </div>
@@ -250,13 +250,13 @@ export default function AssetTurnover() {
               <div className="flex items-center gap-4">
                 <div className="text-right">
                   <div className="text-[10px] text-white/80">{asset.avgHoldingPeriod}</div>
-                  <div className="text-[8px] text-white/50">보유 기간</div>
+                  <div className="text-[8px] text-white/70">보유 기간</div>
                 </div>
                 <div className="text-right">
                   <div className={`text-[10px] ${asset.tradeReturn >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}>
                     {asset.tradeReturn >= 0 ? '+' : ''}${Math.abs(asset.tradeReturn).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                   </div>
-                  <div className="text-[8px] text-white/50">거래 수익</div>
+                  <div className="text-[8px] text-white/70">거래 수익</div>
                 </div>
                 <span
                   className={`text-[8px] px-2 py-1 rounded border ${getStatusColor(asset.status)}`}

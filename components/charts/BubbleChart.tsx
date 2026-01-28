@@ -162,7 +162,7 @@ export default function BubbleChart({ onBubbleClick }: BubbleChartProps) {
   if (state.assets.length === 0) {
     return (
       <div className="inner-glass p-4 rounded-lg">
-        <div className="h-[300px] flex items-center justify-center text-white/50 text-sm">
+        <div className="h-[300px] flex items-center justify-center text-white/70 text-sm">
           <div className="text-center">
             <i className="fas fa-chart-scatter text-3xl mb-2 opacity-30" aria-hidden="true" />
             <div>자산을 추가하세요</div>
@@ -202,7 +202,7 @@ export default function BubbleChart({ onBubbleClick }: BubbleChartProps) {
 
       {/* Legend */}
       {colorMode === 'performance' && (
-        <div className="flex items-center justify-center gap-4 mt-3 text-[10px] text-white/50">
+        <div className="flex items-center justify-center gap-4 mt-3 text-[10px] text-white/70">
           <span className="flex items-center gap-1">
             <span className="w-3 h-3 rounded-full bg-v64-success/60" />
             수익

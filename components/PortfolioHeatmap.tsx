@@ -192,7 +192,7 @@ export default function PortfolioHeatmap() {
 
   if (assets.length === 0) {
     return (
-      <div className="flex items-center justify-center h-[400px] text-white/50">
+      <div className="flex items-center justify-center h-[400px] text-white/70">
         <div className="text-center">
           <i className="fas fa-th-large text-4xl mb-3 opacity-30" />
           <div className="text-sm">자산을 추가하면 히트맵이 표시됩니다</div>
