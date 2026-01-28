@@ -1,13 +1,15 @@
 'use client';
 
 // ═══════════════════════════════════════════════════════════════
-// Header - 메인 헤더 컴포넌트 (리팩토링)
+// Header - 1-Row Horizontal Full Width (v1.8.4)
+// 로고 | 포트폴리오(가로) | 시장지표(가로) | 버튼
 // ═══════════════════════════════════════════════════════════════
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNexus } from '@/lib/context';
 import { supabase } from '@/lib/supabase';
-import { PortfolioSummary, MarketIndicators, HeaderControls } from './headerParts';
+import { getMarketStateInfo, MarketState } from '@/lib/utils';
+import UndoRedoIndicator from './UndoRedoIndicator';
 
 interface HeaderProps {
   onOpenSettings: () => void;
@@ -27,20 +29,16 @@ export default function Header({ onOpenSettings, onOpenAuth, onOpenFreedom, onOp
   const liveIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const isFetchingRef = useRef(false);
 
-  // Auth 상태 체크
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
     });
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
-
     return () => subscription.unsubscribe();
   }, []);
 
-  // Clock update
   useEffect(() => {
     const updateClock = () => {
       const now = new Date();
@@ -51,14 +49,13 @@ export default function Header({ onOpenSettings, onOpenAuth, onOpenFreedom, onOp
     return () => clearInterval(interval);
   }, []);
 
-  // Update sync time
   useEffect(() => {
     if (state.lastSync) {
       const updateSyncTime = () => {
         const diff = Date.now() - state.lastSync!;
         const minutes = Math.floor(diff / 60000);
         const seconds = Math.floor((diff % 60000) / 1000);
-        setSyncTime(minutes > 0 ? `${minutes}분 전` : `${seconds}초 전`);
+        setSyncTime(minutes > 0 ? `${minutes}m` : `${seconds}s`);
       };
       updateSyncTime();
       const interval = setInterval(updateSyncTime, 1000);
@@ -66,12 +63,10 @@ export default function Header({ onOpenSettings, onOpenAuth, onOpenFreedom, onOp
     }
   }, [state.lastSync]);
 
-  // Refresh prices with status update
   const handleRefresh = useCallback(async () => {
     if (isFetchingRef.current) return;
     isFetchingRef.current = true;
     setConnectionStatus('loading');
-
     try {
       await refreshPrices();
       setConnectionStatus('online');
@@ -84,7 +79,6 @@ export default function Header({ onOpenSettings, onOpenAuth, onOpenFreedom, onOp
     }
   }, [refreshPrices, toast]);
 
-  // Toggle Live mode
   const toggleLive = useCallback(() => {
     if (isLive) {
       if (liveIntervalRef.current) {
@@ -103,16 +97,12 @@ export default function Header({ onOpenSettings, onOpenAuth, onOpenFreedom, onOp
     }
   }, [isLive, handleRefresh, toast]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (liveIntervalRef.current) {
-        clearInterval(liveIntervalRef.current);
-      }
+      if (liveIntervalRef.current) clearInterval(liveIntervalRef.current);
     };
   }, []);
 
-  // Calculate portfolio stats
   const portfolioStats = useMemo(() => {
     let totalCost = 0, totalValue = 0, totalCostKrw = 0, totalValueKrw = 0;
     state.assets.forEach(a => {
@@ -124,51 +114,148 @@ export default function Header({ onOpenSettings, onOpenAuth, onOpenFreedom, onOp
       totalCostKrw += Math.round(cost * buyRate);
       totalValueKrw += Math.round(value * state.exchangeRate);
     });
-
-    return {
-      totalCost,
-      totalValue,
-      totalCostKrw,
-      totalValueKrw,
-      returnVal: totalValue - totalCost,
-      returnKrw: totalValueKrw - totalCostKrw,
-    };
+    const returnPct = totalCost > 0 ? ((totalValue - totalCost) / totalCost) * 100 : 0;
+    return { totalCost, totalValue, totalCostKrw, totalValueKrw, returnVal: totalValue - totalCost, returnKrw: totalValueKrw - totalCostKrw, returnPct };
   }, [state.assets, state.exchangeRate]);
 
+  const vixStats = useMemo(() => {
+    const vix = state.market.vix || 15;
+    let vixColor = 'text-v64-success';
+    if (vix > 35) vixColor = 'text-v64-danger';
+    else if (vix > 25) vixColor = 'text-yellow-400';
+    return { vix, vixColor };
+  }, [state.market.vix]);
+
+  const marketInfo = useMemo(() => {
+    const marketState = (state.market.marketState || 'CLOSED') as MarketState;
+    return getMarketStateInfo(marketState);
+  }, [state.market.marketState]);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    toast('로그아웃 되었습니다', 'info');
+  };
+
+  const formatUSD = (n: number) => '$' + n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  const formatKRW = (n: number) => '₩' + n.toLocaleString(undefined, { maximumFractionDigits: 0 });
+
+  const stateColors: Record<string, string> = {
+    green: 'bg-v64-success/20 text-v64-success border-v64-success/30',
+    blue: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+    purple: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+    orange: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+    gray: 'bg-white/10 text-white/70 border-white/20',
+  };
+
+  const plColor = portfolioStats.returnPct >= 0 ? 'text-v64-success' : 'text-v64-danger';
+  const plColorKrw = portfolioStats.returnKrw >= 0 ? 'text-v64-success' : 'text-v64-danger';
+
   return (
-    <header className="glass-card p-3 md:p-4 lg:p-5">
-      <div className="flex flex-wrap justify-between items-center gap-3 md:gap-4">
-        {/* Logo */}
-        <div className="flex items-center gap-2 md:gap-4">
-          <div className="w-10 h-10 md:w-12 md:h-12 border border-white/20 rounded-full flex items-center justify-center bg-white/5 backdrop-blur-md shadow-[0_0_30px_rgba(255,255,255,0.1)]">
-            <i className="fas fa-infinity text-lg md:text-xl text-white" />
+    <header className="glass-card px-3 py-2">
+      <div className="flex items-center">
+        {/* ═══ LOGO ═══ */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="w-8 h-8 border border-white/30 rounded-full flex items-center justify-center bg-gradient-to-br from-white/10 to-white/5">
+            <i className="fas fa-infinity text-sm text-white" />
           </div>
-          <div>
-            <h1 className="text-lg md:text-xl lg:text-2xl font-bold tracking-[0.2em] font-display text-white text-glow">CELESTIAL</h1>
-            <div className="text-[8px] md:text-[10px] tracking-[0.3em] opacity-90 mt-0.5 md:mt-1">NEXUS INTELLIGENCE V1.8</div>
+          <div className="text-xs font-bold tracking-wider font-display text-white">NEXUS</div>
+        </div>
+
+        <div className="w-px h-6 bg-white/20 mx-2" />
+
+        {/* ═══ PORTFOLIO ═══ */}
+        <div className="flex items-center gap-3 flex-1">
+          {/* USD Section */}
+          <div className="flex items-center gap-2">
+            <span className="text-[9px] text-celestial-cyan/80">평가$</span>
+            <span className="text-sm font-display text-celestial-cyan">{formatUSD(portfolioStats.totalValue)}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-[8px] text-white/60">원금</span>
+            <span className="text-[11px] text-white/80">{formatUSD(portfolioStats.totalCost)}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-[8px] text-white/60">손익</span>
+            <span className={`text-[11px] ${plColor}`}>
+              {portfolioStats.returnVal >= 0 ? '+' : ''}{formatUSD(portfolioStats.returnVal)}
+              <span className="text-[9px] ml-0.5">({portfolioStats.returnPct >= 0 ? '+' : ''}{portfolioStats.returnPct.toFixed(1)}%)</span>
+            </span>
+          </div>
+
+          <div className="w-px h-5 bg-white/15" />
+
+          {/* KRW Section */}
+          <div className="flex items-center gap-2">
+            <span className="text-[9px] text-celestial-gold/80">평가₩</span>
+            <span className="text-sm font-display text-celestial-gold">{formatKRW(portfolioStats.totalValueKrw)}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-[8px] text-white/60">원금</span>
+            <span className="text-[11px] text-white/80">{formatKRW(portfolioStats.totalCostKrw)}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-[8px] text-white/60">손익</span>
+            <span className={`text-[11px] ${plColorKrw}`}>
+              {portfolioStats.returnKrw >= 0 ? '+' : ''}{formatKRW(portfolioStats.returnKrw)}
+            </span>
           </div>
         </div>
 
-        {/* Portfolio Summary */}
-        <PortfolioSummary {...portfolioStats} />
+        <div className="w-px h-6 bg-white/20 mx-2" />
 
-        {/* Market Indicators */}
-        <MarketIndicators market={state.market} exchangeRate={state.exchangeRate} />
+        {/* ═══ MARKET ═══ */}
+        <div className="flex items-center gap-3 flex-1">
+          <div className={`px-1.5 py-0.5 rounded text-[8px] font-medium border ${stateColors[marketInfo.color]}`}>
+            {marketInfo.label}
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-[8px] text-blue-400/80">NDX</span>
+            <span className="text-[11px] font-display text-blue-400">
+              {state.market.nasdaq ? (state.market.nasdaq / 1000).toFixed(1) + 'K' : '--'}
+            </span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-[8px] text-emerald-400/80">SPX</span>
+            <span className="text-[11px] font-display text-emerald-400">
+              {state.market.sp500 ? state.market.sp500.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '--'}
+            </span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-[8px] text-v64-danger/80">VIX</span>
+            <span className={`text-[11px] font-display font-medium ${vixStats.vixColor}`}>{vixStats.vix.toFixed(1)}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-[8px] text-white/60">₩</span>
+            <span className="text-[11px] font-display text-white/90">{state.exchangeRate.toLocaleString()}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-[8px] text-celestial-gold/80">10Y</span>
+            <span className="text-[11px] font-display text-celestial-gold">{state.market.tnx ? state.market.tnx.toFixed(2) + '%' : '--'}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className={`w-1.5 h-1.5 rounded-full ${connectionStatus === 'online' ? 'bg-v64-success' : connectionStatus === 'loading' ? 'bg-yellow-400 animate-pulse' : 'bg-white/40'}`} />
+            <span className="text-[9px] text-white/60">{syncTime}</span>
+          </div>
+          <span className="text-[11px] font-display text-white/80">{clock}</span>
+        </div>
 
-        {/* Controls */}
-        <HeaderControls
-          user={user}
-          connectionStatus={connectionStatus}
-          syncTime={syncTime}
-          clock={clock}
-          isLive={isLive}
-          onToggleLive={toggleLive}
-          onExport={onOpenExport}
-          onOpenAuth={onOpenAuth}
-          onOpenFreedom={onOpenFreedom}
-          onOpenSettings={onOpenSettings}
-          toast={toast}
-        />
+        <div className="w-px h-6 bg-white/20 mx-2" />
+
+        {/* ═══ CONTROLS ═══ */}
+        <div className="flex items-center gap-1 flex-shrink-0">
+          <UndoRedoIndicator />
+          {user ? (
+            <button onClick={handleLogout} className="header-btn-compact"><i className="fas fa-sign-out-alt" /><span>Logout</span></button>
+          ) : (
+            <button onClick={onOpenAuth} className="header-btn-compact"><i className="fas fa-user" /><span>Login</span></button>
+          )}
+          <button onClick={toggleLive} className={`header-btn-compact ${isLive ? 'text-v64-success border-v64-success/40' : ''}`}>
+            <i className={`fas fa-${isLive ? 'link' : 'unlink'}`} /><span>{isLive ? 'Live' : 'Connect'}</span>
+          </button>
+          <button onClick={onOpenExport} className="header-btn-compact"><i className="fas fa-download" /><span>Export</span></button>
+          <button onClick={onOpenFreedom} className="header-btn-compact-gold"><i className="fas fa-robot" /><span>AI</span></button>
+          <button onClick={onOpenSettings} className="header-btn-compact"><i className="fas fa-cog" /><span>설정</span></button>
+        </div>
       </div>
     </header>
   );

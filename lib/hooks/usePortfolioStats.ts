@@ -17,6 +17,7 @@ export interface PortfolioStats {
   totalCostKRW: number;
   profitKRW: number;
   assetCount: number;
+  avgBuyRate: number; // 평균 매수환율
   // 유형별 통계
   typeDistribution: Record<string, { count: number; value: number; weight: number }>;
   // 섹터별 통계
@@ -27,6 +28,12 @@ export interface PortfolioStats {
     value: number;
     weight: number;
     profit: number;
+    returnPct: number;
+  }>;
+  // 수익률 상위 종목
+  topPerformers: Array<{
+    ticker: string;
+    value: number;
     returnPct: number;
   }>;
 }
@@ -93,7 +100,7 @@ export function usePortfolioStats(): PortfolioStats {
         : 0;
     });
 
-    // 상위 종목
+    // 상위 종목 (비중 기준)
     const topHoldings = mergedAssets
       .map(data => ({
         ticker: data.ticker,
@@ -105,6 +112,28 @@ export function usePortfolioStats(): PortfolioStats {
       .sort((a, b) => b.value - a.value)
       .slice(0, 10);
 
+    // 수익률 상위 종목
+    const topPerformers = mergedAssets
+      .map(data => ({
+        ticker: data.ticker,
+        value: data.totalValue,
+        returnPct: data.totalCost > 0 ? ((data.totalValue - data.totalCost) / data.totalCost) * 100 : 0,
+      }))
+      .sort((a, b) => b.returnPct - a.returnPct)
+      .slice(0, 3);
+
+    // 평균 매수환율 계산 (원금 가중평균)
+    let avgBuyRate = 0;
+    if (totalCost > 0) {
+      let weightedRateSum = 0;
+      assets.forEach(a => {
+        const cost = a.qty * a.avg;
+        const buyRate = a.buyRate || exchangeRate;
+        weightedRateSum += cost * buyRate;
+      });
+      avgBuyRate = weightedRateSum / totalCost;
+    }
+
     return {
       totalValue,
       totalCost,
@@ -114,9 +143,11 @@ export function usePortfolioStats(): PortfolioStats {
       totalCostKRW,
       profitKRW,
       assetCount: mergedAssets.length,  // 병합된 종목 수
+      avgBuyRate,
       typeDistribution,
       sectorDistribution,
       topHoldings,
+      topPerformers,
     };
   }, [assets, exchangeRate]);
 }

@@ -11,7 +11,6 @@ import SimulationHub from '@/components/SimulationHub';
 import Analytics from '@/components/Analytics';
 import AssetModal from '@/components/AssetModal';
 import DividendModal from '@/components/DividendModal';
-import TradeJournal from '@/components/TradeJournal';
 import SettingsModal from '@/components/SettingsModal';
 import AuthModal from '@/components/AuthModal';
 import FreedomModal from '@/components/FreedomModal';
@@ -26,6 +25,9 @@ import HistoricPerformance from '@/components/HistoricPerformance';
 import PortfolioTimeline from '@/components/charts/PortfolioTimeline';
 import { BottomNavigation, DEFAULT_NAV_ITEMS } from '@/components/ui/BottomNavigation';
 import { useTabNavigation } from '@/lib/hooks/useKeyboardNavigation';
+import QuickStats from '@/components/stellar/QuickStats';
+import InsightsPanel from '@/components/stellar/InsightsPanel';
+import { usePortfolioStats } from '@/lib/hooks/usePortfolioStats';
 
 type TabType = 'stellar' | 'income' | 'analytics' | 'performance' | 'simulation';
 type ViewMode = 'table' | 'heatmap';
@@ -73,20 +75,8 @@ function DashboardContent() {
     'vertical'
   );
 
-  // INCOME 자산 메모이제이션
-  const incomeAssets = useMemo(
-    () => state.assets.filter(a => a.type === 'INCOME'),
-    [state.assets]
-  );
-
-  // 배당 카운트다운 계산 함수 메모이제이션
-  const getDividendCountdown = useCallback((ticker: string) => {
-    // 매주 목요일 배당 가정
-    const now = new Date();
-    const dayOfWeek = now.getDay();
-    const daysUntilThursday = (4 - dayOfWeek + 7) % 7 || 7;
-    return `D-${daysUntilThursday}`;
-  }, []);
+  // 포트폴리오 통계 (Stellar 탭용)
+  const portfolioStats = usePortfolioStats();
 
   // 모달 핸들러 메모이제이션
   const handleOpenSettings = useCallback(() => setSettingsOpen(true), []);
@@ -196,6 +186,7 @@ function DashboardContent() {
               aria-labelledby="tab-stellar"
               tabIndex={0}
               className="h-full min-h-[500px] md:min-h-[800px] tab-panel-enter">
+              {/* Header */}
               <div className="flex justify-between items-end mb-4 pb-2 border-b border-white/10">
                 <h2 className="text-lg font-display tracking-widest flex items-center gap-3 text-white">
                   <i className="fas fa-star text-celestial-gold text-xs" /> STELLAR ASSETS
@@ -253,44 +244,35 @@ function DashboardContent() {
                 </div>
               </div>
 
-              {/* Dividend Countdown */}
-              {incomeAssets.length > 0 && viewMode === 'table' && (
-                <div className="dividend-countdown mb-4">
-                  <i className="fas fa-calendar-alt text-celestial-gold" />
-                  <span className="text-white/60">NEXT DIVIDEND</span>
-                  {incomeAssets.slice(0, 3).map(asset => (
-                    <div key={asset.ticker} className="dividend-countdown-item">
-                      <span className="dividend-countdown-ticker">{asset.ticker}</span>
-                      <span className="dividend-countdown-days">{getDividendCountdown(asset.ticker)}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
+              {/* Quick Stats */}
+              <QuickStats stats={portfolioStats} />
 
-              {/* Asset Table or Heatmap */}
-              {viewMode === 'table' ? (
-                <div className="flex flex-col h-[600px]">
-                  <div className="flex-1 min-h-0">
-                    <div className="overflow-y-auto custom-scrollbar h-full">
-                      <AssetTable
-                        isColSettingsOpen={isColSettingsOpen}
-                        setIsColSettingsOpen={setIsColSettingsOpen}
-                      />
+              {/* 2-Column Layout: Assets (65%) + Insights (35%) */}
+              <div className="grid grid-cols-1 lg:grid-cols-[65%_35%] gap-4">
+                {/* Left: Asset Table or Heatmap */}
+                <div>
+                  {viewMode === 'table' ? (
+                    <div className="flex flex-col h-[600px]">
+                      <div className="flex-1 min-h-0">
+                        <div className="overflow-y-auto custom-scrollbar h-full">
+                          <AssetTable
+                            isColSettingsOpen={isColSettingsOpen}
+                            setIsColSettingsOpen={setIsColSettingsOpen}
+                          />
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="h-[600px]">
+                      <PortfolioHeatmap />
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <div className="h-[650px]">
-                  <PortfolioHeatmap />
-                </div>
-              )}
 
-              {/* Trade Journal Section */}
-              <div className="mt-8 pt-6 border-t border-white/10">
-                <h3 className="text-base font-display tracking-widest flex items-center gap-3 text-white mb-4">
-                  <i className="fas fa-receipt text-celestial-gold text-xs" /> TRADE JOURNAL
-                </h3>
-                <TradeJournal />
+                {/* Right: Insights Panel */}
+                <div className="h-[600px]">
+                  <InsightsPanel stats={portfolioStats} />
+                </div>
               </div>
             </div>
           )}

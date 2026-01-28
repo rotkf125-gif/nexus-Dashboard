@@ -7,7 +7,11 @@ import { formatUSD } from '@/lib/utils';
 type SortBy = 'ticker' | 'amount';
 type SortOrder = 'asc' | 'desc';
 
-export default function TradeJournal() {
+interface TradeJournalProps {
+  compact?: boolean;
+}
+
+export default function TradeJournal({ compact = false }: TradeJournalProps) {
   const { state, setTradeSums, removeTradeSum } = useNexus();
   const { tradeSums } = state;
 
@@ -138,6 +142,102 @@ export default function TradeJournal() {
     setShowAddForm(false);
   };
 
+  // Compact 모드 (InsightsPanel용)
+  if (compact) {
+    return (
+      <div className="space-y-2">
+        {/* Summary */}
+        <div className="flex items-center justify-between text-[9px] mb-2 pb-2 border-b border-white/10">
+          <span className="text-white/60">{stats.totalTickers}개 종목</span>
+          <span className={stats.totalRealized >= 0 ? 'text-v64-success' : 'text-v64-danger'}>
+            {stats.totalRealized >= 0 ? '+' : ''}{formatUSD(stats.totalRealized)}
+          </span>
+        </div>
+
+        {/* Compact List */}
+        {filteredAndSortedTickers.length === 0 ? (
+          <div className="text-[10px] text-white/60 text-center py-4">
+            거래 기록이 없습니다
+          </div>
+        ) : (
+          <div className="space-y-1.5">
+            {filteredAndSortedTickers.slice(0, 8).map((ticker) => {
+              const amount = tradeSums[ticker] || 0;
+              return (
+                <div
+                  key={ticker}
+                  className="flex items-center justify-between bg-white/5 px-2 py-1.5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
+                  onClick={() => handleEditTradeReturn(ticker)}
+                >
+                  <span className="text-[10px] font-medium text-white">{ticker}</span>
+                  <span className={`text-[10px] font-mono ${amount >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}>
+                    {amount >= 0 ? '+' : ''}{formatUSD(amount)}
+                  </span>
+                </div>
+              );
+            })}
+            {filteredAndSortedTickers.length > 8 && (
+              <div className="text-[9px] text-white/60 text-center pt-1">
+                +{filteredAndSortedTickers.length - 8}개 더보기
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Add Button */}
+        <button
+          onClick={() => {
+            setShowAddForm(!showAddForm);
+            if (!showAddForm) {
+              const today = new Date().toISOString().split('T')[0];
+              setNewDate(today);
+            }
+          }}
+          className="w-full text-[9px] py-1.5 mt-2 rounded-lg border border-white/20 text-white/70 hover:bg-white/5 transition-colors"
+        >
+          <i className="fas fa-plus mr-1" />
+          ADD TRADE
+        </button>
+
+        {/* Compact Add Form */}
+        {showAddForm && (
+          <div className="bg-white/5 p-2 rounded-lg space-y-2 mt-2">
+            <input
+              type="text"
+              value={newTicker}
+              onChange={(e) => setNewTicker(e.target.value.toUpperCase())}
+              className="w-full bg-white/10 border border-white/20 rounded px-2 py-1 text-[10px] text-white placeholder-white/60"
+              placeholder="TICKER"
+            />
+            <input
+              type="number"
+              step="0.01"
+              value={newAmount}
+              onChange={(e) => setNewAmount(e.target.value)}
+              className="w-full bg-white/10 border border-white/20 rounded px-2 py-1 text-[10px] text-white placeholder-white/60"
+              placeholder="AMOUNT (+/-)"
+            />
+            <div className="flex gap-1">
+              <button
+                onClick={handleCancelAdd}
+                className="flex-1 text-[8px] py-1 rounded border border-white/20 text-white/70 hover:bg-white/5"
+              >
+                CANCEL
+              </button>
+              <button
+                onClick={handleAddTrade}
+                className="flex-1 text-[8px] py-1 rounded bg-celestial-cyan/20 border border-celestial-cyan/40 text-celestial-cyan hover:bg-celestial-cyan/30"
+              >
+                CONFIRM
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // 기본 모드 (Full)
   return (
     <div className="space-y-4">
       {/* Title */}

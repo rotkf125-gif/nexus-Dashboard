@@ -1,4 +1,4 @@
-# NEXUS DASHBOARD v1.8.3
+# NEXUS DASHBOARD v1.8.4
 
 개인 투자 포트폴리오 관리 대시보드
 
@@ -9,6 +9,36 @@
 | **Live Site** | https://nexus-dashboard-beige.vercel.app |
 | **GitHub** | https://github.com/rotkf125-gif/nexus-dashboard |
 | **Database** | Supabase (PostgreSQL) |
+
+---
+
+## v1.8.4 - Stellar Assets 탭 & Header 리뉴얼
+
+### Header 1-Row Horizontal Full Width 레이아웃
+- **단일 라인 구성**: 로고 | 포트폴리오(가로) | 시장지표(가로) | 컨트롤 버튼
+- **포트폴리오 섹션**: 평가$/₩, 원금, 손익 가로 인라인 형식
+- **시장 지표 섹션**: 마켓상태, NDX, SPX, VIX, 환율, 10Y, 동기화 상태, 시계
+- **컨트롤 버튼**: 아이콘+텍스트 조합 (Login, Connect, Export, AI, 설정)
+- `flex-1` 활용 여백 없이 전체 너비 활용
+
+### Stellar Assets Command Center 레이아웃
+- **Quick Stats**: 총 평가, 수익률, 종목수, 평균 매수환율 상단 표시
+- **2분할 레이아웃**: Assets (65%) + Insights (35%)
+- **Insights Panel**: Type Distribution, Top Performers, Trade Journal 통합
+
+### 새 컴포넌트
+- `components/stellar/QuickStats.tsx`: 상단 요약 통계
+- `components/stellar/InsightsPanel.tsx`: 우측 인사이트 패널
+
+### 기능 개선
+- **평균 매수환율**: 원금 가중평균 환율 계산 (usePortfolioStats)
+- **Top Performers**: 수익률 상위 3종목 표시
+- **Trade Journal Compact**: InsightsPanel 내 컴팩트 모드 추가
+
+### 정리
+- Dividend Countdown 섹션 삭제 (Stellar 탭)
+- 하단 Trade Journal 섹션 삭제 (InsightsPanel로 이동)
+- Header 하위 컴포넌트 통합 (단일 파일로 리팩토링)
 
 ---
 
@@ -131,6 +161,7 @@ CREATE INDEX IF NOT EXISTS idx_snapshots_user_timestamp ON portfolio_snapshots(u
 
 | 버전 | 주요 변경 |
 |------|----------|
+| v1.8.4 | Header 1-Row Horizontal 리뉴얼, Stellar Assets Command Center |
 | v1.8.3 | Simulation 탭 Mission Control 리뉴얼, 티커 병합 처리, WCAG AAA 접근성 |
 | v1.8.2 | Analytics 탭 리뉴얼 (버블차트, 건강점수, 인사이트칩) |
 | v1.8.1 | ETF 섹터 버그 수정, Price 애니메이션 개선 |
