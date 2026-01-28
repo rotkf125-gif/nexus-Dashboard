@@ -180,25 +180,25 @@ export default function AssetTable({ isColSettingsOpen = false, setIsColSettings
                             </span>
                           </div>
                           <div className="flex items-center gap-1">
-                            <button className="w-7 h-7 flex items-center justify-center text-[10px] text-white/70 hover:text-celestial-cyan rounded-lg hover:bg-white/10" onClick={() => openEditAssetModal(i)}>
+                            <button className="w-7 h-7 flex items-center justify-center text-[10px] text-white hover:text-celestial-cyan rounded-lg hover:bg-white/10" onClick={() => openEditAssetModal(i)}>
                               <i className="fas fa-pen" />
                             </button>
-                            <button className="w-7 h-7 flex items-center justify-center text-[10px] text-white/70 hover:text-v64-danger rounded-lg hover:bg-white/10" onClick={() => { if (confirm('Delete?')) removeAsset(i); }}>
+                            <button className="w-7 h-7 flex items-center justify-center text-[10px] text-white hover:text-v64-danger rounded-lg hover:bg-white/10" onClick={() => { if (confirm('Delete?')) removeAsset(i); }}>
                               <i className="fas fa-trash" />
                             </button>
                           </div>
                         </div>
                         <div className="grid grid-cols-3 gap-2 mb-2">
                           <div className="text-center">
-                            <div className="text-[9px] text-white/70 uppercase">수량</div>
+                            <div className="text-[9px] text-white uppercase">수량</div>
                             <div className="text-[11px] text-white font-medium">{a.qty}</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-[9px] text-white/70 uppercase">평균가</div>
-                            <div className="text-[11px] text-white/80">${a.avg.toFixed(2)}</div>
+                            <div className="text-[9px] text-white uppercase">평균가</div>
+                            <div className="text-[11px] text-white">${a.avg.toFixed(2)}</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-[9px] text-white/70 uppercase">현재가</div>
+                            <div className="text-[9px] text-white uppercase">현재가</div>
                             <div className={`text-[11px] text-white font-medium flex items-center justify-center gap-1 ${priceChange ? (priceChange.isUp ? 'price-flash-up' : 'price-flash-down') : ''}`}>
                               ${a.price.toFixed(2)}
                               {priceChange && (
@@ -211,12 +211,12 @@ export default function AssetTable({ isColSettingsOpen = false, setIsColSettings
                         </div>
                         <div className="grid grid-cols-2 gap-3 pt-2 border-t border-white/10">
                           <div>
-                            <div className="text-[9px] text-white/70 uppercase mb-1">평가금액</div>
+                            <div className="text-[9px] text-white uppercase mb-1">평가금액</div>
                             <div className="text-[12px] text-white font-semibold">{formatUSD(value)}</div>
-                            <div className="text-[10px] text-white/60">₩{valueKrw.toLocaleString()}</div>
+                            <div className="text-[10px] text-white">₩{valueKrw.toLocaleString()}</div>
                           </div>
                           <div className="text-right">
-                            <div className="text-[9px] text-white/70 uppercase mb-1">손익</div>
+                            <div className="text-[9px] text-white uppercase mb-1">손익</div>
                             <div className={`text-[12px] font-bold ${plClass}`}>
                               {profit >= 0 ? '+' : ''}{formatUSD(profit)}
                               <span className="text-[10px] opacity-80 ml-1">({pl >= 0 ? '+' : ''}{pl.toFixed(1)}%)</span>
@@ -237,15 +237,15 @@ export default function AssetTable({ isColSettingsOpen = false, setIsColSettings
                     <thead className="text-[8px] font-sans uppercase tracking-widest bg-black/30">
                       <tr>
                         <th className="p-1 border-b border-white/10 w-[3%]" />
-                        <th className="p-1.5 text-left border-b border-white/10 font-medium opacity-80 w-[12%]">Ticker</th>
+                        <th className="p-1.5 text-center border-b border-white/10 font-medium opacity-80 w-[12%]">Ticker</th>
                         {isColumnVisible('qty') && <th className="p-1.5 text-center border-b border-white/10 font-medium opacity-80 w-[6%]">Qty</th>}
-                        {isColumnVisible('return') && <th className="p-1.5 pr-4 text-center border-b border-white/10 font-medium opacity-80 w-[11%]">Return</th>}
-                        {isColumnVisible('avg') && <th className="p-1.5 text-right border-b border-white/10 font-medium opacity-80 w-[9%]">Avg</th>}
-                        {isColumnVisible('price') && <th className="p-1.5 pr-4 text-right border-b border-white/10 font-medium opacity-80 w-[10%]">Price</th>}
-                        {isColumnVisible('valUsd') && <th className="p-1.5 text-right border-b border-white/10 font-medium opacity-80 w-[12%]">Val($)</th>}
-                        {isColumnVisible('valKrw') && <th className="p-1.5 pr-4 text-right border-b border-white/10 font-medium opacity-80 w-[11%]">Val(₩)</th>}
+                        {isColumnVisible('return') && <th className="p-1.5 text-center border-b border-white/10 font-medium opacity-80 w-[11%]">Return</th>}
+                        {isColumnVisible('avg') && <th className="p-1.5 text-center border-b border-white/10 font-medium opacity-80 w-[9%]">Avg</th>}
+                        {isColumnVisible('price') && <th className="p-1.5 text-center border-b border-white/10 font-medium opacity-80 w-[10%]">Price</th>}
+                        {isColumnVisible('valUsd') && <th className="p-1.5 text-center border-b border-white/10 font-medium opacity-80 w-[12%]">Val($)</th>}
+                        {isColumnVisible('valKrw') && <th className="p-1.5 text-center border-b border-white/10 font-medium opacity-80 w-[11%]">Val(₩)</th>}
                         {isColumnVisible('fxRate') && <th className="p-1.5 text-center border-b border-white/10 font-medium opacity-80 w-[8%]">FX Rate</th>}
-                        {isColumnVisible('fxPL') && <th className="p-1.5 text-right border-b border-white/10 font-medium opacity-80 w-[8%]">FX P/L</th>}
+                        {isColumnVisible('fxPL') && <th className="p-1.5 text-center border-b border-white/10 font-medium opacity-80 w-[8%]">FX P/L</th>}
                         <th className="p-1 border-b border-white/10 w-[8%]" />
                       </tr>
                     </thead>

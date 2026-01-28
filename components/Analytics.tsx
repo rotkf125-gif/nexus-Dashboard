@@ -4,8 +4,6 @@ import { useNexus } from '@/lib/context';
 import { useRiskAnalytics } from '@/lib/hooks/useRiskAnalytics';
 import BubbleChart from './charts/BubbleChart';
 import CorrelationHeatmap from './charts/CorrelationHeatmap';
-import HealthScore from './analytics/HealthScore';
-import RiskFactorsPanel from './analytics/RiskFactorsPanel';
 import InsightChips from './analytics/InsightChips';
 
 interface AnalyticsProps {
@@ -43,60 +41,92 @@ export default function Analytics({ horizontal = false }: AnalyticsProps) {
     );
   }
 
-  // 가로 레이아웃 (리뉴얼된 레이아웃)
+  // Command Center 레이아웃 (리뉴얼)
   if (horizontal) {
+    // KPI 데이터 준비
+    const kpiItems = [
+      {
+        label: 'HEALTH',
+        value: riskMetrics.overallScore,
+        trend: riskMetrics.overallScore >= 70 ? 'up' : riskMetrics.overallScore >= 50 ? 'neutral' : 'down',
+        color: riskColor,
+      },
+      {
+        label: 'DIVERSE',
+        value: riskMetrics.diversificationScore,
+        trend: riskMetrics.diversificationScore >= 60 ? 'up' : 'down',
+        color: riskMetrics.diversificationScore >= 70 ? '#22c55e' : riskMetrics.diversificationScore >= 40 ? '#eab308' : '#ef4444',
+      },
+      {
+        label: 'CONC.',
+        value: riskMetrics.concentrationRisk,
+        trend: riskMetrics.concentrationRisk >= 60 ? 'up' : 'down',
+        color: riskMetrics.concentrationRisk >= 70 ? '#22c55e' : riskMetrics.concentrationRisk >= 40 ? '#eab308' : '#ef4444',
+      },
+      {
+        label: 'VOLATIL',
+        value: riskMetrics.volatilityScore,
+        trend: riskMetrics.volatilityScore >= 60 ? 'up' : 'down',
+        color: riskMetrics.volatilityScore >= 70 ? '#22c55e' : riskMetrics.volatilityScore >= 40 ? '#eab308' : '#ef4444',
+      },
+    ];
+
     return (
-      <div className="glass-card p-3 md:p-4 lg:p-5">
-        {/* Row 1: Health Score */}
-        <div className="mb-4">
-          <div className="inner-glass p-4 rounded-xl">
-            <HealthScore
-              score={riskMetrics.overallScore}
-              riskLevel={riskLevel}
-              riskColor={riskColor}
-            />
+      <div className="glass-card p-4 lg:p-5">
+        {/* Row 1: KPI Bar */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-5">
+          {/* KPI Cards */}
+          {kpiItems.map((kpi) => (
+            <div key={kpi.label} className="inner-glass p-3 rounded-xl text-center">
+              <div className="text-[9px] text-white/60 tracking-widest mb-1">{kpi.label}</div>
+              <div className="text-2xl font-display" style={{ color: kpi.color }}>
+                {kpi.value}
+              </div>
+              <div className="text-[10px] mt-0.5" style={{ color: kpi.color }}>
+                {kpi.trend === 'up' ? '▲' : kpi.trend === 'down' ? '▼' : '→'}
+              </div>
+            </div>
+          ))}
+
+          {/* Risk Level Badge */}
+          <div className="inner-glass p-3 rounded-xl text-center border" style={{ borderColor: `${riskColor}40` }}>
+            <div className="text-[9px] text-white/60 tracking-widest mb-1">RISK LEVEL</div>
+            <div
+              className="text-lg font-display tracking-wider"
+              style={{ color: riskColor }}
+            >
+              {riskLevel === 'LOW' ? '🟢' : riskLevel === 'MODERATE' ? '🟡' : riskLevel === 'HIGH' ? '🟠' : '🔴'} {riskLevel}
+            </div>
           </div>
         </div>
 
-        {/* Row 2: Bubble Chart + Risk Factors Panel */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
-          {/* Bubble Chart - 2/3 width */}
-          <div className="lg:col-span-2">
-            <BubbleChart />
-          </div>
+        {/* Row 2: Bubble Chart - Full Width Hero */}
+        <div className="mb-5">
+          <BubbleChart />
+        </div>
 
-          {/* Risk Factors Panel - 1/3 width */}
+        {/* Row 3: Insights + Correlation (5:5) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Insight Alerts */}
           <div className="inner-glass p-4 rounded-xl">
-            <RiskFactorsPanel
+            <div className="flex items-center gap-2 mb-3 border-b border-white/10 pb-2">
+              <i className="fas fa-lightbulb text-celestial-gold text-xs" />
+              <span className="text-[10px] text-white/80 tracking-widest">INSIGHT ALERTS</span>
+            </div>
+            <InsightChips
               riskMetrics={riskMetrics}
-              marketCorrelations={marketCorrelations}
-              beta={1.0 + (riskProfile.cyclicalExposure - 0.3)}
-              sharpeRatio={
-                // 상위 3개 수익률 평균 기반 간이 샤프 계산
-                portfolioStats.top3.length > 0
-                  ? (portfolioStats.top3.reduce((sum, a) => sum + a.returnPct, 0) / portfolioStats.top3.length) /
-                    (riskMetrics.volatilityScore > 0 ? (100 - riskMetrics.volatilityScore) / 20 : 1) / 10
-                  : 0
-              }
+              riskProfile={riskProfile}
+              market={market}
+              maxAssetWeight={maxAssetWeight}
+              topAssetTicker={topAssetTicker}
+              incomeAssetCount={incomeAssetCount}
             />
           </div>
-        </div>
 
-        {/* Row 3: Insight Chips */}
-        <div className="mb-4">
-          <InsightChips
-            riskMetrics={riskMetrics}
-            riskProfile={riskProfile}
-            market={market}
-            maxAssetWeight={maxAssetWeight}
-            topAssetTicker={topAssetTicker}
-            incomeAssetCount={incomeAssetCount}
-          />
-        </div>
-
-        {/* Row 4: Collapsible Correlation Heatmap */}
-        <div className="inner-glass rounded-xl overflow-hidden">
-          <CorrelationHeatmap collapsible defaultExpanded={false} />
+          {/* Correlation Matrix */}
+          <div className="inner-glass rounded-xl overflow-hidden">
+            <CorrelationHeatmap collapsible defaultExpanded={true} />
+          </div>
         </div>
       </div>
     );
@@ -107,7 +137,7 @@ export default function Analytics({ horizontal = false }: AnalyticsProps) {
     <div className="glass-card p-5 h-full flex flex-col">
       <div className="flex items-center gap-2 mb-4 border-b border-white/10 pb-3">
         <i className="fas fa-shield-alt text-celestial-cyan" aria-hidden="true" />
-        <h3 className="font-display text-sm tracking-widest text-white/90">ANALYTICS</h3>
+        <h3 className="font-display text-sm tracking-widest text-white">ANALYTICS</h3>
       </div>
 
       <div className="flex-1 overflow-y-auto custom-scrollbar min-h-0 space-y-4">

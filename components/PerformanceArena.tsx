@@ -8,9 +8,10 @@ import { calculatePortfolioStats } from '@/lib/utils';
 
 interface PerformanceArenaProps {
   compact?: boolean;
+  race?: boolean; // 세로 벤치마크 레이스 모드
 }
 
-export default function PerformanceArena({ compact = false }: PerformanceArenaProps) {
+export default function PerformanceArena({ compact = false, race = false }: PerformanceArenaProps) {
   const { state, toast } = useNexus();
   const { assets, exchangeRate } = state;
   const [benchmarks, setBenchmarks] = useState<BenchmarkData[]>([]);
@@ -74,6 +75,105 @@ export default function PerformanceArena({ compact = false }: PerformanceArenaPr
     return null;
   }
 
+  // 레이스 모드 (세로 벤치마크 레이스, 8:2 레이아웃의 우측용)
+  if (race) {
+    // 포트폴리오 포함 전체 순위 배열
+    const allRanked = [
+      { name: 'MY PORTFOLIO', ticker: 'PORT', return: portfolioStats.returnPct, isPortfolio: true },
+      ...benchmarks.map(b => ({ name: b.name, ticker: b.ticker, return: b.ytdReturn, isPortfolio: false }))
+    ].sort((a, b) => b.return - a.return);
+
+    return (
+      <div className="glass-card p-4 flex flex-col h-full">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-3 border-b border-white/10 pb-2 flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <i className="fas fa-trophy text-celestial-gold text-xs" />
+            <h3 className="font-display text-xs tracking-widest text-white">BENCHMARK RACE</h3>
+          </div>
+          <span className="text-[8px] text-celestial-gold/70 tracking-widest">YTD</span>
+        </div>
+
+        {/* Race List */}
+        <div className="flex-1 overflow-y-auto custom-scrollbar space-y-1.5">
+          {isLoading ? (
+            <div className="flex items-center justify-center h-full">
+              <i className="fas fa-spinner spinner text-white/50" />
+            </div>
+          ) : (
+            allRanked.map((item, idx) => (
+              <div
+                key={item.ticker}
+                className={`inner-glass p-2.5 rounded-lg transition-all ${
+                  item.isPortfolio ? 'border border-celestial-gold/40 bg-celestial-gold/5' : ''
+                }`}
+              >
+                {/* Rank & Name */}
+                <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-display text-white/60 w-4">
+                      {idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`}
+                    </span>
+                    <span className={`text-[10px] font-display tracking-wide ${
+                      item.isPortfolio ? 'text-celestial-gold' : 'text-white/80'
+                    }`}>
+                      {item.ticker}
+                    </span>
+                  </div>
+                  <span className={`text-[11px] font-mono font-medium ${
+                    item.return >= 0 ? 'text-v64-success' : 'text-v64-danger'
+                  }`}>
+                    {item.return >= 0 ? '+' : ''}{item.return.toFixed(1)}%
+                  </span>
+                </div>
+
+                {/* Progress Bar */}
+                <div className="relative h-1.5 bg-white/10 rounded-full overflow-hidden">
+                  <div
+                    className={`absolute top-0 h-full rounded-full transition-all ${
+                      item.isPortfolio
+                        ? 'bg-gradient-to-r from-celestial-gold/60 to-celestial-gold'
+                        : item.return >= 0 ? 'bg-v64-success/60' : 'bg-v64-danger/60'
+                    }`}
+                    style={{
+                      width: `${Math.min(100, (Math.abs(item.return) / maxReturn) * 100)}%`,
+                    }}
+                  />
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Alpha Summary */}
+        <div className="mt-3 pt-3 border-t border-white/10 flex-shrink-0">
+          <div className="grid grid-cols-2 gap-2">
+            <div className="text-center">
+              <div className="text-[7px] text-white/60 tracking-widest">VS S&P</div>
+              <div className={`text-xs font-display ${alphaVsSP500 >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}>
+                {alphaVsSP500 >= 0 ? '+' : ''}{alphaVsSP500.toFixed(1)}%p
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="text-[7px] text-white/60 tracking-widest">VS QQQ</div>
+              <div className={`text-xs font-display ${alphaVsNasdaq >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}>
+                {alphaVsNasdaq >= 0 ? '+' : ''}{alphaVsNasdaq.toFixed(1)}%p
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Refresh */}
+        <button
+          onClick={fetchBenchmarks}
+          className="mt-2 text-[8px] text-white/60 hover:text-white/80 flex items-center justify-center gap-1 flex-shrink-0"
+        >
+          <i className="fas fa-sync-alt" /> Refresh
+        </button>
+      </div>
+    );
+  }
+
   // 컴팩트 모드 (세로 레이아웃, 1/4 너비용)
   if (compact) {
     return (
@@ -84,14 +184,14 @@ export default function PerformanceArena({ compact = false }: PerformanceArenaPr
             <i className="fas fa-trophy text-celestial-gold text-xs" />
             PERFORMANCE
           </h2>
-          {isLoading && <i className="fas fa-spinner spinner text-xs opacity-70" />}
+          {isLoading && <i className="fas fa-spinner spinner text-xs text-white/60" />}
         </div>
 
         {/* Quick Stats */}
         <div className="space-y-2.5 flex-1 overflow-y-auto custom-scrollbar">
           {/* YTD Return */}
           <div className="inner-glass p-3 rounded-lg">
-            <div className="text-[8px] opacity-60 tracking-widest mb-1">YTD RETURN</div>
+            <div className="text-[8px] text-white/60 tracking-widest mb-1">YTD RETURN</div>
             <div className={`text-2xl font-display ${portfolioStats.returnPct >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}>
               {portfolioStats.returnPct >= 0 ? '+' : ''}{portfolioStats.returnPct.toFixed(2)}%
             </div>
@@ -100,13 +200,13 @@ export default function PerformanceArena({ compact = false }: PerformanceArenaPr
           {/* Alpha Cards */}
           <div className="grid grid-cols-2 gap-2">
             <div className="inner-glass p-2.5 rounded-lg text-center">
-              <div className="text-[7px] opacity-60 tracking-widest mb-0.5">VS S&P</div>
+              <div className="text-[7px] text-white/60 tracking-widest mb-0.5">VS S&P</div>
               <div className={`text-sm font-display ${alphaVsSP500 >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}>
                 {alphaVsSP500 >= 0 ? '+' : ''}{alphaVsSP500.toFixed(1)}%p
               </div>
             </div>
             <div className="inner-glass p-2.5 rounded-lg text-center">
-              <div className="text-[7px] opacity-60 tracking-widest mb-0.5">VS QQQ</div>
+              <div className="text-[7px] text-white/60 tracking-widest mb-0.5">VS QQQ</div>
               <div className={`text-sm font-display ${alphaVsNasdaq >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}>
                 {alphaVsNasdaq >= 0 ? '+' : ''}{alphaVsNasdaq.toFixed(1)}%p
               </div>
@@ -119,7 +219,7 @@ export default function PerformanceArena({ compact = false }: PerformanceArenaPr
               <div>
                 <div className="text-[8px] text-celestial-purple tracking-widest mb-1">RANKING</div>
                 <div className="text-xl font-display text-white">
-                  #{ranking} <span className="text-xs opacity-60">/ {benchmarks.length + 1}</span>
+                  #{ranking} <span className="text-xs text-white/60">/ {benchmarks.length + 1}</span>
                 </div>
               </div>
               <div className="text-3xl">
@@ -130,10 +230,10 @@ export default function PerformanceArena({ compact = false }: PerformanceArenaPr
 
           {/* Benchmarks Mini */}
           <div className="space-y-1.5">
-            <div className="text-[8px] opacity-60 tracking-widest">BENCHMARKS</div>
+            <div className="text-[8px] text-white/60 tracking-widest">BENCHMARKS</div>
             {benchmarks.slice(0, 4).map((b) => (
               <div key={b.ticker} className="flex items-center justify-between text-[10px]">
-                <span className="opacity-60">{b.ticker}</span>
+                <span className="text-white/60">{b.ticker}</span>
                 <span className={b.ytdReturn >= 0 ? 'text-v64-success' : 'text-v64-danger'}>
                   {b.ytdReturn >= 0 ? '+' : ''}{b.ytdReturn.toFixed(1)}%
                 </span>
@@ -145,7 +245,7 @@ export default function PerformanceArena({ compact = false }: PerformanceArenaPr
         {/* Refresh Button */}
         <button
           onClick={fetchBenchmarks}
-          className="mt-2.5 text-[9px] opacity-70 hover:opacity-80 flex items-center justify-center gap-1 flex-shrink-0"
+          className="mt-2.5 text-[9px] text-white/60 hover:text-white/80 flex items-center justify-center gap-1 flex-shrink-0"
         >
           <i className="fas fa-sync-alt" /> 새로고침
         </button>
@@ -166,30 +266,30 @@ export default function PerformanceArena({ compact = false }: PerformanceArenaPr
         <h2 className="text-lg font-display tracking-widest flex items-center gap-3 text-white">
           <i className="fas fa-trophy text-celestial-gold text-xs" />
           PERFORMANCE ARENA
-          {isLoading && <i className="fas fa-spinner spinner text-xs opacity-70" />}
+          {isLoading && <i className="fas fa-spinner spinner text-xs text-white/60" />}
         </h2>
 
         {/* Quick Stats */}
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-4 text-[11px]">
             <div>
-              <span className="opacity-60 mr-2">YTD</span>
+              <span className="text-white/60 mr-2">YTD</span>
               <span className={portfolioStats.returnPct >= 0 ? 'text-v64-success' : 'text-v64-danger'}>
                 {portfolioStats.returnPct >= 0 ? '+' : ''}{portfolioStats.returnPct.toFixed(1)}%
               </span>
             </div>
             <div className="border-l border-white/20 pl-4">
-              <span className="opacity-60 mr-2">vs S&P</span>
+              <span className="text-white/60 mr-2">vs S&P</span>
               <span className={alphaVsSP500 >= 0 ? 'text-v64-success' : 'text-v64-danger'}>
                 {alphaVsSP500 >= 0 ? '+' : ''}{alphaVsSP500.toFixed(1)}%p
               </span>
             </div>
             <div className="border-l border-white/20 pl-4">
-              <span className="opacity-60 mr-2">RANK</span>
+              <span className="text-white/60 mr-2">RANK</span>
               <span className="text-celestial-gold">#{ranking}/{benchmarks.length + 1}</span>
             </div>
           </div>
-          <i className={`fas fa-chevron-${isExpanded ? 'up' : 'down'} text-xs opacity-60`} />
+          <i className={`fas fa-chevron-${isExpanded ? 'up' : 'down'} text-xs text-white/60`} />
         </div>
       </div>
 
@@ -200,10 +300,10 @@ export default function PerformanceArena({ compact = false }: PerformanceArenaPr
             {/* Left: Bar Chart */}
             <div className="space-y-3">
               <div className="flex justify-between items-center mb-3">
-                <span className="text-[10px] opacity-60 tracking-widest">YTD RETURN COMPARISON</span>
+                <span className="text-[10px] text-white/60 tracking-widest">YTD RETURN COMPARISON</span>
                 <button
                   onClick={(e) => { e.stopPropagation(); fetchBenchmarks(); }}
-                  className="text-[9px] opacity-70 hover:opacity-80 flex items-center gap-1"
+                  className="text-[9px] text-white/60 hover:text-white/80 flex items-center gap-1"
                 >
                   <i className="fas fa-sync-alt" /> 새로고침
                 </button>
@@ -238,8 +338,8 @@ export default function PerformanceArena({ compact = false }: PerformanceArenaPr
                 <div key={b.ticker} className="inner-glass p-3 rounded-lg">
                   <div className="flex justify-between items-center mb-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] opacity-70">{b.name}</span>
-                      <span className="text-[8px] opacity-60">({b.ticker})</span>
+                      <span className="text-[10px] text-white/80">{b.name}</span>
+                      <span className="text-[8px] text-white/60">({b.ticker})</span>
                     </div>
                     <span className={`text-[11px] font-mono ${
                       b.ytdReturn >= 0 ? 'text-v64-success' : 'text-v64-danger'
@@ -257,7 +357,7 @@ export default function PerformanceArena({ compact = false }: PerformanceArenaPr
                       }}
                     />
                   </div>
-                  <div className="flex justify-between text-[8px] opacity-60 mt-1">
+                  <div className="flex justify-between text-[8px] text-white/60 mt-1">
                     <span>연초 ${b.yearStartPrice?.toFixed(2) || '---'}</span>
                     <span>현재 ${b.currentPrice?.toFixed(2) || '---'}</span>
                   </div>
@@ -275,24 +375,24 @@ export default function PerformanceArena({ compact = false }: PerformanceArenaPr
               {/* Alpha Cards */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="inner-glass p-4 rounded-lg text-center">
-                  <div className="text-[9px] opacity-60 tracking-widest mb-1">VS S&P 500</div>
+                  <div className="text-[9px] text-white/60 tracking-widest mb-1">VS S&P 500</div>
                   <div className={`text-xl font-display ${
                     alphaVsSP500 >= 0 ? 'text-v64-success' : 'text-v64-danger'
                   }`}>
                     {alphaVsSP500 >= 0 ? '+' : ''}{alphaVsSP500.toFixed(1)}%p
                   </div>
-                  <div className="text-[9px] opacity-70 mt-1">
+                  <div className="text-[9px] text-white/60 mt-1">
                     {alphaVsSP500 >= 0 ? '🏆 시장 초과' : '📉 시장 하회'}
                   </div>
                 </div>
                 <div className="inner-glass p-4 rounded-lg text-center">
-                  <div className="text-[9px] opacity-60 tracking-widest mb-1">VS NASDAQ</div>
+                  <div className="text-[9px] text-white/60 tracking-widest mb-1">VS NASDAQ</div>
                   <div className={`text-xl font-display ${
                     alphaVsNasdaq >= 0 ? 'text-v64-success' : 'text-v64-danger'
                   }`}>
                     {alphaVsNasdaq >= 0 ? '+' : ''}{alphaVsNasdaq.toFixed(1)}%p
                   </div>
-                  <div className="text-[9px] opacity-70 mt-1">
+                  <div className="text-[9px] text-white/60 mt-1">
                     {alphaVsNasdaq >= 0 ? '🏆 기술주 초과' : '📉 기술주 하회'}
                   </div>
                 </div>
@@ -304,14 +404,14 @@ export default function PerformanceArena({ compact = false }: PerformanceArenaPr
                   <div>
                     <div className="text-[9px] text-celestial-purple tracking-widest mb-1">CURRENT RANKING</div>
                     <div className="text-2xl font-display text-white">
-                      #{ranking} <span className="text-sm opacity-60">/ {benchmarks.length + 1}</span>
+                      #{ranking} <span className="text-sm text-white/60">/ {benchmarks.length + 1}</span>
                     </div>
                   </div>
                   <div className="text-4xl">
                     {ranking === 1 ? '🥇' : ranking === 2 ? '🥈' : ranking === 3 ? '🥉' : '📊'}
                   </div>
                 </div>
-                <div className="text-[10px] opacity-70 mt-2">
+                <div className="text-[10px] text-white/60 mt-2">
                   {ranking === 1 && '축하합니다! 모든 벤치마크를 상회하고 있습니다.'}
                   {ranking === 2 && '우수한 성과! 대부분의 벤치마크를 상회합니다.'}
                   {ranking === 3 && '양호한 성과를 보이고 있습니다.'}
@@ -321,7 +421,7 @@ export default function PerformanceArena({ compact = false }: PerformanceArenaPr
 
               {/* Last Updated */}
               {lastUpdated && (
-                <div className="text-[8px] opacity-30 text-center">
+                <div className="text-[8px] text-white/40 text-center">
                   * {new Date().getFullYear()}년 YTD 실시간 데이터 |
                   업데이트: {new Date(lastUpdated).toLocaleTimeString('ko-KR')}
                 </div>

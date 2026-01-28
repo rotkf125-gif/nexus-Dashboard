@@ -1,4 +1,4 @@
-# NEXUS DASHBOARD v1.8.4
+# NEXUS DASHBOARD v1.8.5
 
 개인 투자 포트폴리오 관리 대시보드
 
@@ -9,6 +9,28 @@
 | **Live Site** | https://nexus-dashboard-beige.vercel.app |
 | **GitHub** | https://github.com/rotkf125-gif/nexus-dashboard |
 | **Database** | Supabase (PostgreSQL) |
+
+---
+
+## v1.8.5 - Header 2-Row & Asset Table 개선
+
+### Header 2-Row 레이아웃 리뉴얼
+- **2행 구조**:
+  - Row1: 로고 | 마켓 데이터 | Connect/Login/설정
+  - Row2: 시간 | 포트폴리오 | 경과시간/Export/AI
+- **마켓 데이터**: 시장 상태 색상 테두리 박스, 상태 텍스트 표시
+- **포트폴리오**: 평가/원금/수익 라벨 추가, 테두리 제거
+- **텍스트 색상**: 흰색 계열 투명도 제거 (완전한 흰색)
+
+### Trade Journal 개선
+- **열기/닫기 토글**: InsightsPanel 내 collapsible 기능
+- **스크롤 지원**: 최대 높이 300px, 초과 시 스크롤
+
+### Asset Table 개선
+- **정렬 통일**: 모든 컬럼 가운데 정렬
+- **텍스트 색상**: 흰색 계열 투명도 제거 (완전한 흰색)
+- **가격 인디케이터**: 셀 내 오른쪽 끝 배치 (현재가 고정)
+- **모바일 뷰**: 라벨 및 숫자 색상 통일
 
 ---
 
@@ -161,6 +183,7 @@ CREATE INDEX IF NOT EXISTS idx_snapshots_user_timestamp ON portfolio_snapshots(u
 
 | 버전 | 주요 변경 |
 |------|----------|
+| v1.8.5 | Header 2-Row 리뉴얼, Asset Table 정렬/색상 개선, Trade Journal 토글 |
 | v1.8.4 | Header 1-Row Horizontal 리뉴얼, Stellar Assets Command Center |
 | v1.8.3 | Simulation 탭 Mission Control 리뉴얼, 티커 병합 처리, WCAG AAA 접근성 |
 | v1.8.2 | Analytics 탭 리뉴얼 (버블차트, 건강점수, 인사이트칩) |

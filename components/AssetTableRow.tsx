@@ -80,8 +80,8 @@ const AssetTableRow = memo(({
         </span>
       </td>
       {/* 1. Ticker + Sector */}
-      <td className="p-1.5 pl-2">
-        <div className="flex items-center gap-2">
+      <td className="p-1.5 text-center">
+        <div className="flex items-center justify-center gap-2">
           <span className="font-display text-[11px] font-medium" style={{ color: tickerColor }}>{a.ticker}</span>
           <span
             className="text-[8px] px-1 py-0.5 rounded border"
@@ -97,11 +97,11 @@ const AssetTableRow = memo(({
       </td>
       {/* 2. Qty */}
       {isColumnVisible('qty') && (
-        <td className="p-1.5 text-center text-[10px] text-white/80">{a.qty}</td>
+        <td className="p-1.5 text-center text-[10px] text-white">{a.qty}</td>
       )}
       {/* 3. Return: 수익금 + (수익률 %) */}
       {isColumnVisible('return') && (
-        <td className={`p-1.5 pr-4 text-center ${plClass}`}>
+        <td className={`p-1.5 text-center ${plClass}`}>
           <div className="text-[10px] font-semibold">
             {profit >= 0 ? '+' : ''}{formatUSD(profit)}
           </div>
@@ -112,27 +112,25 @@ const AssetTableRow = memo(({
       )}
       {/* 4. Avg */}
       {isColumnVisible('avg') && (
-        <td className="p-1.5 text-right text-[10px] text-white/70">${a.avg.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+        <td className="p-1.5 text-center text-[10px] text-white">${a.avg.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
       )}
       {/* 5. Price + 가격 변화 인디케이터 */}
       {isColumnVisible('price') && (
-        <td className={`p-1.5 pr-4 text-right relative ${priceChange ? (priceChange.isUp ? 'price-flash-up' : 'price-flash-down') : ''}`}>
-          <div className="flex items-center justify-end">
-            <span className={`text-[10px] text-white/90 font-medium ${priceChange ? 'price-count-animation' : ''}`}>
-              ${a.price.toFixed(2)}
-            </span>
-          </div>
+        <td className={`p-1.5 text-center relative ${priceChange ? (priceChange.isUp ? 'price-flash-up' : 'price-flash-down') : ''}`}>
+          <span className={`text-[10px] text-white font-medium ${priceChange ? 'price-count-animation' : ''}`}>
+            ${a.price.toFixed(2)}
+          </span>
           {priceChange && (
-            <span className={`price-indicator ${priceChange.isUp ? 'price-indicator-up' : 'price-indicator-down'}`}>
+            <span className={`absolute right-1 top-1/2 -translate-y-1/2 text-[8px] flex items-center gap-0.5 px-1 py-0.5 rounded whitespace-nowrap ${priceChange.isUp ? 'text-v64-success bg-v64-success/20' : 'text-v64-danger bg-v64-danger/20'}`}>
               <i className={`fas fa-caret-${priceChange.isUp ? 'up' : 'down'}`} />
-              <span>{Math.abs(priceChange.pct).toFixed(1)}%</span>
+              {Math.abs(priceChange.pct).toFixed(1)}%
             </span>
           )}
         </td>
       )}
       {/* 6. Val($) + P/L($) */}
       {isColumnVisible('valUsd') && (
-        <td className="p-1.5 text-right">
+        <td className="p-1.5 text-center">
           <div className="text-[10px] text-white">{formatUSD(value)}</div>
           <div className={`text-[9px] ${plClass}`}>
             ({profit >= 0 ? '+' : ''}{formatUSD(profit)})
@@ -141,8 +139,8 @@ const AssetTableRow = memo(({
       )}
       {/* 7. Val(₩) + P/L(₩) */}
       {isColumnVisible('valKrw') && (
-        <td className="p-1.5 pr-4 text-right">
-          <div className="text-[10px] text-white/80">₩{valueKrw.toLocaleString()}</div>
+        <td className="p-1.5 text-center">
+          <div className="text-[10px] text-white">₩{valueKrw.toLocaleString()}</div>
           <div className={`text-[9px] ${profitKrwClass}`}>
             ({profitKrw >= 0 ? '+' : ''}₩{Math.abs(profitKrw).toLocaleString()})
           </div>
@@ -154,7 +152,7 @@ const AssetTableRow = memo(({
       )}
       {/* 9. FX P/L */}
       {isColumnVisible('fxPL') && (
-        <td className={`p-1.5 text-right text-[10px] ${fxClass}`}>
+        <td className={`p-1.5 text-center text-[10px] ${fxClass}`}>
           {fxPL >= 0 ? '+' : ''}₩{Math.abs(fxPL).toLocaleString()}
         </td>
       )}
@@ -162,21 +160,21 @@ const AssetTableRow = memo(({
       <td className="p-1 text-center">
         <div className="flex items-center justify-center gap-1">
           <button
-            className="w-5 h-5 flex items-center justify-center text-[9px] text-white/70 hover:text-celestial-cyan transition-colors"
+            className="w-5 h-5 flex items-center justify-center text-[9px] text-white hover:text-celestial-cyan transition-colors"
             title="편집"
             onClick={() => onEdit(i)}
           >
             <i className="fas fa-pen" />
           </button>
           <button
-            className="w-5 h-5 flex items-center justify-center text-[9px] text-white/70 hover:text-celestial-gold transition-colors"
+            className="w-5 h-5 flex items-center justify-center text-[9px] text-white hover:text-celestial-gold transition-colors"
             title="차트"
             onClick={() => window.open(`https://finance.yahoo.com/quote/${a.ticker}/chart`, '_blank')}
           >
             <i className="fas fa-chart-line" />
           </button>
           <button
-            className="w-5 h-5 flex items-center justify-center text-[9px] text-white/70 hover:text-v64-danger transition-colors"
+            className="w-5 h-5 flex items-center justify-center text-[9px] text-white hover:text-v64-danger transition-colors"
             title="삭제"
             onClick={() => {
               if (confirm('Delete?')) onRemove(i);

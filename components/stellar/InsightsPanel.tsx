@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { formatUSD } from '@/lib/utils';
 import { PortfolioStats } from '@/lib/hooks/usePortfolioStats';
 import { TYPE_INFO, TYPE_COLORS, TYPE_ORDER } from '@/lib/config';
@@ -15,6 +16,7 @@ interface InsightsPanelProps {
 
 export default function InsightsPanel({ stats }: InsightsPanelProps) {
   const { typeDistribution, topPerformers } = stats;
+  const [isJournalOpen, setIsJournalOpen] = useState(false);
 
   // 타입 순서대로 정렬
   const sortedTypes = TYPE_ORDER.filter(type => typeDistribution[type]?.count > 0);
@@ -94,15 +96,24 @@ export default function InsightsPanel({ stats }: InsightsPanelProps) {
         </div>
       </div>
 
-      {/* Trade Journal */}
-      <div className="inner-glass p-3 rounded-xl flex-1 min-h-0 overflow-hidden flex flex-col">
-        <h4 className="text-[10px] tracking-widest text-orange-400 mb-3 flex items-center gap-2">
-          <i className="fas fa-receipt" />
-          TRADE JOURNAL
-        </h4>
-        <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
-          <TradeJournal compact />
-        </div>
+      {/* Trade Journal - Collapsible */}
+      <div className={`inner-glass rounded-xl transition-all duration-300 ${isJournalOpen ? 'flex-1 min-h-0' : ''}`}>
+        <button
+          onClick={() => setIsJournalOpen(!isJournalOpen)}
+          className="w-full p-3 flex items-center justify-between hover:bg-white/5 rounded-xl transition-colors"
+        >
+          <h4 className="text-[10px] tracking-widest text-orange-400 flex items-center gap-2">
+            <i className="fas fa-receipt" />
+            TRADE JOURNAL
+          </h4>
+          <i className={`fas fa-chevron-${isJournalOpen ? 'up' : 'down'} text-white/60 text-[10px] transition-transform`} />
+        </button>
+
+        {isJournalOpen && (
+          <div className="px-3 pb-3 max-h-[300px] overflow-y-auto custom-scrollbar">
+            <TradeJournal compact />
+          </div>
+        )}
       </div>
     </div>
   );

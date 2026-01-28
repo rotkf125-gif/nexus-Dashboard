@@ -17,12 +17,8 @@ import FreedomModal from '@/components/FreedomModal';
 import ExportModal from '@/components/ExportModal';
 import IncomeStream from '@/components/IncomeStream';
 import DividendOptimizer from '@/components/DividendOptimizer';
-import PortfolioInsight from '@/components/PortfolioInsight';
-import RebalanceSuggestion from '@/components/RebalanceSuggestion';
-import MonthlyReport from '@/components/MonthlyReport';
 import PerformanceArena from '@/components/PerformanceArena';
 import HistoricPerformance from '@/components/HistoricPerformance';
-import PortfolioTimeline from '@/components/charts/PortfolioTimeline';
 import { BottomNavigation, DEFAULT_NAV_ITEMS } from '@/components/ui/BottomNavigation';
 import { useTabNavigation } from '@/lib/hooks/useKeyboardNavigation';
 import QuickStats from '@/components/stellar/QuickStats';
@@ -72,7 +68,7 @@ function DashboardContent() {
     TAB_IDS,
     activeTab,
     (tab) => setActiveTab(tab as TabType),
-    'vertical'
+    'horizontal'
   );
 
   // 포트폴리오 통계 (Stellar 탭용)
@@ -119,65 +115,49 @@ function DashboardContent() {
       {/* Strategy Bar */}
       <StrategyBar />
 
-      {/* Main Content with Left Sidebar Tabs - Seamless Connection */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 glass-card overflow-hidden relative pb-16 lg:pb-0">
-        {/* Left Sidebar Tabs - 데스크톱 전용 (모바일은 하단 네비게이션 사용) */}
-        <div className="hidden lg:flex lg:col-span-2 p-2 md:p-4 flex-col h-full relative z-10">
-          <div className="text-[10px] tracking-[0.15em] text-white/70 mb-3 uppercase font-medium text-center">Navigation</div>
-          <div
-            role="tablist"
-            aria-label="대시보드 탭 네비게이션"
-            aria-orientation="vertical"
-            className="flex flex-col flex-1 gap-0 relative"
-            onKeyDown={handleTabKeyDown}
-          >
-            {TAB_IDS.map((tabId) => {
-              const config = TAB_CONFIG[tabId];
-              const isActive = activeTab === tabId;
-              return (
-                <button
-                  key={tabId}
-                  role="tab"
-                  id={`tab-${tabId}`}
-                  aria-selected={isActive}
-                  aria-controls={`panel-${tabId}`}
-                  tabIndex={isActive ? 0 : -1}
-                  onClick={() => setActiveTab(tabId)}
-                  className={`w-full whitespace-nowrap px-4 py-3 transition-all duration-300 flex items-center justify-center relative focus-visible-ring ${
-                    isActive
-                      ? 'border-l-[3px] bg-current/10'
-                      : 'text-white/70 hover:bg-white/5 border-l-[3px] border-transparent'
-                  }`}
-                  style={{
-                    color: isActive ? config.color : undefined,
-                    borderColor: isActive ? config.color : undefined
-                  }}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <i className={`${config.icon} text-xs`} aria-hidden="true" />
-                    <span className="text-[13px] font-medium tracking-wide">{config.label}</span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Main Content Area with Subtle Tab Color Connection */}
+      {/* Horizontal Tab Navigation - 데스크톱 전용 */}
+      <div className="hidden lg:block glass-card p-2">
         <div
-          className="lg:col-span-10 min-h-[500px] md:min-h-[800px] p-3 md:p-4 lg:p-5 relative transition-colors duration-300"
-          style={{
-            borderLeft: activeTab === 'stellar'
-              ? '1px solid rgba(34,211,238,0.2)'
-              : activeTab === 'income'
-              ? '1px solid rgba(251,191,36,0.2)'
-              : activeTab === 'analytics'
-              ? '1px solid rgba(168,85,247,0.2)'
-              : activeTab === 'performance'
-              ? '1px solid rgba(105,240,174,0.2)'
-              : '1px solid rgba(249,115,22,0.2)'
-          }}
+          role="tablist"
+          aria-label="대시보드 탭 네비게이션"
+          aria-orientation="horizontal"
+          className="flex items-center justify-center gap-1"
+          onKeyDown={handleTabKeyDown}
         >
+          {TAB_IDS.map((tabId) => {
+            const config = TAB_CONFIG[tabId];
+            const isActive = activeTab === tabId;
+            return (
+              <button
+                key={tabId}
+                role="tab"
+                id={`tab-${tabId}`}
+                aria-selected={isActive}
+                aria-controls={`panel-${tabId}`}
+                tabIndex={isActive ? 0 : -1}
+                onClick={() => setActiveTab(tabId)}
+                className={`whitespace-nowrap px-5 py-2.5 transition-all duration-300 flex items-center justify-center relative focus-visible-ring rounded-lg ${
+                  isActive
+                    ? 'border-b-[3px] bg-current/10'
+                    : 'text-white/70 hover:bg-white/5 border-b-[3px] border-transparent'
+                }`}
+                style={{
+                  color: isActive ? config.color : undefined,
+                  borderColor: isActive ? config.color : undefined
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <i className={`${config.icon} text-xs`} aria-hidden="true" />
+                  <span className="text-[12px] font-medium tracking-wide">{config.label}</span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Main Content Area - Full Width */}
+      <div className="glass-card min-h-[500px] md:min-h-[800px] p-3 md:p-4 lg:p-5 relative pb-16 lg:pb-5">
           {/* Stellar Assets Tab */}
           {activeTab === 'stellar' && (
             <div
@@ -247,12 +227,12 @@ function DashboardContent() {
               {/* Quick Stats */}
               <QuickStats stats={portfolioStats} />
 
-              {/* 2-Column Layout: Assets (65%) + Insights (35%) */}
-              <div className="grid grid-cols-1 lg:grid-cols-[65%_35%] gap-4">
+              {/* 2-Column Layout: Assets (70%) + Insights (30%) - Full Width */}
+              <div className="grid grid-cols-1 xl:grid-cols-[70%_30%] gap-4">
                 {/* Left: Asset Table or Heatmap */}
                 <div>
                   {viewMode === 'table' ? (
-                    <div className="flex flex-col h-[600px]">
+                    <div className="flex flex-col h-[650px]">
                       <div className="flex-1 min-h-0">
                         <div className="overflow-y-auto custom-scrollbar h-full">
                           <AssetTable
@@ -263,14 +243,14 @@ function DashboardContent() {
                       </div>
                     </div>
                   ) : (
-                    <div className="h-[600px]">
+                    <div className="h-[650px]">
                       <PortfolioHeatmap />
                     </div>
                   )}
                 </div>
 
                 {/* Right: Insights Panel */}
-                <div className="h-[600px]">
+                <div className="h-[650px]">
                   <InsightsPanel stats={portfolioStats} />
                 </div>
               </div>
@@ -307,9 +287,9 @@ function DashboardContent() {
               </div>
               <IncomeStream showAnalytics />
 
-              {/* Dividend Optimizer Only */}
-              <div className="pt-4 border-t border-white/10">
-                <div className="inner-glass p-4 rounded-lg">
+              {/* Dividend Optimizer Only - Full Width */}
+              <div className="pt-5 border-t border-white/10">
+                <div className="inner-glass p-5 rounded-lg">
                   <DividendOptimizer />
                 </div>
               </div>
@@ -323,23 +303,13 @@ function DashboardContent() {
               id="panel-analytics"
               aria-labelledby="tab-analytics"
               tabIndex={0}
-              className="min-h-[800px] space-y-6 tab-panel-enter">
+              className="min-h-[800px] tab-panel-enter">
               <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
                 <h2 className="text-lg font-display tracking-widest flex items-center gap-3 text-white">
                   <i className="fas fa-shield-alt text-purple-400 text-xs" /> RISK ANALYTICS
                 </h2>
               </div>
               <Analytics horizontal />
-
-              {/* Rebalance & Insight Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <div className="inner-glass p-4 rounded-lg">
-                  <RebalanceSuggestion />
-                </div>
-                <div className="inner-glass p-4 rounded-lg">
-                  <PortfolioInsight />
-                </div>
-              </div>
             </div>
           )}
 
@@ -356,19 +326,14 @@ function DashboardContent() {
                   <i className="fas fa-chart-line text-green-400 text-xs" /> PERFORMANCE ARENA
                 </h2>
               </div>
-              <div className="grid grid-cols-1 xl:grid-cols-4 gap-5">
-                <div className="xl:col-span-1">
-                  <PerformanceArena compact />
-                </div>
-                <div className="xl:col-span-3">
+              {/* 8:2 1-Row Layout */}
+              <div className="grid grid-cols-1 xl:grid-cols-10 gap-5" style={{ height: '480px' }}>
+                <div className="xl:col-span-8 h-full">
                   <HistoricPerformance />
                 </div>
-              </div>
-              {/* Portfolio Timeline */}
-              <PortfolioTimeline />
-              {/* Monthly Report */}
-              <div className="inner-glass p-4 rounded-lg">
-                <MonthlyReport />
+                <div className="xl:col-span-2 h-full">
+                  <PerformanceArena race />
+                </div>
               </div>
             </div>
           )}
@@ -391,7 +356,6 @@ function DashboardContent() {
               </div>
             </div>
           )}
-        </div>
       </div>
 
       {/* Footer - Desktop */}

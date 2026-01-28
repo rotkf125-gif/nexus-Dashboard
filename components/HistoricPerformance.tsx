@@ -271,12 +271,12 @@ export default function HistoricPerformance({ defaultPeriod = '24h' }: Props) {
   }, [state.assets]);
 
   return (
-    <div className="glass-card p-5 flex flex-col" style={{ height: '420px' }}>
+    <div className="glass-card p-5 flex flex-col h-full min-h-[420px]">
       {/* Header */}
       <div className="flex items-center justify-between mb-3 border-b border-white/10 pb-2 flex-shrink-0">
         <div className="flex items-center gap-2">
           <i className="fas fa-chart-area text-celestial-cyan" />
-          <h3 className="font-display text-sm tracking-widest text-white/90">HISTORIC PERFORMANCE</h3>
+          <h3 className="font-display text-sm tracking-widest text-white">HISTORIC PERFORMANCE</h3>
         </div>
 
         {/* Period Tabs */}
@@ -300,13 +300,13 @@ export default function HistoricPerformance({ defaultPeriod = '24h' }: Props) {
       {/* Stats Summary */}
       <div className="grid grid-cols-4 gap-3 mb-3 flex-shrink-0">
         <div className="inner-glass p-2.5 rounded-lg text-center">
-          <div className="text-[8px] opacity-60 tracking-widest mb-0.5">CURRENT VALUE</div>
+          <div className="text-[8px] text-white/60 tracking-widest mb-0.5">CURRENT VALUE</div>
           <div className="text-sm font-display text-celestial-cyan">
             ${currentStats.totalValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </div>
         </div>
         <div className="inner-glass p-2.5 rounded-lg text-center">
-          <div className="text-[8px] opacity-60 tracking-widest mb-0.5">CURRENT RETURN</div>
+          <div className="text-[8px] text-white/60 tracking-widest mb-0.5">CURRENT RETURN</div>
           <div className={`text-sm font-display ${
             currentStats.returnPct >= 0 ? 'text-v64-success' : 'text-v64-danger'
           }`}>
@@ -314,7 +314,7 @@ export default function HistoricPerformance({ defaultPeriod = '24h' }: Props) {
           </div>
         </div>
         <div className="inner-glass p-2.5 rounded-lg text-center">
-          <div className="text-[8px] opacity-60 tracking-widest mb-0.5">{period.toUpperCase()} CHANGE</div>
+          <div className="text-[8px] text-white/60 tracking-widest mb-0.5">{period.toUpperCase()} CHANGE</div>
           <div className={`text-sm font-display ${
             performanceStats.valueChange >= 0 ? 'text-v64-success' : 'text-v64-danger'
           }`}>
@@ -322,7 +322,7 @@ export default function HistoricPerformance({ defaultPeriod = '24h' }: Props) {
           </div>
         </div>
         <div className="inner-glass p-2.5 rounded-lg text-center">
-          <div className="text-[8px] opacity-60 tracking-widest mb-0.5">{period.toUpperCase()} %</div>
+          <div className="text-[8px] text-white/60 tracking-widest mb-0.5">{period.toUpperCase()} %</div>
           <div className={`text-sm font-display ${
             performanceStats.valueChangePct >= 0 ? 'text-v64-success' : 'text-v64-danger'
           }`}>
@@ -345,7 +345,7 @@ export default function HistoricPerformance({ defaultPeriod = '24h' }: Props) {
             <div className="text-center text-white/60">
               <i className="fas fa-database text-2xl mb-2 opacity-30" />
               <div className="text-[10px]">스냅샷 데이터가 없습니다</div>
-              <div className="text-[9px] opacity-70 mt-1">30분마다 자동으로 저장됩니다</div>
+              <div className="text-[9px] text-white/60 mt-1">30분마다 자동으로 저장됩니다</div>
             </div>
           </div>
         ) : (
@@ -357,11 +357,11 @@ export default function HistoricPerformance({ defaultPeriod = '24h' }: Props) {
       <div className="flex justify-center gap-6 pt-2 border-t border-white/10 flex-shrink-0">
         <div className="flex items-center gap-1.5">
           <div className="w-2.5 h-0.5 bg-blue-400 rounded" />
-          <span className="text-[8px] text-white/70">Total Value (USD)</span>
+          <span className="text-[8px] text-white/60">Total Value (USD)</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-2.5 h-0.5 bg-celestial-gold rounded border-dashed" style={{ borderStyle: 'dashed' }} />
-          <span className="text-[8px] text-white/70">Return %</span>
+          <span className="text-[8px] text-white/60">Return %</span>
         </div>
       </div>
     </div>
