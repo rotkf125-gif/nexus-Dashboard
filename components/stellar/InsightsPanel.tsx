@@ -16,7 +16,7 @@ interface InsightsPanelProps {
 
 export default function InsightsPanel({ stats }: InsightsPanelProps) {
   const { typeDistribution, topPerformers } = stats;
-  const [isJournalOpen, setIsJournalOpen] = useState(false);
+  const [showAddTradeForm, setShowAddTradeForm] = useState(false);
 
   // 타입 순서대로 정렬
   const sortedTypes = TYPE_ORDER.filter(type => typeDistribution[type]?.count > 0);
@@ -96,24 +96,33 @@ export default function InsightsPanel({ stats }: InsightsPanelProps) {
         </div>
       </div>
 
-      {/* Trade Journal - Collapsible */}
-      <div className={`inner-glass rounded-xl transition-all duration-300 ${isJournalOpen ? 'flex-1 min-h-0' : ''}`}>
-        <button
-          onClick={() => setIsJournalOpen(!isJournalOpen)}
-          className="w-full p-3 flex items-center justify-between hover:bg-white/5 rounded-xl transition-colors"
-        >
+      {/* Trade Journal - Scrollable */}
+      <div className="inner-glass rounded-xl flex-1 min-h-0 flex flex-col">
+        <div className="p-3 pb-0 flex items-center justify-between">
           <h4 className="text-[10px] tracking-widest text-orange-400 flex items-center gap-2">
             <i className="fas fa-receipt" />
             TRADE JOURNAL
           </h4>
-          <i className={`fas fa-chevron-${isJournalOpen ? 'up' : 'down'} text-white/60 text-[10px] transition-transform`} />
-        </button>
-
-        {isJournalOpen && (
-          <div className="px-3 pb-3 max-h-[300px] overflow-y-auto custom-scrollbar">
-            <TradeJournal compact />
-          </div>
-        )}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setShowAddTradeForm(!showAddTradeForm);
+            }}
+            className="flex items-center gap-1 px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 transition-colors text-[8px] text-white/70"
+          >
+            <i className={`fas fa-${showAddTradeForm ? 'times' : 'plus'}`} />
+            {showAddTradeForm ? 'CANCEL' : 'ADD TRADE'}
+          </button>
+        </div>
+        <div className="px-3 pb-3 pt-2 flex-1 overflow-y-auto custom-scrollbar">
+          <TradeJournal
+            compact
+            externalShowForm={showAddTradeForm}
+            onFormClose={() => setShowAddTradeForm(false)}
+          />
+        </div>
       </div>
     </div>
   );

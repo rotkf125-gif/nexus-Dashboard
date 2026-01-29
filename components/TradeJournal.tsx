@@ -9,18 +9,23 @@ type SortOrder = 'asc' | 'desc';
 
 interface TradeJournalProps {
   compact?: boolean;
+  externalShowForm?: boolean;
+  onFormClose?: () => void;
 }
 
-export default function TradeJournal({ compact = false }: TradeJournalProps) {
+export default function TradeJournal({ compact = false, externalShowForm, onFormClose }: TradeJournalProps) {
   const { state, setTradeSums, removeTradeSum } = useNexus();
   const { tradeSums } = state;
 
   const [filterTicker, setFilterTicker] = useState<string>('');
   const [sortBy, setSortBy] = useState<SortBy>('ticker');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
-  
-  // 입력 폼 상태
-  const [showAddForm, setShowAddForm] = useState(false);
+
+  // 입력 폼 상태 (외부에서 제어 가능)
+  const [internalShowForm, setInternalShowForm] = useState(false);
+  const showAddForm = externalShowForm !== undefined ? externalShowForm : internalShowForm;
+  const setShowAddForm = onFormClose ? (show: boolean) => { if (!show) onFormClose(); } : setInternalShowForm;
+
   const [newDate, setNewDate] = useState('');
   const [newTicker, setNewTicker] = useState('');
   const [newAmount, setNewAmount] = useState('');
@@ -184,22 +189,7 @@ export default function TradeJournal({ compact = false }: TradeJournalProps) {
           </div>
         )}
 
-        {/* Add Button */}
-        <button
-          onClick={() => {
-            setShowAddForm(!showAddForm);
-            if (!showAddForm) {
-              const today = new Date().toISOString().split('T')[0];
-              setNewDate(today);
-            }
-          }}
-          className="w-full text-[9px] py-1.5 mt-2 rounded-lg border border-white/20 text-white/70 hover:bg-white/5 transition-colors"
-        >
-          <i className="fas fa-plus mr-1" />
-          ADD TRADE
-        </button>
-
-        {/* Compact Add Form */}
+        {/* Compact Add Form (외부에서 제어) */}
         {showAddForm && (
           <div className="bg-white/5 p-2 rounded-lg space-y-2 mt-2">
             <input
@@ -219,13 +209,23 @@ export default function TradeJournal({ compact = false }: TradeJournalProps) {
             />
             <div className="flex gap-1">
               <button
-                onClick={handleCancelAdd}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleCancelAdd();
+                }}
                 className="flex-1 text-[8px] py-1 rounded border border-white/20 text-white/70 hover:bg-white/5"
               >
                 CANCEL
               </button>
               <button
-                onClick={handleAddTrade}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleAddTrade();
+                }}
                 className="flex-1 text-[8px] py-1 rounded bg-celestial-cyan/20 border border-celestial-cyan/40 text-celestial-cyan hover:bg-celestial-cyan/30"
               >
                 CONFIRM

@@ -2,9 +2,7 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import { NexusProvider, useNexus } from '@/lib/context';
-import Header from '@/components/Header';
-import PortfolioHealthAlert from '@/components/PortfolioHealthAlert';
-import StrategyBar from '@/components/StrategyBar';
+import DashboardHeader from '@/components/DashboardHeader';
 import AssetTable from '@/components/AssetTable';
 import PortfolioHeatmap from '@/components/PortfolioHeatmap';
 import SimulationHub from '@/components/SimulationHub';
@@ -101,19 +99,13 @@ function DashboardContent() {
       <FreedomModal isOpen={freedomOpen} onClose={handleCloseFreedom} />
       <ExportModal isOpen={exportOpen} onClose={handleCloseExport} />
 
-      {/* Header */}
-      <Header
+      {/* Dashboard Header (Header + Strategy + Alerts) */}
+      <DashboardHeader
         onOpenSettings={handleOpenSettings}
         onOpenAuth={handleOpenAuth}
         onOpenFreedom={handleOpenFreedom}
         onOpenExport={handleOpenExport}
       />
-
-      {/* Portfolio Health Alerts */}
-      <PortfolioHealthAlert />
-
-      {/* Strategy Bar */}
-      <StrategyBar />
 
       {/* Horizontal Tab Navigation - 데스크톱 전용 */}
       <div className="hidden lg:block glass-card p-2">
@@ -167,61 +159,56 @@ function DashboardContent() {
               tabIndex={0}
               className="h-full min-h-[500px] md:min-h-[800px] tab-panel-enter">
               {/* Header */}
-              <div className="flex justify-between items-end mb-4 pb-2 border-b border-white/10">
+              <div className="flex items-end mb-4 pb-2 border-b border-white/10 gap-4">
                 <h2 className="text-lg font-display tracking-widest flex items-center gap-3 text-white">
                   <i className="fas fa-star text-celestial-gold text-xs" /> STELLAR ASSETS
                 </h2>
-                <div className="flex items-center gap-4">
-                  {/* Column Settings Button */}
+                {/* Column Settings Button */}
+                <button
+                  onClick={() => setIsColSettingsOpen(!isColSettingsOpen)}
+                  className="celestial-btn text-[9px] flex items-center gap-1.5"
+                  title="컬럼 설정"
+                >
+                  <i className="fas fa-columns" />
+                  <span className="hidden sm:inline">컬럼</span>
+                </button>
+                {/* View Mode Toggle: Table / Heatmap */}
+                <div className="flex items-center gap-1 inner-glass rounded-lg p-1">
                   <button
-                    onClick={() => setIsColSettingsOpen(!isColSettingsOpen)}
-                    className="celestial-btn text-[9px] flex items-center gap-1.5"
-                    title="컬럼 설정"
+                    onClick={() => setViewMode('table')}
+                    className={`px-3 py-1.5 rounded text-[10px] font-medium tracking-wide transition-all ${
+                      viewMode === 'table'
+                        ? 'bg-celestial-cyan/20 text-celestial-cyan border border-celestial-cyan/30'
+                        : 'text-white/60 hover:text-white/80'
+                    }`}
                   >
-                    <i className="fas fa-columns" />
-                    <span className="hidden sm:inline">컬럼</span>
+                    <i className="fas fa-table mr-1.5" />
+                    TABLE
                   </button>
-
-                  {/* View Mode Toggle: Table / Heatmap */}
-                  <div className="flex items-center gap-1 inner-glass rounded-lg p-1">
-                    <button
-                      onClick={() => setViewMode('table')}
-                      className={`px-3 py-1.5 rounded text-[10px] font-medium tracking-wide transition-all ${
-                        viewMode === 'table'
-                          ? 'bg-celestial-cyan/20 text-celestial-cyan border border-celestial-cyan/30'
-                          : 'text-white/60 hover:text-white/80'
-                      }`}
-                    >
-                      <i className="fas fa-table mr-1.5" />
-                      TABLE
-                    </button>
-                    <button
-                      onClick={() => setViewMode('heatmap')}
-                      className={`px-3 py-1.5 rounded text-[10px] font-medium tracking-wide transition-all ${
-                        viewMode === 'heatmap'
-                          ? 'bg-celestial-purple/20 text-celestial-purple border border-celestial-purple/30'
-                          : 'text-white/60 hover:text-white/80'
-                      }`}
-                    >
-                      <i className="fas fa-th-large mr-1.5" />
-                      HEATMAP
-                    </button>
-                  </div>
-                  <div className="flex gap-3">
-                    <button
-                      onClick={refreshPrices}
-                      className="celestial-btn text-[10px]"
-                    >
-                      <i className="fas fa-sync-alt" />
-                    </button>
-                    <button
-                      onClick={openAddAssetModal}
-                      className="celestial-btn text-[10px]"
-                    >
-                      IGNITE STAR
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => setViewMode('heatmap')}
+                    className={`px-3 py-1.5 rounded text-[10px] font-medium tracking-wide transition-all ${
+                      viewMode === 'heatmap'
+                        ? 'bg-celestial-purple/20 text-celestial-purple border border-celestial-purple/30'
+                        : 'text-white/60 hover:text-white/80'
+                    }`}
+                  >
+                    <i className="fas fa-th-large mr-1.5" />
+                    HEATMAP
+                  </button>
                 </div>
+                <button
+                  onClick={refreshPrices}
+                  className="celestial-btn text-[10px]"
+                >
+                  <i className="fas fa-sync-alt" />
+                </button>
+                <button
+                  onClick={openAddAssetModal}
+                  className="celestial-btn text-[10px]"
+                >
+                  IGNITE STAR
+                </button>
               </div>
 
               {/* Quick Stats */}
@@ -265,25 +252,23 @@ function DashboardContent() {
               aria-labelledby="tab-income"
               tabIndex={0}
               className="min-h-[800px] space-y-6 tab-panel-enter">
-              <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
+              <div className="flex items-center gap-4 mb-4 border-b border-white/10 pb-3">
                 <h2 className="text-lg font-display tracking-widest flex items-center gap-3 text-white">
                   <i className="fas fa-coins text-celestial-gold text-xs" /> INCOME STREAM
                 </h2>
-                <div className="flex gap-2">
-                  <button
-                    onClick={syncFromSheet}
-                    className="celestial-btn text-[10px]"
-                    style={{ borderColor: 'rgba(105,240,174,0.4)', color: '#69F0AE' }}
-                  >
-                    SYNC
-                  </button>
-                  <button
-                    onClick={openDividendModal}
-                    className="celestial-btn celestial-btn-gold text-[10px]"
-                  >
-                    RECORD
-                  </button>
-                </div>
+                <button
+                  onClick={syncFromSheet}
+                  className="celestial-btn text-[10px]"
+                  style={{ borderColor: 'rgba(105,240,174,0.4)', color: '#69F0AE' }}
+                >
+                  SYNC
+                </button>
+                <button
+                  onClick={openDividendModal}
+                  className="celestial-btn celestial-btn-gold text-[10px]"
+                >
+                  RECORD
+                </button>
               </div>
               <IncomeStream showAnalytics />
 

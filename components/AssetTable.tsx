@@ -29,6 +29,16 @@ export default function AssetTable({ isColSettingsOpen = false, setIsColSettings
     dragHandlers,
   } = useAssetTable(assets, updateAssets);
 
+  // 티커별 색상 매핑 (동일 티커는 동일 색상)
+  const tickerColorMap = React.useMemo(() => {
+    const uniqueTickers = Array.from(new Set(assets.map(a => a.ticker)));
+    const map: Record<string, string> = {};
+    uniqueTickers.forEach((ticker, idx) => {
+      map[ticker] = CHART_COLORS[idx % CHART_COLORS.length];
+    });
+    return map;
+  }, [assets]);
+
   if (assets.length === 0) {
     return (
       <div className="empty-state py-16">
@@ -147,7 +157,7 @@ export default function AssetTable({ isColSettingsOpen = false, setIsColSettings
                     const value = a.qty * a.price;
                     const profit = value - cost;
                     const pl = cost > 0 ? ((value - cost) / cost * 100) : 0;
-                    const tickerColor = CHART_COLORS[(startIndex + idx) % CHART_COLORS.length];
+                    const tickerColor = tickerColorMap[a.ticker] || CHART_COLORS[0];
                     const plClass = pl >= 0 ? 'text-v64-success' : 'text-v64-danger';
                     const sectorInfo = SECTORS[a.sector] || SECTORS.Other;
                     const buyRate = a.buyRate || exchangeRate;
@@ -255,6 +265,7 @@ export default function AssetTable({ isColSettingsOpen = false, setIsColSettings
                           key={asset.originalIndex}
                           asset={asset}
                           globalIndex={startIndex + idx}
+                          tickerColor={tickerColorMap[asset.ticker] || CHART_COLORS[0]}
                           exchangeRate={exchangeRate}
                           previousPrice={previousPrices[asset.ticker]}
                           visibleColumns={visibleColumns}

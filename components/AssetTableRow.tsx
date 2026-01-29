@@ -3,12 +3,13 @@
 import React, { memo } from 'react';
 import { AssetWithIndex } from '@/lib/types';
 import { formatUSD, getPriceChangeIndicator } from '@/lib/utils';
-import { SECTORS, CHART_COLORS } from '@/lib/config';
+import { SECTORS } from '@/lib/config';
 import { ColumnKey } from '@/lib/hooks/useAssetTable';
 
 interface AssetTableRowProps {
   asset: AssetWithIndex;
   globalIndex: number;
+  tickerColor: string;
   exchangeRate: number;
   previousPrice: number;
   visibleColumns: Set<ColumnKey>;
@@ -28,6 +29,7 @@ interface AssetTableRowProps {
 const AssetTableRow = memo(({
   asset: a,
   globalIndex,
+  tickerColor,
   exchangeRate,
   previousPrice,
   visibleColumns,
@@ -42,7 +44,6 @@ const AssetTableRow = memo(({
   const value = a.qty * a.price;
   const profit = value - cost;
   const pl = cost > 0 ? ((value - cost) / cost * 100) : 0;
-  const tickerColor = CHART_COLORS[globalIndex % CHART_COLORS.length];
   const plClass = pl >= 0 ? 'text-v64-success' : 'text-v64-danger';
   const sectorInfo = SECTORS[a.sector] || SECTORS.Other;
   const buyRate = a.buyRate || exchangeRate;

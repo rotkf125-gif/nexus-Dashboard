@@ -88,48 +88,38 @@ export default function PortfolioHealthAlert() {
   if (alerts.length === 0) return null;
 
   return (
-    <div className="space-y-2">
-      {alerts.map((alert, index) => (
-        <div
-          key={`${alert.type}-${index}`}
-          className={`flex items-center gap-3 px-4 py-3 rounded-lg border backdrop-blur-md transition-all ${
-            alert.severity === 'danger'
-              ? 'bg-v64-danger/10 border-v64-danger/40 text-v64-danger'
-              : 'bg-v64-warning/10 border-v64-warning/40 text-v64-warning'
-          }`}
-        >
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-            alert.severity === 'danger' ? 'bg-v64-danger/20' : 'bg-v64-warning/20'
-          }`}>
-            <i className={`fas ${
-              alert.type === 'concentration' ? 'fa-exclamation-triangle' :
-              alert.type === 'sector' ? 'fa-chart-pie' :
-              'fa-chart-line'
-            } text-sm`} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="font-medium text-sm tracking-wide">{alert.title}</span>
-              <span className={`text-xs px-2 py-0.5 rounded ${
-                alert.severity === 'danger' ? 'bg-v64-danger/20' : 'bg-v64-warning/20'
-              }`}>
-                {alert.value.toFixed(1)}% {alert.type !== 'vix' && `(>${alert.threshold}%)`}
-              </span>
+    <div className="h-full flex flex-col justify-between gap-1.5 overflow-y-auto custom-scrollbar">
+        {alerts.map((alert, index) => (
+          <div
+            key={`${alert.type}-${index}`}
+            className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg border backdrop-blur-md transition-all ${
+              alert.severity === 'danger'
+                ? 'bg-v64-danger/10 border-v64-danger/40 text-v64-danger'
+                : 'bg-v64-warning/10 border-v64-warning/40 text-v64-warning'
+            }`}
+          >
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
+              alert.severity === 'danger' ? 'bg-v64-danger/20' : 'bg-v64-warning/20'
+            }`}>
+              <i className={`fas ${
+                alert.type === 'concentration' ? 'fa-exclamation-triangle' :
+                alert.type === 'sector' ? 'fa-chart-pie' :
+                'fa-chart-line'
+              } text-[10px]`} />
             </div>
-            <p className="text-xs opacity-80 mt-0.5 truncate">{alert.message}</p>
-          </div>
-          <div className="flex-shrink-0">
-            <div className="w-16 h-1.5 bg-white/10 rounded-full overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all ${
-                  alert.severity === 'danger' ? 'bg-v64-danger' : 'bg-v64-warning'
-                }`}
-                style={{ width: `${Math.min(100, (alert.value / (alert.threshold * 1.5)) * 100)}%` }}
-              />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="font-medium text-[11px] tracking-wide">{alert.title}</span>
+                <span className={`text-[9px] px-1.5 py-0.5 rounded ${
+                  alert.severity === 'danger' ? 'bg-v64-danger/20' : 'bg-v64-warning/20'
+                }`}>
+                  {alert.value.toFixed(1)}%
+                </span>
+              </div>
+              <p className="text-[9px] opacity-80 truncate">{alert.message}</p>
             </div>
           </div>
-        </div>
-      ))}
+        ))}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-# NEXUS DASHBOARD v1.8.5
+# NEXUS DASHBOARD v1.8.6
 
 개인 투자 포트폴리오 관리 대시보드
 
@@ -9,6 +9,36 @@
 | **Live Site** | https://nexus-dashboard-beige.vercel.app |
 | **GitHub** | https://github.com/rotkf125-gif/nexus-dashboard |
 | **Database** | Supabase (PostgreSQL) |
+
+---
+
+## v1.8.6 - DashboardHeader 통합 & 레이아웃 개선
+
+### DashboardHeader 통합 컴포넌트
+- **새 컴포넌트**: `components/DashboardHeader.tsx`
+- **7:3 레이아웃**: 좌측 70% (Header + StrategyBar) / 우측 30% (PortfolioHealthAlert)
+- **알림 없을 때**: "포트폴리오 상태 양호" 표시
+- **컴팩트 알림**: 아이콘, 텍스트 크기 최적화
+
+### Trade Journal 개선
+- **접기 기능 제거**: 항상 표시되는 스크롤 형식
+- **ADD TRADE 버튼**: 상단 헤더 옆 고정 배치
+- **버튼 클릭 오류 수정**: 이벤트 전파 방지 추가
+
+### 탭 헤더 버튼 배치 개선
+- **Stellar Assets**: 컬럼/뷰모드/새로고침/IGNITE STAR 버튼 제목 옆 배치
+- **Income Stream**: SYNC/RECORD 버튼 제목 옆 배치
+
+### Analytics 탭 개선
+- **상관관계 히트맵 제거**
+- **9:1 레이아웃**: 자산 분포(BubbleChart) 90% / 인사이트 알람 10%
+
+### Asset Table 개선
+- **동일 티커 동일 색상**: 티커별 색상 매핑으로 같은 종목 동일 색상 표시
+
+### Header Controls 정렬
+- **SyncTime 위치 변경**: Connect 버튼 왼쪽으로 이동
+- **2행 정렬**: justify-end로 우측 정렬 통일
 
 ---
 
@@ -183,6 +213,7 @@ CREATE INDEX IF NOT EXISTS idx_snapshots_user_timestamp ON portfolio_snapshots(u
 
 | 버전 | 주요 변경 |
 |------|----------|
+| v1.8.6 | DashboardHeader 통합 컴포넌트, 7:3 레이아웃, Analytics 9:1, 동일 티커 동일 색상 |
 | v1.8.5 | Header 2-Row 리뉴얼, Asset Table 정렬/색상 개선, Trade Journal 토글 |
 | v1.8.4 | Header 1-Row Horizontal 리뉴얼, Stellar Assets Command Center |
 | v1.8.3 | Simulation 탭 Mission Control 리뉴얼, 티커 병합 처리, WCAG AAA 접근성 |

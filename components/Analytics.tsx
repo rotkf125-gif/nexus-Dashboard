@@ -3,7 +3,6 @@
 import { useNexus } from '@/lib/context';
 import { useRiskAnalytics } from '@/lib/hooks/useRiskAnalytics';
 import BubbleChart from './charts/BubbleChart';
-import CorrelationHeatmap from './charts/CorrelationHeatmap';
 import InsightChips from './analytics/InsightChips';
 
 interface AnalyticsProps {
@@ -100,18 +99,18 @@ export default function Analytics({ horizontal = false }: AnalyticsProps) {
           </div>
         </div>
 
-        {/* Row 2: Bubble Chart - Full Width Hero */}
-        <div className="mb-5">
-          <BubbleChart />
-        </div>
+        {/* Row 2: Bubble Chart (9) + Insight Alerts (1) */}
+        <div className="grid grid-cols-1 lg:grid-cols-10 gap-4">
+          {/* Bubble Chart - 자산 분포 */}
+          <div className="lg:col-span-9">
+            <BubbleChart />
+          </div>
 
-        {/* Row 3: Insights + Correlation (5:5) */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Insight Alerts */}
-          <div className="inner-glass p-4 rounded-xl">
+          <div className="lg:col-span-1 inner-glass p-3 rounded-xl">
             <div className="flex items-center gap-2 mb-3 border-b border-white/10 pb-2">
               <i className="fas fa-lightbulb text-celestial-gold text-xs" />
-              <span className="text-[10px] text-white/80 tracking-widest">INSIGHT ALERTS</span>
+              <span className="text-[9px] text-white/80 tracking-widest">ALERTS</span>
             </div>
             <InsightChips
               riskMetrics={riskMetrics}
@@ -121,11 +120,6 @@ export default function Analytics({ horizontal = false }: AnalyticsProps) {
               topAssetTicker={topAssetTicker}
               incomeAssetCount={incomeAssetCount}
             />
-          </div>
-
-          {/* Correlation Matrix */}
-          <div className="inner-glass rounded-xl overflow-hidden">
-            <CorrelationHeatmap collapsible defaultExpanded={true} />
           </div>
         </div>
       </div>
