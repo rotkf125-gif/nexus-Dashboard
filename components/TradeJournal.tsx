@@ -26,7 +26,6 @@ export default function TradeJournal({ compact = false, externalShowForm, onForm
   const showAddForm = externalShowForm !== undefined ? externalShowForm : internalShowForm;
   const setShowAddForm = onFormClose ? (show: boolean) => { if (!show) onFormClose(); } : setInternalShowForm;
 
-  const [newDate, setNewDate] = useState('');
   const [newTicker, setNewTicker] = useState('');
   const [newAmount, setNewAmount] = useState('');
 
@@ -114,10 +113,6 @@ export default function TradeJournal({ compact = false, externalShowForm, onForm
       alert('티커를 입력하세요');
       return;
     }
-    if (!newDate) {
-      alert('날짜를 선택하세요');
-      return;
-    }
     if (!newAmount || newAmount.trim() === '') {
       alert('금액을 입력하세요');
       return;
@@ -134,14 +129,12 @@ export default function TradeJournal({ compact = false, externalShowForm, onForm
     setTradeSums(newTicker.toUpperCase(), currentAmount + amount);
 
     // 폼 초기화
-    setNewDate('');
     setNewTicker('');
     setNewAmount('');
     setShowAddForm(false);
   };
 
   const handleCancelAdd = () => {
-    setNewDate('');
     setNewTicker('');
     setNewAmount('');
     setShowAddForm(false);
@@ -150,89 +143,97 @@ export default function TradeJournal({ compact = false, externalShowForm, onForm
   // Compact 모드 (InsightsPanel용)
   if (compact) {
     return (
-      <div className="space-y-2">
-        {/* Summary */}
-        <div className="flex items-center justify-between text-[9px] mb-2 pb-2 border-b border-white/10">
-          <span className="text-white/60">{stats.totalTickers}개 종목</span>
-          <span className={stats.totalRealized >= 0 ? 'text-v64-success' : 'text-v64-danger'}>
-            {stats.totalRealized >= 0 ? '+' : ''}{formatUSD(stats.totalRealized)}
-          </span>
-        </div>
-
-        {/* Compact List */}
-        {filteredAndSortedTickers.length === 0 ? (
-          <div className="text-[10px] text-white/60 text-center py-4">
-            거래 기록이 없습니다
-          </div>
-        ) : (
-          <div className="space-y-1.5">
-            {filteredAndSortedTickers.slice(0, 8).map((ticker) => {
-              const amount = tradeSums[ticker] || 0;
-              return (
-                <div
-                  key={ticker}
-                  className="flex items-center justify-between bg-white/5 px-2 py-1.5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
-                  onClick={() => handleEditTradeReturn(ticker)}
-                >
-                  <span className="text-[10px] font-medium text-white">{ticker}</span>
-                  <span className={`text-[10px] font-mono ${amount >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}>
-                    {amount >= 0 ? '+' : ''}{formatUSD(amount)}
-                  </span>
-                </div>
-              );
-            })}
-            {filteredAndSortedTickers.length > 8 && (
-              <div className="text-[9px] text-white/60 text-center pt-1">
-                +{filteredAndSortedTickers.length - 8}개 더보기
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Compact Add Form (외부에서 제어) */}
+      <div className="relative h-full">
+        {/* 팝업 오버레이 폼 */}
         {showAddForm && (
-          <div className="bg-white/5 p-2 rounded-lg space-y-2 mt-2">
-            <input
-              type="text"
-              value={newTicker}
-              onChange={(e) => setNewTicker(e.target.value.toUpperCase())}
-              className="w-full bg-white/10 border border-white/20 rounded px-2 py-1 text-[10px] text-white placeholder-white/60"
-              placeholder="TICKER"
-            />
-            <input
-              type="number"
-              step="0.01"
-              value={newAmount}
-              onChange={(e) => setNewAmount(e.target.value)}
-              className="w-full bg-white/10 border border-white/20 rounded px-2 py-1 text-[10px] text-white placeholder-white/60"
-              placeholder="AMOUNT (+/-)"
-            />
-            <div className="flex gap-1">
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleCancelAdd();
-                }}
-                className="flex-1 text-[8px] py-1 rounded border border-white/20 text-white/70 hover:bg-white/5"
-              >
-                CANCEL
-              </button>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleAddTrade();
-                }}
-                className="flex-1 text-[8px] py-1 rounded bg-celestial-cyan/20 border border-celestial-cyan/40 text-celestial-cyan hover:bg-celestial-cyan/30"
-              >
-                CONFIRM
-              </button>
+          <div className="absolute inset-0 z-10 bg-black/80 backdrop-blur-sm rounded-lg flex items-center justify-center p-3">
+            <div className="w-full max-w-[200px] space-y-3">
+              <div className="text-center text-[10px] text-white/80 tracking-widest mb-2">
+                ADD TRADE
+              </div>
+              <input
+                type="text"
+                value={newTicker}
+                onChange={(e) => setNewTicker(e.target.value.toUpperCase())}
+                className="w-full bg-white/10 border border-white/30 rounded-lg px-3 py-2 text-[11px] text-white placeholder-white/50 focus:outline-none focus:border-celestial-cyan/50"
+                placeholder="TICKER (예: AAPL)"
+                autoFocus
+              />
+              <input
+                type="number"
+                step="0.01"
+                value={newAmount}
+                onChange={(e) => setNewAmount(e.target.value)}
+                className="w-full bg-white/10 border border-white/30 rounded-lg px-3 py-2 text-[11px] text-white placeholder-white/50 focus:outline-none focus:border-celestial-cyan/50"
+                placeholder="금액 (+/-)"
+              />
+              <div className="flex gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleCancelAdd();
+                  }}
+                  className="flex-1 text-[9px] py-2 rounded-lg border border-white/30 text-white/70 hover:bg-white/10 transition-colors"
+                >
+                  취소
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleAddTrade();
+                  }}
+                  className="flex-1 text-[9px] py-2 rounded-lg bg-celestial-cyan/30 border border-celestial-cyan/50 text-celestial-cyan hover:bg-celestial-cyan/40 transition-colors"
+                >
+                  추가
+                </button>
+              </div>
             </div>
           </div>
         )}
+
+        <div className="space-y-2">
+          {/* Summary */}
+          <div className="flex items-center justify-between text-[9px] mb-2 pb-2 border-b border-white/10">
+            <span className="text-white/60">{stats.totalTickers}개 종목</span>
+            <span className={stats.totalRealized >= 0 ? 'text-v64-success' : 'text-v64-danger'}>
+              {stats.totalRealized >= 0 ? '+' : ''}{formatUSD(stats.totalRealized)}
+            </span>
+          </div>
+
+          {/* Compact List */}
+          {filteredAndSortedTickers.length === 0 ? (
+            <div className="text-[10px] text-white/60 text-center py-4">
+              거래 기록이 없습니다
+            </div>
+          ) : (
+            <div className="space-y-1.5">
+              {filteredAndSortedTickers.slice(0, 8).map((ticker) => {
+                const amount = tradeSums[ticker] || 0;
+                return (
+                  <div
+                    key={ticker}
+                    className="flex items-center justify-between bg-white/5 px-2 py-1.5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
+                    onClick={() => handleEditTradeReturn(ticker)}
+                  >
+                    <span className="text-[10px] font-medium text-white">{ticker}</span>
+                    <span className={`text-[10px] font-mono ${amount >= 0 ? 'text-v64-success' : 'text-v64-danger'}`}>
+                      {amount >= 0 ? '+' : ''}{formatUSD(amount)}
+                    </span>
+                  </div>
+                );
+              })}
+              {filteredAndSortedTickers.length > 8 && (
+                <div className="text-[9px] text-white/60 text-center pt-1">
+                  +{filteredAndSortedTickers.length - 8}개 더보기
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     );
   }
@@ -247,13 +248,7 @@ export default function TradeJournal({ compact = false, externalShowForm, onForm
           <h2 className="text-xl font-bold text-white tracking-wider">TRADE JOURNAL</h2>
         </div>
         <button
-          onClick={() => {
-            setShowAddForm(!showAddForm);
-            if (!showAddForm) {
-              const today = new Date().toISOString().split('T')[0];
-              setNewDate(today);
-            }
-          }}
+          onClick={() => setShowAddForm(!showAddForm)}
           className="celestial-btn text-[9px]"
         >
           <i className={`fas fa-${showAddForm ? 'times' : 'plus'} mr-1`} />
@@ -264,20 +259,7 @@ export default function TradeJournal({ compact = false, externalShowForm, onForm
       {/* Add Trade Form */}
       {showAddForm && (
         <div className="glass-card p-4 space-y-3 border border-celestial-cyan/20">
-          <div className="grid grid-cols-3 gap-3">
-            {/* Date */}
-            <div>
-              <label className="text-[10px] text-white/70 block mb-1 tracking-widest font-medium">
-                DATE
-              </label>
-              <input
-                type="date"
-                value={newDate}
-                onChange={(e) => setNewDate(e.target.value)}
-                className="glass-input py-2 w-full rounded-lg text-sm"
-              />
-            </div>
-
+          <div className="grid grid-cols-2 gap-3">
             {/* Ticker */}
             <div>
               <label className="text-[10px] text-white/70 block mb-1 tracking-widest font-medium">
