@@ -19,7 +19,7 @@ import PerformanceArena from '@/components/PerformanceArena';
 import HistoricPerformance from '@/components/HistoricPerformance';
 import { BottomNavigation, DEFAULT_NAV_ITEMS } from '@/components/ui/BottomNavigation';
 import { useTabNavigation } from '@/lib/hooks/useKeyboardNavigation';
-import QuickStats from '@/components/stellar/QuickStats';
+import StellarHeader from '@/components/stellar/StellarHeader';
 import InsightsPanel from '@/components/stellar/InsightsPanel';
 import { usePortfolioStats } from '@/lib/hooks/usePortfolioStats';
 
@@ -158,61 +158,16 @@ function DashboardContent() {
               aria-labelledby="tab-stellar"
               tabIndex={0}
               className="h-full min-h-[500px] md:min-h-[800px] tab-panel-enter">
-              {/* Header */}
-              <div className="flex items-end mb-4 pb-2 border-b border-white/10 gap-4">
-                <h2 className="text-lg font-display tracking-widest flex items-center gap-3 text-white">
-                  <i className="fas fa-star text-celestial-gold text-xs" /> STELLAR ASSETS
-                </h2>
-                {/* Column Settings Button */}
-                <button
-                  onClick={() => setIsColSettingsOpen(!isColSettingsOpen)}
-                  className="celestial-btn text-[9px] flex items-center gap-1.5"
-                  title="컬럼 설정"
-                >
-                  <i className="fas fa-columns" />
-                  <span className="hidden sm:inline">컬럼</span>
-                </button>
-                {/* View Mode Toggle: Table / Heatmap */}
-                <div className="flex items-center gap-1 inner-glass rounded-lg p-1">
-                  <button
-                    onClick={() => setViewMode('table')}
-                    className={`px-3 py-1.5 rounded text-[10px] font-medium tracking-wide transition-all ${
-                      viewMode === 'table'
-                        ? 'bg-celestial-cyan/20 text-celestial-cyan border border-celestial-cyan/30'
-                        : 'text-white/60 hover:text-white/80'
-                    }`}
-                  >
-                    <i className="fas fa-table mr-1.5" />
-                    TABLE
-                  </button>
-                  <button
-                    onClick={() => setViewMode('heatmap')}
-                    className={`px-3 py-1.5 rounded text-[10px] font-medium tracking-wide transition-all ${
-                      viewMode === 'heatmap'
-                        ? 'bg-celestial-purple/20 text-celestial-purple border border-celestial-purple/30'
-                        : 'text-white/60 hover:text-white/80'
-                    }`}
-                  >
-                    <i className="fas fa-th-large mr-1.5" />
-                    HEATMAP
-                  </button>
-                </div>
-                <button
-                  onClick={refreshPrices}
-                  className="celestial-btn text-[10px]"
-                >
-                  <i className="fas fa-sync-alt" />
-                </button>
-                <button
-                  onClick={openAddAssetModal}
-                  className="celestial-btn text-[10px]"
-                >
-                  IGNITE STAR
-                </button>
-              </div>
-
-              {/* Quick Stats */}
-              <QuickStats stats={portfolioStats} />
+              {/* Stellar Header: Title + Buttons + Quick Stats */}
+              <StellarHeader
+                stats={portfolioStats}
+                viewMode={viewMode}
+                isColSettingsOpen={isColSettingsOpen}
+                onViewModeChange={setViewMode}
+                onColSettingsToggle={() => setIsColSettingsOpen(!isColSettingsOpen)}
+                onRefresh={refreshPrices}
+                onAddAsset={openAddAssetModal}
+              />
 
               {/* 2-Column Layout: Assets (70%) + Insights (30%) - Full Width */}
               <div className="grid grid-cols-1 xl:grid-cols-[70%_30%] gap-4">

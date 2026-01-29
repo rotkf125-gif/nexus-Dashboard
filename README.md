@@ -1,4 +1,4 @@
-# NEXUS DASHBOARD v1.8.6
+# NEXUS DASHBOARD v1.8.7
 
 개인 투자 포트폴리오 관리 대시보드
 
@@ -9,6 +9,32 @@
 | **Live Site** | https://nexus-dashboard-beige.vercel.app |
 | **GitHub** | https://github.com/rotkf125-gif/nexus-dashboard |
 | **Database** | Supabase (PostgreSQL) |
+
+---
+
+## v1.8.7 - UI 통합 & 가시성 개선
+
+### DashboardHeader 레이아웃 개선
+- **좌우 배치 변경**: 포트폴리오(좌) / 시장데이터(우) 레이아웃
+- **8:2 비율**: 대시보드 80% / 알림 박스 20%
+- **컨트롤 박스 3x2 그리드**: 시간상태/커넥트/로그인 | Export/AI/설정
+- **시장 데이터 강조**: 볼드체 및 색상 강화 (NDX, S&P, VIX, US10Y, 환율)
+
+### StellarHeader 통합 컴포넌트
+- **새 컴포넌트**: `components/stellar/StellarHeader.tsx`
+- **통합 요소**: 타이틀 + 버튼(컬럼/뷰모드/새로고침/IGNITE STAR) + 퀵스탯
+- **높이 통일**: 모든 요소 h-[42px] 고정
+- **퀵스탯 디자인**: 개별 카드 + 아이콘 강조 + 그라데이션 배경
+
+### 전역 스타일 개선
+- **폰트 통일**: Montserrat 단일 폰트 적용
+- **볼드체 기본**: body font-weight: 600
+- **Analytics KPI**: 텍스트/숫자/화살표 크기 최대화, 흰색 가시성 개선
+
+### 정리
+- **Header.tsx 삭제**: DashboardHeader로 완전 통합
+- **QuickStats.tsx 삭제**: StellarHeader로 통합
+- **UndoRedoIndicator 삭제**: 기능 및 컴포넌트 제거
 
 ---
 
@@ -215,6 +241,7 @@ CREATE INDEX IF NOT EXISTS idx_snapshots_user_timestamp ON portfolio_snapshots(u
 
 | 버전 | 주요 변경 |
 |------|----------|
+| v1.8.7 | StellarHeader 통합, DashboardHeader 좌우 배치, 폰트/볼드체 통일, UndoRedo 삭제 |
 | v1.8.6 | DashboardHeader 통합 컴포넌트, 7:3 레이아웃, Analytics 9:1, 동일 티커 동일 색상 |
 | v1.8.5 | Header 2-Row 리뉴얼, Asset Table 정렬/색상 개선, Trade Journal 토글 |
 | v1.8.4 | Header 1-Row Horizontal 리뉴얼, Stellar Assets Command Center |

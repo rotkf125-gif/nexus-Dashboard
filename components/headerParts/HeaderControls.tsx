@@ -5,7 +5,6 @@
 // ═══════════════════════════════════════════════════════════════
 
 import { supabase } from '@/lib/supabase';
-import UndoRedoIndicator from '../UndoRedoIndicator';
 
 interface HeaderControlsProps {
   user: any;
@@ -59,9 +58,6 @@ export default function HeaderControls({
         <div className="text-lg font-display font-light w-20 text-center">{clock}</div>
       </div>
       <div className="flex gap-1.5 items-center">
-        {/* Undo/Redo */}
-        <UndoRedoIndicator />
-        <div className="w-px h-6 bg-white/20 mx-1" />
         {/* Auth Button */}
         {user ? (
           <button

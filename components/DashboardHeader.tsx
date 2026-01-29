@@ -12,7 +12,6 @@ import { supabase } from '@/lib/supabase';
 import { getMarketStateInfo, MarketState } from '@/lib/utils';
 import { SECTORS } from '@/lib/config';
 import { ETF_SECTOR_DATA } from '@/lib/market-data';
-import UndoRedoIndicator from './UndoRedoIndicator';
 
 interface DashboardHeaderProps {
   onOpenSettings: () => void;
@@ -256,8 +255,8 @@ export default function DashboardHeader({ onOpenSettings, onOpenAuth, onOpenFree
 
   return (
     <div className="flex items-stretch gap-3">
-      {/* ═══ LEFT 70%: Header + Strategy ═══ */}
-      <div className="flex-[7] flex flex-col gap-2">
+      {/* ═══ LEFT 80%: Header + Strategy ═══ */}
+      <div className="flex-[8] flex flex-col gap-2">
         {/* Header */}
         <header className="glass-card px-4 py-2">
           <div className="flex items-stretch">
@@ -269,97 +268,110 @@ export default function DashboardHeader({ onOpenSettings, onOpenAuth, onOpenFree
                 </div>
                 <div className="text-base font-bold tracking-wider font-display text-white">NEXUS</div>
               </div>
-              <span className="text-sm font-display text-white/70">{clock}</span>
+              <span className="text-sm font-display font-bold text-white/70">{clock}</span>
             </div>
 
-            {/* CENTER: MARKET + PORTFOLIO */}
-            <div className="flex-1 flex flex-col mx-3 gap-1.5">
-              {/* Row 1: Market Data */}
-              <div className={`flex items-center justify-center gap-4 px-4 py-1 rounded-lg border ${stateColors[marketInfo.color]}`}>
-                <span className="text-xs font-medium tracking-wider">{marketInfo.label}</span>
-                <div className="w-px h-4 bg-white/20" />
-                <div className="flex items-center gap-1">
-                  <span className="text-xs text-blue-400/70">NDX</span>
-                  <span className="text-sm font-display text-blue-400">
-                    {state.market.nasdaq ? (state.market.nasdaq / 1000).toFixed(1) + 'K' : '--'}
-                  </span>
+            {/* CENTER: PORTFOLIO (LEFT) + MARKET (RIGHT) */}
+            <div className="flex-1 flex mx-3 gap-3">
+              {/* LEFT: Portfolio */}
+              <div className="flex-[6] inner-glass rounded-lg px-4 py-2 flex flex-col justify-center gap-1 min-w-[450px]">
+                {/* USD Row */}
+                <div className="flex items-center gap-3 flex-nowrap whitespace-nowrap">
+                  <span className="text-xs text-white font-bold w-8 flex-shrink-0">USD</span>
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <span className="text-xs text-white/70 font-bold">평가</span>
+                    <span className="text-base font-display font-bold text-celestial-cyan">{formatUSD(portfolioStats.totalValue)}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <span className="text-xs text-white/70 font-bold">원금</span>
+                    <span className="text-base font-bold text-white">{formatUSD(portfolioStats.totalCost)}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <span className="text-xs text-white/70 font-bold">수익</span>
+                    <span className={`text-base font-bold ${plColor}`}>
+                      {portfolioStats.returnVal >= 0 ? '+' : ''}{formatUSD(portfolioStats.returnVal)}
+                      <span className="ml-1 text-sm font-bold">({portfolioStats.returnPct >= 0 ? '+' : ''}{portfolioStats.returnPct.toFixed(1)}%)</span>
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  <span className="text-xs text-emerald-400/70">S&P</span>
-                  <span className="text-sm font-display text-emerald-400">
-                    {state.market.sp500 ? state.market.sp500.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '--'}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span className="text-xs text-v64-danger/70">VIX</span>
-                  <span className={`text-sm font-display font-medium ${vixStats.vixColor}`}>{vixStats.vix.toFixed(1)}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span className="text-xs text-white">₩</span>
-                  <span className="text-sm font-display text-white">{state.exchangeRate.toLocaleString()}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span className="text-xs text-celestial-gold/70">US10Y</span>
-                  <span className="text-sm font-display text-celestial-gold">{state.market.tnx ? state.market.tnx.toFixed(2) + '%' : '--'}</span>
+                {/* KRW Row */}
+                <div className="flex items-center gap-3 flex-nowrap whitespace-nowrap">
+                  <span className="text-xs text-white font-bold w-8 flex-shrink-0">KRW</span>
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <span className="text-xs text-white/70 font-bold">평가</span>
+                    <span className="text-base font-display font-bold text-celestial-gold">{formatKRW(portfolioStats.totalValueKrw)}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <span className="text-xs text-white/70 font-bold">원금</span>
+                    <span className="text-base font-bold text-white">{formatKRW(portfolioStats.totalCostKrw)}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <span className="text-xs text-white/70 font-bold">수익</span>
+                    <span className={`text-base font-bold ${plColorKrw}`}>
+                      {portfolioStats.returnKrw >= 0 ? '+' : ''}{formatKRW(portfolioStats.returnKrw)}
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              {/* Row 2: Portfolio */}
-              <div className="flex items-center justify-center gap-3 px-4">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] text-white">평가</span>
-                  <span className="text-sm font-display text-celestial-cyan">{formatUSD(portfolioStats.totalValue)}</span>
+              {/* RIGHT: Market Data */}
+              <div className={`inner-glass rounded-lg px-4 py-2 flex flex-col justify-center gap-1 border ${stateColors[marketInfo.color]}`}>
+                {/* Row 1: NDX, US10Y, VIX */}
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm text-blue-300 font-bold">NDX</span>
+                    <span className="text-lg font-display font-bold text-blue-400">
+                      {state.market.nasdaq ? (state.market.nasdaq / 1000).toFixed(1) + 'K' : '--'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm text-yellow-300 font-bold">US10Y</span>
+                    <span className="text-lg font-display font-bold text-celestial-gold">{state.market.tnx ? state.market.tnx.toFixed(2) + '%' : '--'}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm font-bold text-red-400">VIX</span>
+                    <span className={`text-lg font-display font-bold ${vixStats.vixColor}`}>{vixStats.vix.toFixed(1)}</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] text-white">원금</span>
-                  <span className="text-sm text-white">{formatUSD(portfolioStats.totalCost)}</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] text-white">수익</span>
-                  <span className={`text-sm ${plColor}`}>
-                    {portfolioStats.returnVal >= 0 ? '+' : ''}{formatUSD(portfolioStats.returnVal)}
-                    <span className="ml-1">({portfolioStats.returnPct >= 0 ? '+' : ''}{portfolioStats.returnPct.toFixed(1)}%)</span>
-                  </span>
-                </div>
-                <div className="w-px h-4 bg-white/15" />
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] text-white">평가</span>
-                  <span className="text-sm font-display text-celestial-gold">{formatKRW(portfolioStats.totalValueKrw)}</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] text-white">원금</span>
-                  <span className="text-sm text-white">{formatKRW(portfolioStats.totalCostKrw)}</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] text-white">수익</span>
-                  <span className={`text-sm ${plColorKrw}`}>
-                    {portfolioStats.returnKrw >= 0 ? '+' : ''}{formatKRW(portfolioStats.returnKrw)}
-                  </span>
+                {/* Row 2: S&P, 환율, Market State */}
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm text-emerald-300 font-bold">S&P</span>
+                    <span className="text-lg font-display font-bold text-emerald-400">
+                      {state.market.sp500 ? state.market.sp500.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '--'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm text-white font-bold">환율</span>
+                    <span className="text-lg font-display font-bold text-white">₩{state.exchangeRate.toLocaleString()}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm font-bold tracking-wider">{marketInfo.label}</span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* RIGHT: CONTROLS */}
-            <div className="flex flex-col justify-center gap-1 flex-shrink-0 pl-3 border-l border-white/20 min-w-[200px]">
-              <div className="flex items-center justify-end gap-1">
-                <div className="flex items-center gap-1 px-2">
-                  <span className={`w-1.5 h-1.5 rounded-full ${connectionStatus === 'online' ? 'bg-v64-success' : connectionStatus === 'loading' ? 'bg-yellow-400 animate-pulse' : 'bg-white/40'}`} />
-                  <span className="text-xs text-white/60">{syncTime}</span>
+            {/* RIGHT: CONTROLS - 3x2 Grid */}
+            <div className="flex-shrink-0 pl-3 border-l border-white/20 flex items-center justify-center w-[280px]">
+              <div className="grid grid-cols-3 gap-1.5 w-full">
+                {/* Row 1: 시간상태, 커넥트, 로그인 */}
+                <div className="flex items-center justify-center gap-1 inner-glass rounded-lg px-1 py-2">
+                  <span className={`w-2 h-2 rounded-full flex-shrink-0 ${connectionStatus === 'online' ? 'bg-v64-success' : connectionStatus === 'loading' ? 'bg-yellow-400 animate-pulse' : 'bg-white/40'}`} />
+                  <span className="text-xs text-white font-bold">{syncTime}</span>
                 </div>
-                <button onClick={toggleLive} className={`header-btn-compact ${isLive ? 'text-v64-success border-v64-success/40' : ''}`}>
+                <button onClick={toggleLive} className={`inner-glass rounded-lg px-1 py-2 flex items-center justify-center gap-1 text-xs font-bold transition-all ${isLive ? 'text-v64-success border border-v64-success/40' : 'text-white/80 hover:text-white'}`}>
                   <i className={`fas fa-${isLive ? 'link' : 'unlink'}`} /><span>{isLive ? 'Live' : 'Connect'}</span>
                 </button>
                 {user ? (
-                  <button onClick={handleLogout} className="header-btn-compact"><i className="fas fa-sign-out-alt" /><span>Logout</span></button>
+                  <button onClick={handleLogout} className="inner-glass rounded-lg px-1 py-2 flex items-center justify-center gap-1 text-xs font-bold text-white/80 hover:text-white transition-all"><i className="fas fa-sign-out-alt" /><span>Logout</span></button>
                 ) : (
-                  <button onClick={onOpenAuth} className="header-btn-compact"><i className="fas fa-user" /><span>Login</span></button>
+                  <button onClick={onOpenAuth} className="inner-glass rounded-lg px-1 py-2 flex items-center justify-center gap-1 text-xs font-bold text-white/80 hover:text-white transition-all"><i className="fas fa-user" /><span>Login</span></button>
                 )}
-                <button onClick={onOpenSettings} className="header-btn-compact"><i className="fas fa-cog" /></button>
-              </div>
-              <div className="flex items-center justify-end gap-1">
-                <UndoRedoIndicator />
-                <button onClick={onOpenExport} className="header-btn-compact"><i className="fas fa-download" /><span>Export</span></button>
-                <button onClick={onOpenFreedom} className="header-btn-compact-gold"><i className="fas fa-robot" /><span>AI</span></button>
+                {/* Row 2: Export, AI, 설정 */}
+                <button onClick={onOpenExport} className="inner-glass rounded-lg px-1 py-2 flex items-center justify-center gap-1 text-xs font-bold text-white/80 hover:text-white transition-all"><i className="fas fa-download" /><span>Export</span></button>
+                <button onClick={onOpenFreedom} className="inner-glass rounded-lg px-1 py-2 flex items-center justify-center gap-1 text-xs font-bold text-celestial-gold border border-celestial-gold/40 transition-all"><i className="fas fa-robot" /><span>AI</span></button>
+                <button onClick={onOpenSettings} className="inner-glass rounded-lg px-1 py-2 flex items-center justify-center gap-1 text-xs font-bold text-white/80 hover:text-white transition-all"><i className="fas fa-cog" /><span>설정</span></button>
               </div>
             </div>
           </div>
@@ -385,8 +397,8 @@ export default function DashboardHeader({ onOpenSettings, onOpenAuth, onOpenFree
         </div>
       </div>
 
-      {/* ═══ RIGHT 30%: Alerts ═══ */}
-      <div className="flex-[3]">
+      {/* ═══ RIGHT 20%: Alerts ═══ */}
+      <div className="flex-[2]">
         {alerts.length > 0 ? (
           <div className="h-full flex flex-col justify-between gap-1.5 overflow-y-auto custom-scrollbar">
             {alerts.map((alert, index) => (

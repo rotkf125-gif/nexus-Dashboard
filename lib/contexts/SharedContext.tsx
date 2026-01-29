@@ -278,7 +278,7 @@ export function SharedProvider({ children }: { children: ReactNode }) {
   if (!isLoaded) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <i className="fas fa-spinner spinner text-2xl opacity-50" />
+        <i className="fas fa-spinner spinner text-2xl opacity-70" />
       </div>
     );
   }

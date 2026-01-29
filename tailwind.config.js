@@ -30,8 +30,8 @@ module.exports = {
       },
       fontFamily: {
         sans: ['Montserrat', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
-        display: ['Cinzel', 'serif'],
+        mono: ['Montserrat', 'sans-serif'],
+        display: ['Montserrat', 'sans-serif'],
       },
       spacing: {
         'touch': '44px',

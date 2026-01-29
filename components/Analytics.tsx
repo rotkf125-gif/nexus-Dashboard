@@ -45,25 +45,25 @@ export default function Analytics({ horizontal = false }: AnalyticsProps) {
     // KPI 데이터 준비
     const kpiItems = [
       {
-        label: 'HEALTH',
+        label: '건강도',
         value: riskMetrics.overallScore,
         trend: riskMetrics.overallScore >= 70 ? 'up' : riskMetrics.overallScore >= 50 ? 'neutral' : 'down',
         color: riskColor,
       },
       {
-        label: 'DIVERSE',
+        label: '다각화',
         value: riskMetrics.diversificationScore,
         trend: riskMetrics.diversificationScore >= 60 ? 'up' : 'down',
         color: riskMetrics.diversificationScore >= 70 ? '#22c55e' : riskMetrics.diversificationScore >= 40 ? '#eab308' : '#ef4444',
       },
       {
-        label: 'CONC.',
+        label: '집중도',
         value: riskMetrics.concentrationRisk,
         trend: riskMetrics.concentrationRisk >= 60 ? 'up' : 'down',
         color: riskMetrics.concentrationRisk >= 70 ? '#22c55e' : riskMetrics.concentrationRisk >= 40 ? '#eab308' : '#ef4444',
       },
       {
-        label: 'VOLATIL',
+        label: '변동성',
         value: riskMetrics.volatilityScore,
         trend: riskMetrics.volatilityScore >= 60 ? 'up' : 'down',
         color: riskMetrics.volatilityScore >= 70 ? '#22c55e' : riskMetrics.volatilityScore >= 40 ? '#eab308' : '#ef4444',
@@ -76,26 +76,23 @@ export default function Analytics({ horizontal = false }: AnalyticsProps) {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-5">
           {/* KPI Cards */}
           {kpiItems.map((kpi) => (
-            <div key={kpi.label} className="inner-glass p-3 rounded-xl text-center">
-              <div className="text-[9px] text-white/60 tracking-widest mb-1">{kpi.label}</div>
-              <div className="text-2xl font-display" style={{ color: kpi.color }}>
+            <div key={kpi.label} className="inner-glass p-4 rounded-xl flex items-center justify-center gap-3 min-h-[70px]">
+              <span className="text-sm text-white font-medium tracking-wide">{kpi.label}</span>
+              <span className="text-3xl font-display font-bold text-white">
                 {kpi.value}
-              </div>
-              <div className="text-[10px] mt-0.5" style={{ color: kpi.color }}>
+              </span>
+              <span className="text-2xl" style={{ color: kpi.color }}>
                 {kpi.trend === 'up' ? '▲' : kpi.trend === 'down' ? '▼' : '→'}
-              </div>
+              </span>
             </div>
           ))}
 
           {/* Risk Level Badge */}
-          <div className="inner-glass p-3 rounded-xl text-center border" style={{ borderColor: `${riskColor}40` }}>
-            <div className="text-[9px] text-white/60 tracking-widest mb-1">RISK LEVEL</div>
-            <div
-              className="text-lg font-display tracking-wider"
-              style={{ color: riskColor }}
-            >
-              {riskLevel === 'LOW' ? '🟢' : riskLevel === 'MODERATE' ? '🟡' : riskLevel === 'HIGH' ? '🟠' : '🔴'} {riskLevel}
-            </div>
+          <div className="inner-glass p-4 rounded-xl flex items-center justify-center gap-3 min-h-[70px] border" style={{ borderColor: `${riskColor}40` }}>
+            <span className="text-sm text-white font-medium tracking-wide">위험</span>
+            <span className="text-xl font-display font-bold text-white">
+              {riskLevel === 'LOW' ? '🟢 낮음' : riskLevel === 'MODERATE' ? '🟡 보통' : riskLevel === 'HIGH' ? '🟠 높음' : '🔴 매우높음'}
+            </span>
           </div>
         </div>
 
@@ -110,7 +107,7 @@ export default function Analytics({ horizontal = false }: AnalyticsProps) {
           <div className="lg:col-span-1 inner-glass p-3 rounded-xl">
             <div className="flex items-center gap-2 mb-3 border-b border-white/10 pb-2">
               <i className="fas fa-lightbulb text-celestial-gold text-xs" />
-              <span className="text-[9px] text-white/80 tracking-widest">ALERTS</span>
+              <span className="text-[9px] text-white/80 tracking-widest">알림</span>
             </div>
             <InsightChips
               riskMetrics={riskMetrics}

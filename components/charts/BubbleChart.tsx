@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect } from 'react';
 import {
   Chart,
   BubbleController,
@@ -9,17 +9,77 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { BubbleDataPoint, BubbleColorMode } from '@/lib/types';
 import { useBubbleChartData } from '@/lib/hooks/useBubbleChartData';
 import { useNexus } from '@/lib/context';
 
 Chart.register(BubbleController, PointElement, LinearScale, Tooltip, Legend);
 
-const COLOR_MODE_OPTIONS: { value: BubbleColorMode; label: string }[] = [
-  { value: 'sector', label: '섹터별' },
-  { value: 'type', label: '유형별' },
-  { value: 'performance', label: '성과별' },
-];
+// 0% 기준선 플러그인
+const zeroLinePlugin = {
+  id: 'zeroLine',
+  afterDraw: (chart: Chart) => {
+    const ctx = chart.ctx;
+    const yScale = chart.scales.y;
+    const xScale = chart.scales.x;
+
+    if (!yScale || !xScale) return;
+
+    const yZero = yScale.getPixelForValue(0);
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(xScale.left, yZero);
+    ctx.lineTo(xScale.right, yZero);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([6, 4]);
+    ctx.stroke();
+
+    // 0% 레이블
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.font = '10px JetBrains Mono';
+    ctx.textAlign = 'left';
+    ctx.fillText('0%', xScale.left + 4, yZero - 4);
+    ctx.restore();
+  },
+};
+
+// 버블 내부 티커 레이블 플러그인
+const bubbleLabelPlugin = {
+  id: 'bubbleLabel',
+  afterDatasetsDraw: (chart: Chart) => {
+    const ctx = chart.ctx;
+    const meta = chart.getDatasetMeta(0);
+
+    if (!meta || !meta.data) return;
+
+    ctx.save();
+    meta.data.forEach((element: any, index: number) => {
+      const dataPoint = chart.data.datasets[0].data[index] as any;
+      if (!dataPoint?.ticker) return;
+
+      const { x, y } = element;
+      const r = dataPoint.r || 10;
+
+      // 버블 크기에 따라 폰트 크기 조절 (최소 7px, 최대 11px)
+      const fontSize = Math.max(7, Math.min(11, r * 0.45));
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+      ctx.font = `bold ${fontSize}px JetBrains Mono`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      // 그림자 효과
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+      ctx.shadowBlur = 2;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 1;
+
+      ctx.fillText(dataPoint.ticker, x, y);
+    });
+    ctx.restore();
+  },
+};
 
 interface BubbleChartProps {
   onBubbleClick?: (ticker: string) => void;
@@ -29,9 +89,9 @@ export default function BubbleChart({ onBubbleClick }: BubbleChartProps) {
   const { state } = useNexus();
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstance = useRef<Chart | null>(null);
-  const [colorMode, setColorMode] = useState<BubbleColorMode>('sector');
 
-  const bubbleData = useBubbleChartData(state.assets, colorMode);
+  // 항상 성과별(performance) 모드 사용
+  const bubbleData = useBubbleChartData(state.assets, 'performance');
 
   useEffect(() => {
     if (!chartRef.current || bubbleData.length === 0) return;
@@ -65,9 +125,9 @@ export default function BubbleChart({ onBubbleClick }: BubbleChartProps) {
             if (d.type === 'INCOME') {
               return d.color.replace(/[\d.]+\)$/, '1)');
             }
-            return 'transparent';
+            return 'rgba(255, 255, 255, 0.3)';
           }),
-          borderWidth: bubbleData.map(d => d.type === 'INCOME' ? 2 : 0),
+          borderWidth: bubbleData.map(d => d.type === 'INCOME' ? 2 : 1),
           hoverBackgroundColor: bubbleData.map(d =>
             d.color.replace(/[\d.]+\)$/, '0.9)')
           ),
@@ -75,6 +135,7 @@ export default function BubbleChart({ onBubbleClick }: BubbleChartProps) {
           hoverBorderWidth: 2,
         }],
       },
+      plugins: [zeroLinePlugin, bubbleLabelPlugin],
       options: {
         responsive: true,
         maintainAspectRatio: false,
@@ -142,9 +203,23 @@ export default function BubbleChart({ onBubbleClick }: BubbleChartProps) {
               color: 'rgba(255, 255, 255, 0.5)',
               font: { size: 10 },
             },
-            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+            grid: {
+              color: (context) => {
+                // 0% 라인은 기준선 플러그인이 그리므로 기본 그리드에서 제외
+                if (context.tick.value === 0) {
+                  return 'transparent';
+                }
+                return 'rgba(255, 255, 255, 0.05)';
+              },
+            },
             ticks: {
-              color: 'rgba(255, 255, 255, 0.5)',
+              color: (context) => {
+                // 0% 라인은 강조 색상
+                if (context.tick.value === 0) {
+                  return 'rgba(255, 255, 255, 0.7)';
+                }
+                return 'rgba(255, 255, 255, 0.5)';
+              },
               font: { size: 10 },
               callback: (value) => `${Number(value) >= 0 ? '+' : ''}${value}%`,
             },
@@ -187,36 +262,25 @@ export default function BubbleChart({ onBubbleClick }: BubbleChartProps) {
         <canvas ref={chartRef} />
       </div>
 
-      {/* Color Mode Tabs */}
-      <div className="bubble-chart-tabs mt-3">
-        {COLOR_MODE_OPTIONS.map((option) => (
-          <button
-            key={option.value}
-            onClick={() => setColorMode(option.value)}
-            className={`bubble-chart-tab ${colorMode === option.value ? 'active' : ''}`}
-          >
-            {option.label}
-          </button>
-        ))}
+      {/* Legend - 성과별 (항상 표시) */}
+      <div className="flex items-center justify-center gap-4 mt-3 text-[10px] text-white/70">
+        <span className="flex items-center gap-1">
+          <span className="w-3 h-3 rounded-full bg-v64-success/60" />
+          수익
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="w-3 h-3 rounded-full bg-v64-danger/60" />
+          손실
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="w-3 h-3 rounded-full border border-white/30" />
+          INCOME
+        </span>
+        <span className="flex items-center gap-1 ml-2 pl-2 border-l border-white/20">
+          <span className="w-[1px] h-3 border-t border-dashed border-white/50" style={{ width: '12px' }} />
+          0% 기준선
+        </span>
       </div>
-
-      {/* Legend */}
-      {colorMode === 'performance' && (
-        <div className="flex items-center justify-center gap-4 mt-3 text-[10px] text-white/70">
-          <span className="flex items-center gap-1">
-            <span className="w-3 h-3 rounded-full bg-v64-success/60" />
-            수익
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="w-3 h-3 rounded-full bg-v64-danger/60" />
-            손실
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="w-3 h-3 rounded-full border border-white/30" />
-            INCOME
-          </span>
-        </div>
-      )}
     </div>
   );
 }
